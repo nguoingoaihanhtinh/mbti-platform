@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "mbti-platform",
   "private": true,
   "scripts": {
     "build": "turbo run build",
