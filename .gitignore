@@ -1,38 +1,75 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+###############################################
 # Dependencies
-node_modules
+###############################################
+node_modules/
 .pnp
 .pnp.js
+bun.lockb
 
-# Local env files
+###############################################
+# Local environment files
+###############################################
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!env.example
 
+###############################################
 # Testing
-coverage
+###############################################
+coverage/
+*.test.ts
+*.spec.ts
 
-# Turbo
-.turbo
+###############################################
+# Turbo Repo
+###############################################
+.turbo/
 
-# Vercel
-.vercel
+###############################################
+# Vercel / Deployment
+###############################################
+.vercel/
 
+###############################################
 # Build Outputs
+###############################################
+# Next.js
 .next/
 out/
-build
-dist
 
+# API / other builds
+build/
+dist/
 
-# Debug
+###############################################
+# Cache & Temp Files
+###############################################
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
 
-# Misc
+.cache/
+temp/
+tmp/
+
+###############################################
+# IDE
+###############################################
+.vscode/
+.idea/
+
+###############################################
+# OS files
+###############################################
 .DS_Store
+Thumbs.db
+
+###############################################
+# Misc
+###############################################
 *.pem
