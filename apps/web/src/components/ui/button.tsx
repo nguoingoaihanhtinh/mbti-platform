@@ -1,8 +1,7 @@
-"use client";
-import React, { ReactNode } from "react";
+import React from "react";
+import type { ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger" | "link";
-
 type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,8 +16,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * [Button](mbti-platform/packages/ui/src/button.tsx:1)
- * Tailwind-powered button component with variants and sizes.
+ * Tailwind-based Button component with variants, sizes, loading state and icon support.
+ * [Button()](mbti-platform/apps/web/src/components/ui/button.tsx:1)
  */
 export const Button = ({
   children,
@@ -33,10 +32,10 @@ export const Button = ({
   ...rest
 }: ButtonProps) => {
   const base =
-    "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black disabled:opacity-50 disabled:cursor-not-allowed select-none";
+    "relative inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black disabled:opacity-50 disabled:cursor-not-allowed select-none";
 
   const sizes: Record<ButtonSize, string> = {
-    sm: "text-sm h-8 px-3",
+    sm: "text-xs h-7 px-3",
     md: "text-sm h-10 px-4",
     lg: "text-base h-12 px-6",
     icon: "h-10 w-10",
@@ -49,44 +48,38 @@ export const Button = ({
       "border border-gray-300 text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 focus-visible:ring-gray-900",
     ghost: "text-gray-700 hover:bg-gray-100 active:bg-gray-200 focus-visible:ring-gray-900",
     danger: "bg-red-600 text-white hover:bg-red-500 active:bg-red-700 focus-visible:ring-red-600",
-    link: "text-gray-900 underline-offset-4 hover:underline px-0",
+    link: "text-gray-900 underline-offset-4 hover:underline px-0 font-medium h-auto",
   };
 
-  const compose = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" ");
+  const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" ");
 
-  const content = (
-    <>
-      {leftIcon && <span className={compose(rightIcon || children ? "mr-2" : "")}>{leftIcon}</span>}
+  return (
+    <button
+      className={cx(base, sizes[size], variants[variant], fullWidth && "w-full", loading && "opacity-90", className)}
+      disabled={disabled || loading}
+      {...rest}
+    >
+      {leftIcon && <span className={cx(rightIcon || children ? "mr-2" : "")}>{leftIcon}</span>}
       <span className={loading ? "opacity-0" : ""}>{children}</span>
-      {rightIcon && <span className={compose(leftIcon || children ? "ml-2" : "")}>{rightIcon}</span>}
+      {rightIcon && <span className={cx(leftIcon || children ? "ml-2" : "")}>{rightIcon}</span>}
       {loading && (
         <span className="absolute inset-0 flex items-center justify-center">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-transparent" />
         </span>
       )}
-    </>
-  );
-
-  return (
-    <button
-      className={compose(base, sizes[size], variants[variant], fullWidth && "w-full", loading && "relative", className)}
-      disabled={disabled || loading}
-      {...rest}
-    >
-      {content}
     </button>
   );
 };
 
 /**
- * Convenience button for destructive actions.
- * [DangerButton()](mbti-platform/packages/ui/src/button.tsx:1)
+ * Destructive action convenience wrapper.
+ * [DangerButton()](mbti-platform/apps/web/src/components/ui/button.tsx:1)
  */
 export const DangerButton = (props: Omit<ButtonProps, "variant">) => <Button {...props} variant="danger" />;
 
 /**
- * Icon-only button.
- * [IconButton()](mbti-platform/packages/ui/src/button.tsx:1)
+ * Icon-only button wrapper.
+ * [IconButton()](mbti-platform/apps/web/src/components/ui/button.tsx:1)
  */
 export const IconButton = ({
   children,
