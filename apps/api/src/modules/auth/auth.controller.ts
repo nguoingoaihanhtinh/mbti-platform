@@ -7,18 +7,22 @@ import {
   Get,
   UseGuards,
   UnauthorizedException,
+  Query,
+  Redirect,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
-import { JwtUtil } from '@/utils/jwt.util';
+import { JWTPayload, JwtUtil } from '@/utils/jwt.util';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UserService } from '../user/user.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtUtil: JwtUtil,
+    private userService: UserService,
   ) {}
 
   @Post('register')
@@ -89,5 +93,76 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {
     return req.user;
+  }
+
+  @Get('google')
+  @Redirect()
+  googleLogin() {
+    const googleAuthUrl = new URL(
+      'https://accounts.google.com/o/oauth2/v2/auth',
+    );
+    googleAuthUrl.searchParams.set('client_id', process.env.GOOGLE_CLIENT_ID!);
+    googleAuthUrl.searchParams.set(
+      'redirect_uri',
+      `${process.env.API_URL}/auth/google/callback`,
+    );
+    console.log('REDIRECT:', process.env.API_URL);
+    googleAuthUrl.searchParams.set('response_type', 'code');
+    googleAuthUrl.searchParams.set('scope', 'openid email profile');
+    return { url: googleAuthUrl.toString() };
+  }
+
+  // 2. Xử lý callback từ Google
+  @Get('google/callback')
+  async googleCallback(
+    @Query('code') code: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: `${process.env.API_URL}/auth/google/callback`,
+      }),
+    });
+
+    const { access_token } = await tokenResponse.json();
+    const userResponse = await fetch(
+      'https://www.googleapis.com/oauth2/v3/userinfo',
+      {
+        headers: { Authorization: `Bearer ${access_token}` },
+      },
+    );
+    const googleUser = await userResponse.json();
+
+    let user = await this.userService.findOneByEmail(googleUser.email);
+    if (!user) {
+      user = await this.userService.create({
+        email: googleUser.email,
+        full_name: googleUser.name,
+        password: 'google_oauth_user',
+        role: 'candidate',
+        // avatar: googleUser.picture || null,
+      });
+    }
+
+    const payload: JWTPayload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtUtil.signAccess(payload);
+    const refreshToken = this.jwtUtil.signRefresh(payload);
+
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+
+    return res.redirect('http://localhost:5173/assessments');
   }
 }

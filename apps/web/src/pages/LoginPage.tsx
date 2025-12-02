@@ -92,9 +92,17 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button type="button" variant="outline" className="gap-2" onClick={() => alert("Google OAuth (pending)")}>
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                onClick={() => {
+                  window.location.href = "http://localhost:3000/auth/google";
+                }}
+              >
                 <span className="text-sm font-medium text-gray-700">Google</span>
               </Button>
+
               <Button type="button" variant="outline" className="gap-2" onClick={() => alert("GitHub OAuth (pending)")}>
                 <span className="text-sm font-medium text-gray-700">GitHub</span>
               </Button>
