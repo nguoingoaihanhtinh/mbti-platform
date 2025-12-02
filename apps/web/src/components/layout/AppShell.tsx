@@ -1,10 +1,8 @@
 import React from "react";
-import { Bell, User, Home, BookOpen, BarChart3, Settings } from "lucide-react";
+import { Bell, User, Home, BookOpen, BarChart3, Settings, LogOut } from "lucide-react";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { useNavigate } from "@tanstack/react-router";
 
-/**
- * Shared application shell for authenticated pages.
- * Provides header, left sidebar, optional right sidebar, and main content.
- */
 interface AppShellProps {
   children: React.ReactNode;
   rightSidebar?: React.ReactNode;
@@ -19,50 +17,85 @@ const navItems = [
 ];
 
 export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShellProps) {
+  const { logout: logoutStore } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      // Call backend to clear cookies
+      await fetch("http://localhost:3000/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      // Clear Zustand state
+      logoutStore();
+      // Redirect to login
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still log out locally
+      logoutStore();
+      navigate({ to: "/login" });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-secondary-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-white border-b border-secondary-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-lg">NIIT | Assessment</span>
+            <span className="font-semibold text-lg text-primary-900">H&HIS | Assessment</span>
           </div>
+
           <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Bell className="w-5 h-5 text-gray-600" />
+            <button className="p-2 hover:bg-secondary-100 rounded-lg">
+              <Bell className="w-5 h-5 text-neutral-600" />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <User className="w-5 h-5 text-gray-600" />
-            </button>
+            <div className="relative group">
+              <button className="p-2 hover:bg-secondary-100 rounded-lg">
+                <User className="w-5 h-5 text-neutral-600" />
+              </button>
+              {/* Dropdown menu */}
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-secondary-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-secondary-100 rounded-lg"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto flex">
         {/* Left Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-200 min-h-screen p-6">
+        <aside className="w-64 bg-white border-r border-secondary-200 min-h-screen p-6">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-20 h-20 bg-gray-200 rounded-full mb-3 flex items-center justify-center">
-              <User className="w-10 h-10 text-gray-500" />
+            <div className="w-20 h-20 bg-secondary-200 rounded-full mb-3 flex items-center justify-center">
+              <User className="w-10 h-10 text-neutral-500" />
             </div>
-            <h3 className="font-semibold text-lg">Scott Johnson</h3>
-            <p className="text-sm text-gray-500">Computer Science Student</p>
-            <p className="text-xs text-gray-400 mt-1">User ID: 2,400.00</p>
+            <h3 className="font-semibold text-lg text-primary-900">Scott Johnson</h3>
+            <p className="text-sm text-neutral-500">Computer Science Student</p>
+            <p className="text-xs text-neutral-400 mt-1">User ID: 2,400.00</p>
           </div>
 
           <div className="space-y-6">
             <div>
-              <h4 className="text-xs font-semibold text-gray-500 mb-2">INTLA</h4>
-              <div className="text-2xl font-bold">12</div>
-              <div className="text-xs text-gray-500 mt-1">Remaining</div>
+              <h4 className="text-xs font-semibold text-neutral-500 mb-2">INTLA</h4>
+              <div className="text-2xl font-bold text-primary-900">12</div>
+              <div className="text-xs text-neutral-500 mt-1">Remaining</div>
             </div>
 
             <div>
-              <h4 className="text-xs font-semibold text-gray-500 mb-2">LEVEL</h4>
-              <div className="text-2xl font-bold">45</div>
+              <h4 className="text-xs font-semibold text-neutral-500 mb-2">LEVEL</h4>
+              <div className="text-2xl font-bold text-primary-900">45</div>
             </div>
 
             <nav className="space-y-2 pt-4">
@@ -73,7 +106,7 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
                   <button
                     key={n.id}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
-                      active ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-100"
+                      active ? "bg-primary text-primary-foreground" : "text-neutral-700 hover:bg-secondary-100"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -86,11 +119,11 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">{children}</main>
+        <main className="flex-1 p-8 text-primary-900">{children}</main>
 
-        {/* Optional Right Sidebar */}
+        {/* Right Sidebar */}
         {rightSidebar && (
-          <aside className="w-64 bg-white border-l border-gray-200 min-h-screen p-6">{rightSidebar}</aside>
+          <aside className="w-64 bg-white border-l border-secondary-200 min-h-screen p-6">{rightSidebar}</aside>
         )}
       </div>
     </div>

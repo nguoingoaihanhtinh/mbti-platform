@@ -110,11 +110,11 @@ export default function TestPage() {
             Question {currentQuestion} / {testData.totalQuestions}
           </div>
         </div>
-
+        {/* Progress bar */}
         <div className="mb-6">
-          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-secondary-200 rounded-full h-2 overflow-hidden">
             <div
-              className="bg-gray-900 h-2 rounded-full transition-all duration-300"
+              className="bg-primary-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -132,13 +132,13 @@ export default function TestPage() {
                   disabled={timeLeft === 0}
                   onClick={() => timeLeft > 0 && setSelectedAnswer(option.id)}
                   className={`w-full text-left p-4 rounded-lg border-2 transition
-                    ${active ? "border-gray-900 bg-white" : "border-gray-200 bg-white"}
+                    ${active ? "border-primary bg-white" : "border-gray-200 bg-white"}
                     ${timeLeft === 0 ? "opacity-50 cursor-not-allowed" : "hover:shadow-sm"}`}
                 >
                   <div className="flex items-start gap-3">
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                        active ? "border-gray-900 bg-gray-900" : "border-gray-300"
+                        active ? "border-primary-500 bg-primary-500" : "border-primary-300 bg-white"
                       }`}
                     >
                       {active && <div className="w-2 h-2 bg-white rounded-full"></div>}
@@ -205,18 +205,14 @@ export default function TestPage() {
           })}
         </div>
         <div className="flex gap-6 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-900 rounded"></div>
-            <span>Current</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-200 rounded"></div>
-            <span>Previous</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border border-gray-300 rounded"></div>
-            <span>Not Answered</span>
-          </div>
+          <div className="w-4 h-4 bg-primary-500 rounded"></div>
+          <span>Current</span>
+
+          <div className="w-4 h-4 bg-secondary-200 rounded"></div>
+          <span>Previous</span>
+
+          <div className="w-4 h-4 border border-secondary-300 rounded"></div>
+          <span>Not Answered</span>
         </div>
       </div>
     </AppShell>

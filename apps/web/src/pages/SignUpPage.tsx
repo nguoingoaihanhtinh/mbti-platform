@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "../components/ui/button";
+import { useAuth } from "../hooks/useAuth";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
+  const { register, loading, error } = useAuth();
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -17,15 +19,20 @@ export default function SignupPage() {
       alert("Passwords don't match");
       return;
     }
-    navigate({ to: "/assessments" });
+    await register({
+      email: formData.email,
+      full_name: formData.fullName,
+      password: formData.password,
+      confirm_password: formData.confirmPassword,
+    });
   };
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-4">
       <div className="max-w-md w-full mx-auto">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-2xl mb-4">
-            <span className="text-white text-2xl font-bold">NI</span>
+          <div className="inline-flex items-center justify-center w-32 h-16 bg-primary rounded-2xl mb-4">
+            <span className="text-white text-2xl font-bold">H&HIS</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
           <p className="text-gray-600">Start your learning journey today</p>
@@ -88,7 +95,7 @@ export default function SignupPage() {
                 className="w-4 h-4 mt-1 border-gray-300 rounded text-gray-900 focus:ring-gray-900"
                 required
               />
-              <label className="ml-2 text-sm text-gray-700 space-x-1">
+              <label className="ml-2 text-sm text-gray-700 ">
                 <span>I agree to the</span>
                 <Button type="button" variant="link" className="h-auto px-0 text-sm">
                   Terms of Service

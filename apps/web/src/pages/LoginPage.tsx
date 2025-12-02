@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "../components/ui/button";
+import { useAuth } from "../hooks/useAuth";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const { login, loading, error } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: auth integration
+    await login({
+      email: formData.email,
+      password: formData.password,
+    });
     navigate({ to: "/assessments" });
   };
 
@@ -19,8 +24,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col justify-center px-4">
       <div className="max-w-md w-full mx-auto">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-2xl mb-4">
-            <span className="text-white text-2xl font-bold">NI</span>
+          <div className="inline-flex items-center justify-center w-32 h-16 bg-primary rounded-2xl mb-4">
+            <span className="text-white text-2xl font-bold">H&HIS</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-600">Sign in to continue your learning journey</p>
