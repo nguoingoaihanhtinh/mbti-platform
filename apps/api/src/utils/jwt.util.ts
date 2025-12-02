@@ -2,23 +2,26 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 export interface JWTPayload {
-  sub: number;
+  sub: string;
   email: string;
-  iat?: number;
-  exp?: number;
 }
 
 @Injectable()
 export class JwtUtil {
   constructor(private jwtService: JwtService) {}
 
-  sign(payload: JWTPayload): string {
-    return this.jwtService.sign(payload);
+  signAccess(payload: JWTPayload): string {
+    return this.jwtService.sign(payload, { expiresIn: '15m' });
+  }
+
+  signRefresh(payload: JWTPayload): string {
+    return this.jwtService.sign(payload, { expiresIn: '7d' });
   }
 
   verify(token: string): JWTPayload {
     try {
       const decoded = this.jwtService.verify(token);
+
       if (
         typeof decoded === 'object' &&
         decoded !== null &&

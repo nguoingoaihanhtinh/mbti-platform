@@ -8,7 +8,7 @@ export class RegisterDto {
   password: string;
 
   @MinLength(6)
-  confirm_password: string; // ← only for validation, not stored
+  confirm_password: string;
 
   @IsString()
   @IsNotEmpty()

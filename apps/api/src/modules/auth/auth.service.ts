@@ -28,7 +28,7 @@ export class AuthService {
       email,
       full_name,
       password: hashed,
-      role: 'user',
+      role: 'candidate',
     });
 
     const { password: _, ...safeUser } = user;
@@ -44,12 +44,14 @@ export class AuthService {
     }
 
     const payload: JWTPayload = { sub: user.id, email: user.email };
-    const token = this.jwtUtil.sign(payload);
+    const accessToken = this.jwtUtil.signAccess(payload);
+    const refreshToken = this.jwtUtil.signRefresh(payload);
 
     const { password: _, ...safeUser } = user;
     return {
       user: safeUser,
-      access_token: token,
+      accessToken,
+      refreshToken,
     };
   }
 }
