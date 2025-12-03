@@ -168,7 +168,7 @@ export class AuthController {
       sameSite: 'lax',
     });
 
-    return res.redirect('http://localhost:5173/assessments');
+    return res.redirect(`${process.env.FRONTEND_URL}/assessments`);
   }
 
   @Post('forgot-password')
