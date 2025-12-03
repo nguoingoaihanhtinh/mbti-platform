@@ -10,9 +10,9 @@ async function bootstrap() {
   const corsOrigin =
     process.env.NODE_ENV === 'production'
       ? [
-          'https://your-frontend-domain.com', // Replace with your actual frontend URL
-          'https://mbti-web.onrender.com', // Example Render frontend URL
-        ]
+          process.env.FRONTEND_URL,
+          'https://mbti-platform-web.vercel.app',
+        ].filter(Boolean)
       : ['http://localhost:5173', 'http://localhost:3000'];
 
   app.enableCors({

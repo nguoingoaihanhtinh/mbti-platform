@@ -23,6 +23,8 @@ services:
         value: production
       - key: PORT
         fromEnvironment: PORT
+      - key: FRONTEND_URL
+        fromEnvironment: FRONTEND_URL
       - key: SUPABASE_URL
         fromEnvironment: SUPABASE_URL
       - key: SUPABASE_ANON_KEY
