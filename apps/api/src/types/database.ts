@@ -45,6 +45,25 @@ export type Database = {
         };
         Relationships: [];
       };
+
+      password_reset_otp: {
+        Row: {
+          email: string;
+          otp: string;
+          expires_at: string;
+        };
+        Insert: {
+          email: string;
+          otp: string;
+          expires_at: string;
+        };
+        Update: {
+          email?: string;
+          otp?: string;
+          expires_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

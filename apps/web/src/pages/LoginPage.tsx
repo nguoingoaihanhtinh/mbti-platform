@@ -68,9 +68,7 @@ export default function LoginPage() {
                 type="button"
                 variant="link"
                 className="text-sm font-medium"
-                onClick={() => {
-                  /* TODO forgot */
-                }}
+                onClick={() => navigate({ to: "/forgot-password" })}
               >
                 Forgot password?
               </Button>

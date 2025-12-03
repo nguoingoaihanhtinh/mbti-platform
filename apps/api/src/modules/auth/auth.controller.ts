@@ -12,7 +12,12 @@ import {
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 import { JWTPayload, JwtUtil } from '@/utils/jwt.util';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
@@ -164,5 +169,17 @@ export class AuthController {
     });
 
     return res.redirect('http://localhost:5173/assessments');
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(dto.email);
+    return { message: 'If your email is registered, you’ll receive an OTP.' };
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.otp, dto.newPassword);
+    return { message: 'Password updated.' };
   }
 }
