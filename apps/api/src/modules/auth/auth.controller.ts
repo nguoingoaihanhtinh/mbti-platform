@@ -148,7 +148,10 @@ export class AuthController {
     if (!user) {
       user = await this.userService.create({
         email: googleUser.email,
-        full_name: googleUser.name,
+        full_name:
+          googleUser.name ||
+          googleUser.given_name + ' ' + googleUser.family_name ||
+          googleUser.email.split('@')[0],
         password: 'google_oauth_user',
         role: 'candidate',
         // avatar: googleUser.picture || null,
