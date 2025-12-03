@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, User, Home, BookOpen, BarChart3, Settings, LogOut } from "lucide-react";
+import { Bell, User, Home, BookOpen, BarChart3, Settings, LogOut, type LucideIcon } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -9,7 +9,7 @@ interface AppShellProps {
   activeNav?: "all" | "analytics" | "seasonal" | "profile";
 }
 
-const navItems = [
+const navItems: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "all", label: "All Tests", icon: Home },
   { id: "analytics", label: "Analytics", icon: BookOpen },
   { id: "seasonal", label: "Seasonal", icon: BarChart3 },
@@ -46,18 +46,18 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-primary-foreground" />
+              {React.createElement(BookOpen as any, { className: "w-5 h-5 text-primary-foreground" })}
             </div>
             <span className="font-semibold text-lg text-primary-900">H&HIS | Assessment</span>
           </div>
 
           <div className="flex items-center gap-4">
             <button className="p-2 hover:bg-secondary-100 rounded-lg">
-              <Bell className="w-5 h-5 text-neutral-600" />
+              {React.createElement(Bell as any, { className: "w-5 h-5 text-neutral-600" })}
             </button>
             <div className="relative group">
               <button className="p-2 hover:bg-secondary-100 rounded-lg">
-                <User className="w-5 h-5 text-neutral-600" />
+                {React.createElement(User as any, { className: "w-5 h-5 text-neutral-600" })}
               </button>
               {/* Dropdown menu */}
               <div className="absolute right-0 mt-2 w-48 bg-white border border-secondary-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
@@ -65,7 +65,7 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-secondary-100 rounded-lg"
                 >
-                  <LogOut className="w-4 h-4" />
+                  {React.createElement(LogOut as any, { className: "w-4 h-4" })}
                   <span>Logout</span>
                 </button>
               </div>
@@ -79,7 +79,7 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
         <aside className="w-64 bg-white border-r border-secondary-200 min-h-screen p-6">
           <div className="flex flex-col items-center mb-8">
             <div className="w-20 h-20 bg-secondary-200 rounded-full mb-3 flex items-center justify-center">
-              <User className="w-10 h-10 text-neutral-500" />
+              {React.createElement(User as any, { className: "w-10 h-10 text-neutral-500" })}
             </div>
             <h3 className="font-semibold text-lg text-primary-900">Scott Johnson</h3>
             <p className="text-sm text-neutral-500">Computer Science Student</p>
@@ -109,7 +109,7 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
                       active ? "bg-primary text-primary-foreground" : "text-neutral-700 hover:bg-secondary-100"
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
+                    {React.createElement(Icon as any, { className: "w-5 h-5" })}
                     <span>{n.label}</span>
                   </button>
                 );

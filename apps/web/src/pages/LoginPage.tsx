@@ -8,7 +8,7 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
-  const { login, loading, error } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
