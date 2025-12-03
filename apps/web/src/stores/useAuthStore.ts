@@ -2,6 +2,9 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
+// Get API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export type User = {
   id: string;
   email: string;
@@ -48,7 +51,7 @@ export const useAuthStore = create<AuthState>()(
         login: async () => {
           set({ loading: true, error: null });
           try {
-            const res = await fetch("http://localhost:3000/auth/profile", {
+            const res = await fetch(`${API_URL}/auth/profile`, {
               credentials: "include", // critical for cookies
             });
             if (res.ok) {
@@ -67,7 +70,7 @@ export const useAuthStore = create<AuthState>()(
         refreshProfile: async () => {
           set({ loading: true });
           try {
-            const res = await fetch("http://localhost:3000/auth/profile", {
+            const res = await fetch(`${API_URL}/auth/profile`, {
               credentials: "include",
             });
             if (res.ok) {

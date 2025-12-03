@@ -23,7 +23,8 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
   const handleLogout = async () => {
     try {
       // Call backend to clear cookies
-      await fetch("http://localhost:3000/auth/logout", {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      await fetch(`${apiUrl}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

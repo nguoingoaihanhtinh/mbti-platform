@@ -95,7 +95,8 @@ export default function LoginPage() {
                 variant="outline"
                 className="gap-2"
                 onClick={() => {
-                  window.location.href = "http://localhost:3000/auth/google";
+                  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+                  window.location.href = `${apiUrl}/auth/google`;
                 }}
               >
                 <span className="text-sm font-medium text-gray-700">Google</span>
