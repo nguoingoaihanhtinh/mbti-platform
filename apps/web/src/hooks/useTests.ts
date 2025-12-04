@@ -3,13 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { testKeys } from "../libs/queryKeys";
 import api from "../libs/api";
 
-export function useTests(page = 1, limit = 10) {
+export function useTests(page = 1, limit = 20) {
   return useQuery({
     queryKey: [...testKeys.all, page, limit],
     queryFn: async () => {
-      const res = await api.get("/tests", { params: { page, limit } });
+      const res = await api.get("/tests", {
+        params: { page, limit },
+        headers: { "Cache-Control": "no-cache" }, // <- force fresh fetch
+      });
       return res.data;
     },
+    staleTime: 0,
   });
 }
 

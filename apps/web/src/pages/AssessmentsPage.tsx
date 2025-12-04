@@ -8,6 +8,7 @@ export default function AssessmentsPage() {
   const navigate = useNavigate();
 
   const { data } = useTests(1, 20);
+  // console.log("Fetched tests:", data);
   const tests = data?.data || [];
 
   return (
