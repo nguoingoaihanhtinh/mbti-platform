@@ -8,7 +8,7 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
-  const { login, loading, error } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -68,9 +68,7 @@ export default function LoginPage() {
                 type="button"
                 variant="link"
                 className="text-sm font-medium"
-                onClick={() => {
-                  /* TODO forgot */
-                }}
+                onClick={() => navigate({ to: "/forgot-password" })}
               >
                 Forgot password?
               </Button>
@@ -97,7 +95,8 @@ export default function LoginPage() {
                 variant="outline"
                 className="gap-2"
                 onClick={() => {
-                  window.location.href = "http://localhost:3000/auth/google";
+                  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+                  window.location.href = `${apiUrl}/auth/google`;
                 }}
               >
                 <span className="text-sm font-medium text-gray-700">Google</span>

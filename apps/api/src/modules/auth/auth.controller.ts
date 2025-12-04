@@ -12,7 +12,12 @@ import {
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 import { JWTPayload, JwtUtil } from '@/utils/jwt.util';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
@@ -143,7 +148,10 @@ export class AuthController {
     if (!user) {
       user = await this.userService.create({
         email: googleUser.email,
-        full_name: googleUser.name,
+        full_name:
+          googleUser.name ||
+          googleUser.given_name + ' ' + googleUser.family_name ||
+          googleUser.email.split('@')[0],
         password: 'google_oauth_user',
         role: 'candidate',
         // avatar: googleUser.picture || null,
@@ -163,6 +171,18 @@ export class AuthController {
       sameSite: 'lax',
     });
 
-    return res.redirect('http://localhost:5173/assessments');
+    return res.redirect(`${process.env.FRONTEND_URL}/assessments`);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(dto.email);
+    return { message: 'If your email is registered, you’ll receive an OTP.' };
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.otp, dto.newPassword);
+    return { message: 'Password updated.' };
   }
 }

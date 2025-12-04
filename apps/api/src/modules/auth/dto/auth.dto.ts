@@ -23,3 +23,12 @@ export class LoginDto {
   @MinLength(1)
   password: string;
 }
+
+export class ForgotPasswordDto {
+  @IsEmail()
+  email: string;
+}
+export class ResetPasswordDto {
+  otp: string;
+  newPassword: string;
+}

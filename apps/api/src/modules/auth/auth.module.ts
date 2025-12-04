@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserModule } from '../user/user.module';
 import { JwtUtil } from '@/utils/jwt.util';
+import { SupabaseProvider } from '@/database/supabase.provider';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { JwtUtil } from '@/utils/jwt.util';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtUtil],
+  providers: [AuthService, JwtUtil, SupabaseProvider],
 })
 export class AuthModule {}

@@ -1,7 +1,9 @@
 // src/components/LandingPage.tsx
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
       <div className="max-w-4xl mx-auto text-center">
@@ -11,15 +13,18 @@ export default function LandingPage() {
         </p>
 
         <div className="flex gap-4 justify-center">
-          <Link to="/login" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          <button
+            onClick={() => navigate({ to: "/login" })}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
             Login
-          </Link>
-          <Link
-            to="/tests"
+          </button>
+          <button
+            onClick={() => navigate({ to: "/assessments" })}
             className="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition"
           >
             Browse Tests
-          </Link>
+          </button>
         </div>
       </div>
     </div>

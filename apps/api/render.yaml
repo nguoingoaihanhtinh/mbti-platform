@@ -1,0 +1,43 @@
+# render.yaml
+services:
+  - type: web
+    name: mbti-api
+    runtime: node
+    env: node
+    plan: free # Specify plan type
+    region: singapore # Available free tier region
+    buildCommand: |
+      # Install bun if not available
+      curl -fsSL https://bun.sh/install | bash
+      export PATH="$HOME/.bun/bin:$PATH"
+      # Navigate to API directory and build
+      cd apps/api
+      bun install --frozen-lockfile
+      bun run build
+    startCommand: |
+      export PATH="$HOME/.bun/bin:$PATH"
+      cd apps/api
+      bun run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromEnvironment: PORT
+      - key: FRONTEND_URL
+        fromEnvironment: FRONTEND_URL
+      - key: SUPABASE_URL
+        fromEnvironment: SUPABASE_URL
+      - key: SUPABASE_ANON_KEY
+        fromEnvironment: SUPABASE_ANON_KEY
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromEnvironment: SUPABASE_SERVICE_ROLE_KEY
+      - key: JWT_SECRET
+        generateValue: true
+      - key: RESEND_API_KEY
+        fromEnvironment: RESEND_API_KEY
+      - key: GOOGLE_CLIENT_ID
+        fromEnvironment: GOOGLE_CLIENT_ID
+      - key: GOOGLE_CLIENT_SECRET
+        fromEnvironment: GOOGLE_CLIENT_SECRET
+      - key: API_URL
+        value: https://mbti-api.onrender.com

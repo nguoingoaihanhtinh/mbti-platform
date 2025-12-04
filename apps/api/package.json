@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "nest start --watch",
+    "gen-tree": "npx @tanstack/router-cli generate",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -35,6 +36,7 @@
     "class-validator": "^0.14.3",
     "cookie-parser": "^1.4.7",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.5.2",
     "rxjs": "^7.8.1"
   },
   "resolutions": {
@@ -48,6 +50,7 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",

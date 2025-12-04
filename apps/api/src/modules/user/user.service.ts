@@ -106,4 +106,13 @@ export class UserService {
       };
     }
   }
+  async updatePassword(email: string, hashedPassword: string) {
+    const { error } = await this.client
+      .from('users')
+      .update({ password: hashedPassword })
+      .eq('email', email)
+      .single();
+
+    if (error) throw error;
+  }
 }

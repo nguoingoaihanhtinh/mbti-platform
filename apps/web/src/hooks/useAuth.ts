@@ -15,6 +15,10 @@ export type LoginData = {
   password: string;
 };
 
+export type ForgotPasswordData = {
+  email: string;
+};
+
 export const useAuth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -55,10 +59,27 @@ export const useAuth = () => {
     navigate({ to: "/login" });
   };
 
+  const forgotPassword = async (email: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.post("/auth/forgot-password", { email });
+
+      alert("If your email is registered, you’ll receive an OTP shortly.");
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Failed to send OTP";
+      setError(message);
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     register,
     login,
     logout,
+    forgotPassword,
     loading,
     error,
   };

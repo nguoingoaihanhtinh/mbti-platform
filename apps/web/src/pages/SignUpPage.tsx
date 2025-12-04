@@ -10,7 +10,7 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
-  const { register, loading, error } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
