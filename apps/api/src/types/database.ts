@@ -218,7 +218,159 @@ export type Database = {
         };
         Relationships: [];
       };
+      assessments: {
+        Row: {
+          id: string;
+          user_id: string;
+          test_id: string;
+          test_version_id: string | null;
+          status: string; // 'notStarted' | 'started' | 'completed'
+          started_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          test_id: string;
+          test_version_id?: string | null;
+          status: string;
+          started_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          test_id?: string;
+          test_version_id?: string | null;
+          status?: string;
+          started_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'assessments_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'assessments_test_id_fkey';
+            columns: ['test_id'];
+            isOneToOne: false;
+            referencedRelation: 'tests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'assessments_test_version_id_fkey';
+            columns: ['test_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'test_versions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+
+      responses: {
+        Row: {
+          id: string;
+          assessment_id: string;
+          question_id: string;
+          answer_id: string | null;
+          selected_option_index: number | null;
+          free_text: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          assessment_id: string;
+          question_id: string;
+          answer_id?: string | null;
+          selected_option_index?: number | null;
+          free_text?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          assessment_id?: string;
+          question_id?: string;
+          answer_id?: string | null;
+          selected_option_index?: number | null;
+          free_text?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'responses_assessment_id_fkey';
+            columns: ['assessment_id'];
+            isOneToOne: false;
+            referencedRelation: 'assessments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'responses_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: false;
+            referencedRelation: 'questions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'responses_answer_id_fkey';
+            columns: ['answer_id'];
+            isOneToOne: false;
+            referencedRelation: 'answers';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+
+      // ✅ RESULTS
+      results: {
+        Row: {
+          id: string;
+          assessment_id: string;
+          mbti_type: string; // CHECK: matches "^[IE][NS][FT][JP]$"
+          raw_scores: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          assessment_id: string;
+          mbti_type: string;
+          raw_scores: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          assessment_id?: string;
+          mbti_type?: string;
+          raw_scores?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'results_assessment_id_fkey';
+            columns: ['assessment_id'];
+            isOneToOne: false;
+            referencedRelation: 'assessments';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
+
     Views: {
       [_ in never]: never;
     };

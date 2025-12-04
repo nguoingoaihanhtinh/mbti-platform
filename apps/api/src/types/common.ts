@@ -29,6 +29,25 @@ export type Answer = Database['public']['Tables']['answers']['Row'];
 export type AnswerInsert = Database['public']['Tables']['answers']['Insert'];
 export type AnswerUpdate = Database['public']['Tables']['answers']['Update'];
 
+// === ASSESSMENT ===
+export type Assessment = Database['public']['Tables']['assessments']['Row'];
+export type AssessmentInsert =
+  Database['public']['Tables']['assessments']['Insert'];
+export type AssessmentUpdate =
+  Database['public']['Tables']['assessments']['Update'];
+
+// === RESPONSE ===
+export type Response = Database['public']['Tables']['responses']['Row'];
+export type ResponseInsert =
+  Database['public']['Tables']['responses']['Insert'];
+export type ResponseUpdate =
+  Database['public']['Tables']['responses']['Update'];
+
+// === RESULT ===
+export type Result = Database['public']['Tables']['results']['Row'];
+export type ResultInsert = Database['public']['Tables']['results']['Insert'];
+export type ResultUpdate = Database['public']['Tables']['results']['Update'];
+
 export interface UserQueryParams {
   page?: number;
   limit?: number;
