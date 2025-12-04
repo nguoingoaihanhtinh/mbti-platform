@@ -31,8 +31,8 @@ export default function SignupPage() {
     <div className="min-h-screen flex flex-col justify-center px-4">
       <div className="max-w-md w-full mx-auto">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-32 h-16 bg-primary rounded-2xl mb-4">
-            <span className="text-white text-2xl font-bold">H&HIS</span>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/Group 50.png" alt="H&HIS" className="h-16 w-auto" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
           <p className="text-gray-600">Start your learning journey today</p>

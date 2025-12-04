@@ -45,6 +45,160 @@ export type Database = {
         };
         Relationships: [];
       };
+      tests: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      test_versions: {
+        Row: {
+          id: string;
+          test_id: string;
+          version_number: number;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          test_id: string;
+          version_number: number;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          test_id?: string;
+          version_number?: number;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'test_versions_test_id_fkey';
+            columns: ['test_id'];
+            isOneToOne: false;
+            referencedRelation: 'tests';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      questions: {
+        Row: {
+          id: string;
+          test_id: string;
+          test_version_id: string | null;
+          text: string;
+          type: string | null;
+          dimension: string | null;
+          order_index: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          test_id: string;
+          test_version_id?: string | null;
+          text: string;
+          type?: string | null;
+          dimension?: string | null;
+          order_index: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          test_id?: string;
+          test_version_id?: string | null;
+          text?: string;
+          type?: string | null;
+          dimension?: string | null;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'questions_test_id_fkey';
+            columns: ['test_id'];
+            isOneToOne: false;
+            referencedRelation: 'tests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'questions_test_version_id_fkey';
+            columns: ['test_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'test_versions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      answers: {
+        Row: {
+          id: string;
+          question_id: string;
+          text: string;
+          score: number;
+          dimension: string | null;
+          order_index: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          question_id: string;
+          text: string;
+          score: number;
+          dimension?: string | null;
+          order_index: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          question_id?: string;
+          text?: string;
+          score?: number;
+          dimension?: string | null;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'answers_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: false;
+            referencedRelation: 'questions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

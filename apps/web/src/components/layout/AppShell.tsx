@@ -45,10 +45,7 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
       <header className="bg-white border-b border-secondary-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-semibold text-lg text-primary-900">H&HIS | Assessment</span>
+            <img src="/Group 50.png" alt="H&HIS Assessment" className="h-8 w-auto" />
           </div>
 
           <div className="flex items-center gap-4">
