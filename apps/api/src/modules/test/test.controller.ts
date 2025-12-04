@@ -17,6 +17,11 @@ import { UpdateTestVersionDto } from './dto/update-test-version.dto';
 export class TestController {
   constructor(private testService: TestService) {}
 
+  @Get()
+  getAllTests() {
+    return this.testService.getAllTests();
+  }
+
   @Post()
   createTest(@Body() dto: CreateTestDto) {
     return this.testService.createTest(

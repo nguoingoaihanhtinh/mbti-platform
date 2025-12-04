@@ -142,6 +142,15 @@ export class TestService {
     };
   }
 
+  async getAllTests(): Promise<Test[]> {
+    const { data: tests, error } = await this.supabase.client
+      .from('tests')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return tests;
+  }
+
   async getTestVersions(testId: string): Promise<TestVersion[]> {
     const { data: versions, error } = await this.supabase.client
       .from('test_versions')
