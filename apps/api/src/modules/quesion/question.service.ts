@@ -1,10 +1,14 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { SupabaseProvider } from '@/database/supabase.provider';
+import { PaginationService } from '@/common/services/pagination.service';
 import { QuestionInsert, QuestionUpdate, Question } from '@/types/common';
 
 @Injectable()
 export class QuestionService {
-  constructor(private supabase: SupabaseProvider) {}
+  constructor(
+    private supabase: SupabaseProvider,
+    private pagination: PaginationService,
+  ) {}
 
   async createQuestion(data: QuestionInsert) {
     const { data: question, error } = await this.supabase.client
@@ -29,19 +33,29 @@ export class QuestionService {
     return question;
   }
 
-  async getQuestionsByTest(testId: string, versionId?: string) {
-    let query = this.supabase.client
-      .from('questions')
-      .select('*')
-      .eq('test_id', testId);
+  async getQuestionsByTest(
+    testId: string,
+    versionId?: string,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    return this.pagination.paginate<Question>(
+      (page, limit) => {
+        let query = this.supabase.client
+          .from('questions')
+          .select('*', { count: 'exact' })
+          .eq('test_id', testId)
+          .order('order_index');
 
-    if (versionId) {
-      query = query.eq('test_version_id', versionId);
-    }
+        if (versionId) {
+          query = query.eq('test_version_id', versionId);
+        }
 
-    const { data: questions, error } = await query.order('order_index');
-    if (error) throw error;
-    return questions;
+        return query;
+      },
+      page,
+      limit,
+    );
   }
 
   async updateQuestion(id: string, data: QuestionUpdate): Promise<Question> {

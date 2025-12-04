@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TestService } from './test.service';
 import { CreateTestDto } from './dto/create-test.dto';
@@ -18,8 +19,11 @@ export class TestController {
   constructor(private testService: TestService) {}
 
   @Get()
-  getAllTests() {
-    return this.testService.getAllTests();
+  getAllTests(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.testService.getAllTests(page, limit);
   }
 
   @Post()

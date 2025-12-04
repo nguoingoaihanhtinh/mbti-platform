@@ -31,8 +31,15 @@ export class QuestionController {
   getQuestions(
     @Query('testId') testId: string,
     @Query('versionId') versionId?: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
   ) {
-    return this.questionService.getQuestionsByTest(testId, versionId);
+    return this.questionService.getQuestionsByTest(
+      testId,
+      versionId,
+      page,
+      limit,
+    );
   }
 
   @Put(':id')

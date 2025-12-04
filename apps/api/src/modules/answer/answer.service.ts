@@ -1,10 +1,14 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { SupabaseProvider } from '@/database/supabase.provider';
 import { AnswerInsert, AnswerUpdate, Answer } from '@/types/common';
+import { PaginationService } from '@/common/services/pagination.service';
 
 @Injectable()
 export class AnswerService {
-  constructor(private supabase: SupabaseProvider) {}
+  constructor(
+    private supabase: SupabaseProvider,
+    private pagination: PaginationService,
+  ) {}
 
   async createAnswer(data: AnswerInsert) {
     const { data: answer, error } = await this.supabase.client
@@ -29,15 +33,24 @@ export class AnswerService {
     return answer;
   }
 
-  async getAnswersByQuestion(questionId: string) {
-    const { data: answers, error } = await this.supabase.client
-      .from('answers')
-      .select('*')
-      .eq('question_id', questionId)
-      .order('order_index');
+  async getAnswersByQuestion(
+    questionId: string,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    return this.pagination.paginate<Answer>(
+      (page, limit) => {
+        let query = this.supabase.client
+          .from('answers')
+          .select('*', { count: 'exact' })
+          .eq('question_id', questionId)
+          .order('order_index');
 
-    if (error) throw error;
-    return answers;
+        return query;
+      },
+      page,
+      limit,
+    );
   }
 
   async updateAnswer(id: string, data: AnswerUpdate): Promise<Answer> {

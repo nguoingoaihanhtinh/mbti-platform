@@ -11,10 +11,14 @@ import {
   TestVersion,
 } from '@/types/common';
 import { CreateQuestionDto } from '../quesion/dto/create-question.dto';
+import { PaginationService } from '@/common/services/pagination.service';
 
 @Injectable()
 export class TestService {
-  constructor(private supabase: SupabaseProvider) {}
+  constructor(
+    private supabase: SupabaseProvider,
+    private pagination: PaginationService,
+  ) {}
 
   //CREATE TEST (with version + questions + answers)
   async createTest(
@@ -142,13 +146,16 @@ export class TestService {
     };
   }
 
-  async getAllTests(): Promise<Test[]> {
-    const { data: tests, error } = await this.supabase.client
-      .from('tests')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return tests;
+  async getAllTests(page = 1, limit = 10) {
+    return this.pagination.paginate(
+      (page, limit) =>
+        this.supabase.client
+          .from('tests')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: false }),
+      page,
+      limit,
+    );
   }
 
   async getTestVersions(testId: string): Promise<TestVersion[]> {

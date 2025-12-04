@@ -20,5 +20,6 @@ import { SupabaseProvider } from '@/database/supabase.provider';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtUtil, SupabaseProvider],
+  exports: [JwtUtil],
 })
 export class AuthModule {}

@@ -7,6 +7,8 @@ import {
   ParseUUIDPipe,
   UseGuards,
   Req,
+  BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AssessmentService } from './assessment.service';
@@ -18,7 +20,21 @@ import { CompleteAssessmentDto } from './dto/complete-assessment.dto';
 @UseGuards(JwtAuthGuard)
 export class AssessmentController {
   constructor(private assessmentService: AssessmentService) {}
+  @Get('me')
+  getMyAssessments(
+    @Req() req,
+    @Query('page') pageStr?: string,
+    @Query('limit') limitStr?: string,
+  ) {
+    const page = pageStr ? parseInt(pageStr, 10) : 1;
+    const limit = limitStr ? parseInt(limitStr, 10) : 10;
 
+    if (page < 1 || limit < 1 || limit > 100) {
+      throw new BadRequestException('Invalid page or limit');
+    }
+
+    return this.assessmentService.getUserAssessments(req.user.sub, page, limit);
+  }
   @Post()
   createAssessment(@Body() dto: CreateAssessmentDto, @Req() req) {
     return this.assessmentService.createAssessment(req.user.sub, dto);

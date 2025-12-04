@@ -5,6 +5,8 @@ import { UserModule } from './modules/user/user.module';
 import { TestModule } from './modules/test/test.module';
 import { QuestionModule } from './modules/quesion/question.module';
 import { AnswerModule } from './modules/answer/answer.module';
+import { PaginationService } from './common/services/pagination.service';
+import { AssessmentModule } from './modules/assessment/assessment.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { AnswerModule } from './modules/answer/answer.module';
     TestModule,
     QuestionModule,
     AnswerModule,
+    AssessmentModule,
   ],
+  providers: [PaginationService],
 })
 export class AppModule {}

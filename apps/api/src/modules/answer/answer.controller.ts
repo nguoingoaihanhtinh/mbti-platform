@@ -28,8 +28,12 @@ export class AnswerController {
   }
 
   @Get()
-  getAnswers(@Query('questionId') questionId: string) {
-    return this.answerService.getAnswersByQuestion(questionId);
+  getAnswers(
+    @Query('questionId') questionId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+  ) {
+    return this.answerService.getAnswersByQuestion(questionId, page, limit);
   }
 
   @Put(':id')

@@ -9,10 +9,14 @@ import {
   Response,
   Result,
 } from '@/types/common';
+import { PaginationService } from '@/common/services/pagination.service';
 
 @Injectable()
 export class AssessmentService {
-  constructor(private supabase: SupabaseProvider) {}
+  constructor(
+    private supabase: SupabaseProvider,
+    private pagination: PaginationService,
+  ) {}
 
   async createAssessment(
     userId: string,
@@ -57,14 +61,24 @@ export class AssessmentService {
     return response;
   }
 
-  async getResponses(assessmentId: string) {
-    const { data: responses, error } = await this.supabase.client
-      .from('responses')
-      .select('*')
-      .eq('assessment_id', assessmentId);
+  async getResponses(
+    assessmentId: string,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    return this.pagination.paginate<Response>(
+      (page, limit) => {
+        let query = this.supabase.client
+          .from('responses')
+          .select('*', { count: 'exact' })
+          .eq('assessment_id', assessmentId)
+          .order('created_at');
 
-    if (error) throw error;
-    return responses;
+        return query;
+      },
+      page,
+      limit,
+    );
   }
 
   async completeAssessment(assessmentId: string, userId: string) {
@@ -153,5 +167,22 @@ export class AssessmentService {
 
     if (rErr || !result) throw new BadRequestException('Result not found');
     return result;
+  }
+  async getUserAssessments(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    return this.pagination.paginate<Assessment>(
+      (page, limit) => {
+        return this.supabase.client
+          .from('assessments')
+          .select('*', { count: 'exact' })
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+      },
+      page,
+      limit,
+    );
   }
 }
