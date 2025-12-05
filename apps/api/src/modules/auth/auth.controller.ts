@@ -162,7 +162,7 @@ export class AuthController {
       }
 
       const googleUser = await userResponse.json();
-
+      console.log('Google User:', googleUser);
       if (!googleUser.email) {
         console.error('Google user missing email:', googleUser);
         return res.redirect(
