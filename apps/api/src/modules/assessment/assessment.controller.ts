@@ -65,9 +65,15 @@ export class AssessmentController {
   }
 
   @Get(':id/responses')
-  getResponses(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
-    // Todo: verify ownership
-    return this.assessmentService.getResponses(id);
+  getResponses(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('page') pageStr?: string,
+    @Query('limit') limitStr?: string,
+  ) {
+    const page = pageStr ? parseInt(pageStr, 10) : 1;
+    const limit = limitStr ? parseInt(limitStr, 10) : 20;
+
+    return this.assessmentService.getResponses(id, page, limit);
   }
 
   @Get(':id/result')

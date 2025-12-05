@@ -68,13 +68,15 @@ export class AssessmentService {
   ) {
     return this.pagination.paginate<Response>(
       (page, limit) => {
-        let query = this.supabase.client
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        return this.supabase.client
           .from('responses')
           .select('*', { count: 'exact' })
           .eq('assessment_id', assessmentId)
-          .order('created_at');
-
-        return query;
+          .order('created_at')
+          .range(from, to);
       },
       page,
       limit,
