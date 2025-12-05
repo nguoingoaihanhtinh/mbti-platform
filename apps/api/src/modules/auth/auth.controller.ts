@@ -162,13 +162,22 @@ export class AuthController {
     const accessToken = this.jwtUtil.signAccess(payload);
     const refreshToken = this.jwtUtil.signRefresh(payload);
 
+    const isProd = process.env.NODE_ENV === 'production';
+
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      sameSite: 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 15 * 60 * 1000,
+      path: '/',
     });
+
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      sameSite: 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
     });
 
     return res.redirect(`${process.env.FRONTEND_URL}/assessments`);
