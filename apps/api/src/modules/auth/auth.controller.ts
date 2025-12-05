@@ -123,62 +123,104 @@ export class AuthController {
     @Query('code') code: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        code,
-        grant_type: 'authorization_code',
-        redirect_uri: `${process.env.API_URL}/auth/google/callback`,
-      }),
-    });
-
-    const { access_token } = await tokenResponse.json();
-    const userResponse = await fetch(
-      'https://www.googleapis.com/oauth2/v3/userinfo',
-      {
-        headers: { Authorization: `Bearer ${access_token}` },
-      },
-    );
-    const googleUser = await userResponse.json();
-
-    let user = await this.userService.findOneByEmail(googleUser.email);
-    if (!user) {
-      user = await this.userService.create({
-        email: googleUser.email,
-        full_name:
-          googleUser.name ||
-          googleUser.given_name + ' ' + googleUser.family_name ||
-          googleUser.email.split('@')[0],
-        password: 'google_oauth_user',
-        role: 'candidate',
-        // avatar: googleUser.picture || null,
+    try {
+      // 1. Exchange code for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: `${process.env.API_URL}/auth/google/callback`,
+        }),
       });
+
+      if (!tokenResponse.ok) {
+        console.error('Token exchange failed:', await tokenResponse.text());
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/login?error=google_auth_failed`,
+        );
+      }
+
+      const { access_token } = await tokenResponse.json();
+
+      // 2. Fetch user info
+      const userResponse = await fetch(
+        'https://www.googleapis.com/oauth2/v3/userinfo',
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        },
+      );
+
+      if (!userResponse.ok) {
+        console.error('Userinfo fetch failed:', await userResponse.text());
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/login?error=google_userinfo_failed`,
+        );
+      }
+
+      const googleUser = await userResponse.json();
+
+      if (!googleUser.email) {
+        console.error('Google user missing email:', googleUser);
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/login?error=google_no_email`,
+        );
+      }
+
+      if (googleUser.email_verified !== true) {
+        console.error('Google email not verified:', googleUser.email);
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/login?error=google_email_not_verified`,
+        );
+      }
+
+      let fullName = googleUser.name;
+      if (!fullName && googleUser.given_name && googleUser.family_name) {
+        fullName = `${googleUser.given_name} ${googleUser.family_name}`;
+      }
+      if (!fullName) {
+        fullName = googleUser.email.split('@')[0];
+      }
+
+      let user = await this.userService.findOneByEmail(googleUser.email);
+      if (!user) {
+        user = await this.userService.create({
+          email: googleUser.email,
+          full_name: fullName,
+          password: 'google_oauth_user',
+          role: 'candidate',
+        });
+      }
+
+      const payload: JWTPayload = { sub: user.id, email: user.email };
+      const accessToken = this.jwtUtil.signAccess(payload);
+      const refreshToken = this.jwtUtil.signRefresh(payload);
+
+      res.cookie('access_token', accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+        maxAge: 15 * 60 * 1000,
+      });
+      res.cookie('refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.redirect(`${process.env.FRONTEND_URL}/assessments`);
+    } catch (error) {
+      console.error('Google callback error:', error);
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/login?error=server_error`,
+      );
     }
-
-    const payload: JWTPayload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtUtil.signAccess(payload);
-    const refreshToken = this.jwtUtil.signRefresh(payload);
-
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.redirect(`${process.env.FRONTEND_URL}/assessments`);
   }
 
   @Post('forgot-password')
