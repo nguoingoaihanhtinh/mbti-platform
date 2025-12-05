@@ -121,7 +121,7 @@ export class AuthController {
   @Get('google/callback')
   async googleCallback(
     @Query('code') code: string,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response, // ← removed passthrough since we handle everything
   ) {
     try {
       // 1. Exchange code for access token
@@ -140,6 +140,7 @@ export class AuthController {
       if (!tokenResponse.ok) {
         console.error('Token exchange failed:', await tokenResponse.text());
         return res.redirect(
+          302,
           `${process.env.FRONTEND_URL}/login?error=google_auth_failed`,
         );
       }
@@ -157,15 +158,18 @@ export class AuthController {
       if (!userResponse.ok) {
         console.error('Userinfo fetch failed:', await userResponse.text());
         return res.redirect(
+          302,
           `${process.env.FRONTEND_URL}/login?error=google_userinfo_failed`,
         );
       }
 
       const googleUser = await userResponse.json();
       console.log('Google User:', googleUser);
+
       if (!googleUser.email) {
         console.error('Google user missing email:', googleUser);
         return res.redirect(
+          302,
           `${process.env.FRONTEND_URL}/login?error=google_no_email`,
         );
       }
@@ -173,6 +177,7 @@ export class AuthController {
       if (googleUser.email_verified !== true) {
         console.error('Google email not verified:', googleUser.email);
         return res.redirect(
+          302,
           `${process.env.FRONTEND_URL}/login?error=google_email_not_verified`,
         );
       }
@@ -203,7 +208,7 @@ export class AuthController {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        domain: '.onrender.com', // ← critical for cross-origin
+        domain: 'mbti-platform.onrender.com',
         path: '/',
         maxAge: 15 * 60 * 1000,
       });
@@ -212,15 +217,16 @@ export class AuthController {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        domain: '.onrender.com',
+        domain: 'mbti-platform.onrender.com',
         path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      return res.redirect(`${process.env.FRONTEND_URL}/assessments`);
+      return res.redirect(302, `${process.env.FRONTEND_URL}/assessments`);
     } catch (error) {
       console.error('Google callback error:', error);
       return res.redirect(
+        302,
         `${process.env.FRONTEND_URL}/login?error=server_error`,
       );
     }
