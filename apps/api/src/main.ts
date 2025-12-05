@@ -19,6 +19,8 @@ async function bootstrap() {
   app.enableCors({
     origin: corsOrigin,
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Set-Cookie'],
   });
 
   // Use PORT from environment or default to 3000

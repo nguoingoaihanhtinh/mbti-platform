@@ -61,10 +61,8 @@ export class AuthController {
   }
 
   @Get('refresh')
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const refreshToken = req.cookies?.refresh_token;
     if (!refreshToken) {
       throw new UnauthorizedException('No refresh token');
@@ -145,6 +143,7 @@ export class AuthController {
         );
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { access_token } = await tokenResponse.json();
 
       // 2. Fetch user info
@@ -203,21 +202,19 @@ export class AuthController {
       const payload: JWTPayload = { sub: user.id, email: user.email };
       const accessToken = this.jwtUtil.signAccess(payload);
       const refreshToken = this.jwtUtil.signRefresh(payload);
-
+      const isProd = process.env.NODE_ENV === 'production';
       res.cookie('access_token', accessToken, {
         httpOnly: true,
-        secure: true,
+        secure: isProd,
         sameSite: 'none',
-        domain: 'mbti-platform.onrender.com',
         path: '/',
         maxAge: 15 * 60 * 1000,
       });
 
       res.cookie('refresh_token', refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: isProd,
         sameSite: 'none',
-        domain: 'mbti-platform.onrender.com',
         path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
