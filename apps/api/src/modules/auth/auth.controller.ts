@@ -77,7 +77,7 @@ export class AuthController {
       res.cookie('access_token', accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 15 * 60 * 1000,
       });
 
@@ -162,22 +162,20 @@ export class AuthController {
     const accessToken = this.jwtUtil.signAccess(payload);
     const refreshToken = this.jwtUtil.signRefresh(payload);
 
-    const isProd = process.env.NODE_ENV === 'production';
-
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      maxAge: 15 * 60 * 1000,
+      secure: true,
+      sameSite: 'none',
       path: '/',
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: true,
+      sameSite: 'none',
       path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.redirect(`${process.env.FRONTEND_URL}/assessments`);
