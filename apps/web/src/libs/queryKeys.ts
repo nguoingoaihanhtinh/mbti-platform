@@ -13,3 +13,11 @@ export const questionKeys = {
 export const answerKeys = {
   byQuestion: (questionId: string, page?: number, limit?: number) => ["answers", questionId, page, limit] as const,
 };
+
+export const assessmentKeys = {
+  all: ["assessments"] as const,
+  mine: (page: number, limit: number) => [...assessmentKeys.all, "me", page, limit] as const,
+  detail: (id: string) => [...assessmentKeys.all, id] as const,
+  responses: (id: string) => [...assessmentKeys.all, id, "responses"] as const,
+  result: (id: string) => [...assessmentKeys.all, id, "result"] as const,
+};

@@ -9,15 +9,18 @@ import { useAuthStore } from "./stores/useAuthStore";
 const queryClient = new QueryClient();
 
 function App() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
   const login = useAuthStore((state) => state.login);
 
   useEffect(() => {
-    login();
-  }, [login]);
+    if (!isAuthenticated && !isLoading) {
+      login();
+    }
+  }, [isAuthenticated, isLoading, login]);
 
   return <RouterProvider router={router} />;
 }
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>

@@ -11,11 +11,10 @@ async function bootstrap() {
   // Configure CORS for both development and production
   const corsOrigin =
     process.env.NODE_ENV === 'production'
-      ? [
-          process.env.FRONTEND_URL,
-          'https://mbti-platform-web.vercel.app',
-        ].filter(Boolean)
-      : ['http://localhost:5173', 'http://localhost:3000'];
+      ? [process.env.FRONTEND_URL, 'https://mbti-platform-web.vercel.app']
+          .filter(Boolean)
+          .map((url) => url?.trim())
+      : ['http://localhost:5173'];
 
   app.enableCors({
     origin: corsOrigin,
