@@ -119,10 +119,7 @@ export class AuthController {
 
   // 2. Xử lý callback từ Google
   @Get('google/callback')
-  async googleCallback(
-    @Query('code') code: string,
-    @Res() res: Response, // ← removed passthrough since we handle everything
-  ) {
+  async googleCallback(@Query('code') code: string, @Res() res: Response) {
     try {
       // 1. Exchange code for access token
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -204,34 +201,29 @@ export class AuthController {
       const accessToken = this.jwtUtil.signAccess(payload);
       const refreshToken = this.jwtUtil.signRefresh(payload);
 
+      // Set cookies WITHOUT passthrough
       res.cookie('access_token', accessToken, {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
         domain: 'mbti-platform.onrender.com',
         path: '/',
-        maxAge: 15 * 60 * 1000,
       });
-
       res.cookie('refresh_token', refreshToken, {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
         domain: 'mbti-platform.onrender.com',
         path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      return res.redirect(302, `${process.env.FRONTEND_URL}/assessments`);
-    } catch (error) {
-      console.error('Google callback error:', error);
-      return res.redirect(
-        302,
-        `${process.env.FRONTEND_URL}/login?error=server_error`,
-      );
+      // Redirect WITHOUT return
+      res.redirect(302, `${process.env.FRONTEND_URL}/assessments`);
+    } catch (err) {
+      console.error('Google callback error:', err);
+      res.redirect(302, `${process.env.FRONTEND_URL}/login?error=server`);
     }
   }
-
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     await this.authService.forgotPassword(dto.email);
