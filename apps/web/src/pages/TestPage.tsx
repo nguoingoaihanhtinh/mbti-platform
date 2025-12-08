@@ -11,13 +11,13 @@ const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
   const { testId } = useSearch({ from: "/test" });
-
+  console.log("testId:", testId);
   if (!testId) {
     return <div>Invalid test ID</div>;
   }
   const navigate = useNavigate();
 
-  const { data: test, isLoading, error } = useTest(testId);
+  const { data: test, isLoading, error } = useTest(testId, undefined, { enabled: !!testId });
 
   const [page, setPage] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState<Record<string, string>>({});

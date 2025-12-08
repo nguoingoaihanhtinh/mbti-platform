@@ -8,6 +8,7 @@ import {
   Assessment,
   Response,
   Result,
+  ResultWithMBTI,
 } from '@/types/common';
 import { PaginationService } from '@/common/services/pagination.service';
 
@@ -150,25 +151,41 @@ export class AssessmentService {
     return types[Math.floor(Math.random() * types.length)];
   }
 
-  async getResultByAssessment(assessmentId: string, userId: string) {
-    const { data: assessment, error: aErr } = await this.supabase.client
+  async getResultByAssessment(
+    assessmentId: string,
+    userId: string,
+  ): Promise<ResultWithMBTI> {
+    // 1. Verify ownership
+    const { data: assessment } = await this.supabase.client
       .from('assessments')
       .select('id')
       .eq('id', assessmentId)
       .eq('user_id', userId)
       .single();
 
-    if (aErr || !assessment)
-      throw new BadRequestException('Assessment not found');
+    if (!assessment) throw new BadRequestException('Assessment not found');
 
-    const { data: result, error: rErr } = await this.supabase.client
+    // 2. Fetch result
+    const { data: result } = await this.supabase.client
       .from('results')
       .select('*')
       .eq('assessment_id', assessmentId)
       .single();
 
-    if (rErr || !result) throw new BadRequestException('Result not found');
-    return result;
+    if (!result) throw new BadRequestException('Result not found');
+
+    // 3. Fetch MBTI type details
+    const { data: mbtiType } = await this.supabase.client
+      .from('mbti_types')
+      .select('*')
+      .eq('type_code', result.mbti_type)
+      .single();
+
+    // 4. Return enriched result
+    return {
+      ...result,
+      mbti_type_details: mbtiType || undefined,
+    };
   }
   async getUserAssessments(
     userId: string,

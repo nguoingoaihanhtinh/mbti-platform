@@ -372,6 +372,63 @@ export type Database = {
           },
         ];
       };
+      mbti_types: {
+        Row: {
+          id: string;
+          type_code: string;
+          type_name: string;
+          overview: string;
+          strengths: string[];
+          weaknesses: string[];
+          career_recommendations: string[];
+          improvement_areas: string[];
+          workplace_needs: string[];
+          suitable_roles: string[];
+          communication_style: string | null;
+          leadership_style: string | null;
+          stress_responses: string | null;
+          development_tips: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          type_code: string;
+          type_name: string;
+          overview: string;
+          strengths: string[];
+          weaknesses: string[];
+          career_recommendations: string[];
+          improvement_areas: string[];
+          workplace_needs: string[];
+          suitable_roles: string[];
+          communication_style?: string | null;
+          leadership_style?: string | null;
+          stress_responses?: string | null;
+          development_tips?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          type_code?: string;
+          type_name?: string;
+          overview?: string;
+          strengths?: string[];
+          weaknesses?: string[];
+          career_recommendations?: string[];
+          improvement_areas?: string[];
+          workplace_needs?: string[];
+          suitable_roles?: string[];
+          communication_style?: string | null;
+          leadership_style?: string | null;
+          stress_responses?: string | null;
+          development_tips?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
 
     Views: {

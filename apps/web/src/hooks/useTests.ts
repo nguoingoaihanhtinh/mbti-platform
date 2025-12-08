@@ -13,11 +13,12 @@ export function useTests(page = 1, limit = 20) {
       });
       return res.data;
     },
+
     staleTime: 0,
   });
 }
 
-export function useTest(id: string, versionId?: string) {
+export function useTest(id: string, versionId?: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: testKeys.details(id),
     queryFn: async () => {
@@ -25,6 +26,7 @@ export function useTest(id: string, versionId?: string) {
       const res = await api.get(url);
       return res.data;
     },
+    enabled: options?.enabled ?? true,
   });
 }
 

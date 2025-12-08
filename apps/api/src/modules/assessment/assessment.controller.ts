@@ -15,6 +15,7 @@ import { AssessmentService } from './assessment.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { SubmitResponseDto } from './dto/submit-response.dto';
 import { CompleteAssessmentDto } from './dto/complete-assessment.dto';
+import { ResultWithMBTI } from '@/types/common';
 
 @Controller('assessments')
 @UseGuards(JwtAuthGuard)
@@ -77,7 +78,10 @@ export class AssessmentController {
   }
 
   @Get(':id/result')
-  getResult(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
+  getResult(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req,
+  ): Promise<ResultWithMBTI> {
     return this.assessmentService.getResultByAssessment(id, req.user.sub);
   }
 }

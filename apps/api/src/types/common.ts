@@ -55,3 +55,10 @@ export interface UserQueryParams {
   id: string;
   email?: string;
 }
+
+// --- MBTI Type ---
+export type MBTIType = Database['public']['Tables']['mbti_types']['Row'];
+
+export interface ResultWithMBTI extends Result {
+  mbti_type_details?: MBTIType;
+}
