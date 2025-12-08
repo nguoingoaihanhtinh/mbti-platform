@@ -74,12 +74,43 @@ export const useAuth = () => {
       setLoading(false);
     }
   };
+  const sendLoginOtp = async (email: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.post("/auth/login/otp", { email });
+      return true;
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Failed to send OTP";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyLoginOtp = async (email: string, otp: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.post("/auth/login/verify", { email, otp });
+      navigate({ to: "/assessments" });
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Invalid OTP";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     register,
     login,
     logout,
     forgotPassword,
+    sendLoginOtp,
+    verifyLoginOtp,
     loading,
     error,
   };

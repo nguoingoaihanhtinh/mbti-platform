@@ -7,8 +7,6 @@ import {
   Get,
   UseGuards,
   UnauthorizedException,
-  Query,
-  Redirect,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -47,17 +45,60 @@ export class AuthController {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? 'none' : 'lax',
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
     });
-
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return { user };
+  }
+
+  @Post('login/otp')
+  async sendLoginOtp(@Body('email') email: string) {
+    await this.authService.sendLoginOtp(email);
+    return { message: 'OTP sent to your email' };
+  }
+
+  @Post('login/verify')
+  async verifyLoginOtp(
+    @Body() { email, otp }: { email: string; otp: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const isValid = await this.authService.verifyOtp(email, otp, 'login');
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid or expired OTP');
+    }
+
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const payload: JWTPayload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtUtil.signAccess(payload);
+    const refreshToken = this.jwtUtil.signRefresh(payload);
+
+    const isProd = process.env.NODE_ENV === 'production';
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 15 * 60 * 1000,
+      path: '/',
+    });
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
     });
 
-    return { user };
+    const { password: _, ...safeUser } = user;
+    return { user: safeUser };
   }
 
   @Get('refresh')
@@ -69,18 +110,17 @@ export class AuthController {
     if (!refreshToken) {
       throw new UnauthorizedException('No refresh token');
     }
-
     try {
       const payload = this.jwtUtil.verify(refreshToken);
       const accessToken = this.jwtUtil.signAccess(payload);
-
+      const isProd = process.env.NODE_ENV === 'production';
       res.cookie('access_token', accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
         maxAge: 15 * 60 * 1000,
+        path: '/',
       });
-
       return { message: 'Token refreshed' };
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
@@ -100,130 +140,6 @@ export class AuthController {
     return req.user;
   }
 
-  @Get('google')
-  @Redirect()
-  googleLogin() {
-    const googleAuthUrl = new URL(
-      'https://accounts.google.com/o/oauth2/v2/auth',
-    );
-    googleAuthUrl.searchParams.set('client_id', process.env.GOOGLE_CLIENT_ID!);
-    googleAuthUrl.searchParams.set(
-      'redirect_uri',
-      `${process.env.API_URL}/auth/google/callback`,
-    );
-    console.log('REDIRECT:', process.env.API_URL);
-    googleAuthUrl.searchParams.set('response_type', 'code');
-    googleAuthUrl.searchParams.set('scope', 'openid email profile');
-    return { url: googleAuthUrl.toString() };
-  }
-
-  // 2. Xử lý callback từ Google
-  @Get('google/callback')
-  async googleCallback(@Query('code') code: string, @Res() res: Response) {
-    try {
-      // 1. Exchange code for access token
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
-          code,
-          grant_type: 'authorization_code',
-          redirect_uri: `${process.env.API_URL}/auth/google/callback`,
-        }),
-      });
-
-      if (!tokenResponse.ok) {
-        console.error('Token exchange failed:', await tokenResponse.text());
-        return res.redirect(
-          302,
-          `${process.env.FRONTEND_URL}/login?error=google_auth_failed`,
-        );
-      }
-
-      const { access_token } = await tokenResponse.json();
-
-      // 2. Fetch user info
-      const userResponse = await fetch(
-        'https://www.googleapis.com/oauth2/v3/userinfo',
-        {
-          headers: { Authorization: `Bearer ${access_token}` },
-        },
-      );
-
-      if (!userResponse.ok) {
-        console.error('Userinfo fetch failed:', await userResponse.text());
-        return res.redirect(
-          302,
-          `${process.env.FRONTEND_URL}/login?error=google_userinfo_failed`,
-        );
-      }
-
-      const googleUser = await userResponse.json();
-      console.log('Google User:', googleUser);
-
-      if (!googleUser.email) {
-        console.error('Google user missing email:', googleUser);
-        return res.redirect(
-          302,
-          `${process.env.FRONTEND_URL}/login?error=google_no_email`,
-        );
-      }
-
-      if (googleUser.email_verified !== true) {
-        console.error('Google email not verified:', googleUser.email);
-        return res.redirect(
-          302,
-          `${process.env.FRONTEND_URL}/login?error=google_email_not_verified`,
-        );
-      }
-
-      let fullName = googleUser.name;
-      if (!fullName && googleUser.given_name && googleUser.family_name) {
-        fullName = `${googleUser.given_name} ${googleUser.family_name}`;
-      }
-      if (!fullName) {
-        fullName = googleUser.email.split('@')[0];
-      }
-
-      let user = await this.userService.findOneByEmail(googleUser.email);
-      if (!user) {
-        user = await this.userService.create({
-          email: googleUser.email,
-          full_name: fullName,
-          password: 'google_oauth_user',
-          role: 'candidate',
-        });
-      }
-
-      const payload: JWTPayload = { sub: user.id, email: user.email };
-      const accessToken = this.jwtUtil.signAccess(payload);
-      const refreshToken = this.jwtUtil.signRefresh(payload);
-
-      // Set cookies WITHOUT passthrough
-      res.cookie('access_token', accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        domain: 'mbti-platform.onrender.com',
-        path: '/',
-      });
-      res.cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        domain: 'mbti-platform.onrender.com',
-        path: '/',
-      });
-
-      // Redirect WITHOUT return
-      res.redirect(302, `${process.env.FRONTEND_URL}/assessments`);
-    } catch (err) {
-      console.error('Google callback error:', err);
-      res.redirect(302, `${process.env.FRONTEND_URL}/login?error=server`);
-    }
-  }
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     await this.authService.forgotPassword(dto.email);

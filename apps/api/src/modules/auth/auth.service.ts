@@ -58,39 +58,63 @@ export class AuthService {
       refreshToken,
     };
   }
-  async forgotPassword(email: string) {
-    console.log('forgotPassword called with email:', email);
-
-    const user = await this.userService.findOneByEmail(email);
-    if (!user) {
-      console.log('Email not found in DB');
-      return;
-    }
-    console.log('User found, generating OTP...');
-
+  async generateAndStoreOtp(
+    email: string,
+    purpose: 'login' | 'password_reset',
+  ) {
     const otp = crypto.randomInt(100000, 999999).toString();
-    console.log('Generated OTP:', otp);
-
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await this.supabase.client
-      .from('password_reset_otp')
-      .upsert({ email, otp, expires_at: expiresAt.toISOString() });
 
-    console.log('OTP saved to DB');
+    await this.supabase.client.from('otps').upsert({
+      email,
+      otp,
+      purpose,
+      expires_at: expiresAt.toISOString(),
+    });
 
-    try {
-      await sendPasswordResetEmail(email, otp);
-      console.log('Email sent via Resend');
-    } catch (err) {
-      console.error('Resend error:', err);
-      throw new BadRequestException('Failed to send email');
+    return otp;
+  }
+
+  async verifyOtp(
+    email: string,
+    otp: string,
+    purpose: 'login' | 'password_reset',
+  ) {
+    const now = new Date().toISOString();
+    const { data, error } = await this.supabase.client
+      .from('otps')
+      .select('otp')
+      .eq('email', email)
+      .eq('otp', otp)
+      .eq('purpose', purpose)
+      .gte('expires_at', now)
+      .single();
+
+    if (error || !data) {
+      return false;
     }
+
+    await this.supabase.client
+      .from('otps')
+      .delete()
+      .eq('email', email)
+      .eq('otp', otp)
+      .eq('purpose', purpose);
+
+    return true;
+  }
+  async forgotPassword(email: string) {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) return;
+
+    const otp = await this.generateAndStoreOtp(email, 'password_reset');
+    await sendPasswordResetEmail(email, otp);
   }
 
   async resetPassword(otp: string, newPassword: string) {
     const now = new Date().toISOString();
     const { data, error } = await this.supabase.client
-      .from('password_reset_otp')
+      .from('otps')
       .select('email')
       .eq('otp', otp)
       .gte('expires_at', now)
@@ -104,9 +128,16 @@ export class AuthService {
 
     await this.userService.updatePassword(data.email, hashed);
 
-    await this.supabase.client
-      .from('password_reset_otp')
-      .delete()
-      .eq('otp', otp);
+    await this.supabase.client.from('otps').delete().eq('otp', otp);
+  }
+  async sendLoginOtp(email: string) {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      throw new BadRequestException('Email not registered');
+    }
+
+    const otp = await this.generateAndStoreOtp(email, 'login');
+    // console.log(`[OTP] Sending login OTP ${otp} to ${email}`);
+    await sendPasswordResetEmail(email, otp);
   }
 }

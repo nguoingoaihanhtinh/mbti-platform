@@ -200,21 +200,24 @@ export type Database = {
         ];
       };
 
-      password_reset_otp: {
+      otps: {
         Row: {
           email: string;
           otp: string;
           expires_at: string;
+          purpose: string;
         };
         Insert: {
           email: string;
           otp: string;
           expires_at: string;
+          purpose: string;
         };
         Update: {
           email?: string;
           otp?: string;
           expires_at?: string;
+          purpose?: string;
         };
         Relationships: [];
       };

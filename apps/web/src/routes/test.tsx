@@ -2,19 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import TestPage from "../pages/TestPage";
 
+const testSearchSchema = z.object({
+  testId: z.string().uuid(),
+});
+
 export const Route = createFileRoute("/test")({
   validateSearch: (search) => {
-    const parsed = z
-      .object({
-        testId: z.string().uuid(),
-      })
-      .safeParse(search);
-
-    if (!parsed.success) {
-      throw new Error("Invalid or missing testId");
+    const result = testSearchSchema.safeParse(search);
+    if (!result.success) {
+      return { testId: null };
     }
-    return parsed.data;
+    return result.data;
   },
-
   component: TestPage,
 });

@@ -11,6 +11,10 @@ const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
   const { testId } = useSearch({ from: "/test" });
+
+  if (!testId) {
+    return <div>Invalid test ID</div>;
+  }
   const navigate = useNavigate();
 
   const { data: test, isLoading, error } = useTest(testId);
