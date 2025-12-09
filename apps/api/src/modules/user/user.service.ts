@@ -154,4 +154,38 @@ export class UserService {
 
     return data;
   }
+  async getUserProfile(userId: string) {
+    const { data, error } = await this.client
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error?.code === 'PGRST116') return null;
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserProfile(
+    userId: string,
+    profileData: {
+      education?: string;
+      experience?: string;
+      social_links?: Record<string, string>;
+      about?: string;
+    },
+  ) {
+    const { data, error } = await this.client
+      .from('user_profiles')
+      .upsert({
+        id: userId,
+        ...profileData,
+        updated_at: new Date().toISOString(),
+      })
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
 }

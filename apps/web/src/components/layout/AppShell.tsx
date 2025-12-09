@@ -1,5 +1,16 @@
 import React from "react";
-import { Bell, User, Home, BookOpen, BarChart3, Settings, LogOut, type LucideIcon } from "lucide-react";
+import {
+  Bell,
+  User,
+  Home,
+  BookOpen,
+  BarChart3,
+  Settings,
+  LogOut,
+  type LucideIcon,
+  Linkedin,
+  Github,
+} from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -18,7 +29,7 @@ const navItems: { id: string; label: string; icon: LucideIcon }[] = [
 
 export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShellProps) {
   const { user, logout: logoutStore } = useAuthStore();
-  console.log("AppShell user:", user);
+  // console.log("AppShell user:", user);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -81,26 +92,67 @@ export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShell
             </div>
             <h3 className="font-semibold text-lg text-primary-900">{user.full_name}</h3>
             <p className="text-sm text-neutral-500">{user.email}</p>
+            {user.id && <p className="text-xs text-neutral-400 mt-1">User ID: {user.id.substring(0, 8)}</p>}
           </div>
 
-          <div className="space-y-6">
+          {/* Profile Summary */}
+          <div className="space-y-4">
+            {/* Role */}
             <div>
-              <h4 className="text-xs font-semibold text-neutral-500 mb-2">ROLE</h4>
-              <div className="text-sm font-medium text-primary-900 capitalize">{user.role}</div>
+              <h4 className="text-xs font-semibold text-neutral-500 mb-1">ROLE</h4>
+              <p className="text-sm font-medium text-primary-900 capitalize">{user.role}</p>
             </div>
 
-            <div>
-              <h4 className="text-xs font-semibold text-neutral-500 mb-2">COMPLETED TESTS</h4>
-              <div className="text-2xl font-bold text-primary-900">0</div>
-            </div>
+            {/* Education (only if exists) */}
+            {user.profile?.education && (
+              <div>
+                <h4 className="text-xs font-semibold text-neutral-500 mb-1">EDUCATION</h4>
+                <p className="text-sm text-neutral-700">{user.profile.education}</p>
+              </div>
+            )}
 
-            <nav className="space-y-2 pt-4">
+            {/* Social Links (only if any exist) */}
+            {(user.profile?.social_links?.linkedin || user.profile?.social_links?.github) && (
+              <div>
+                <h4 className="text-xs font-semibold text-neutral-500 mb-1">SOCIAL</h4>
+                <div className="flex flex-col gap-1">
+                  {user.profile.social_links.linkedin && (
+                    <a
+                      href={user.profile.social_links.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                      title="LinkedIn"
+                    >
+                      <Linkedin className="w-4 h-4" />
+                      <span>LinkedIn</span>
+                    </a>
+                  )}
+                  {user.profile.social_links.github && (
+                    <a
+                      href={user.profile.social_links.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-800 hover:text-black"
+                      title="GitHub"
+                    >
+                      <Github className="w-4 h-4" />
+                      <span>GitHub</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Navigation */}
+            <nav className="pt-4 border-t border-secondary-200">
               {navItems.map((n) => {
                 const Icon = n.icon;
                 const active = n.id === activeNav;
                 return (
                   <button
                     key={n.id}
+                    onClick={() => navigate({ to: n.id === "profile" ? "/profile" : "/" + n.id })}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
                       active ? "bg-primary text-primary-foreground" : "text-neutral-700 hover:bg-secondary-100"
                     }`}

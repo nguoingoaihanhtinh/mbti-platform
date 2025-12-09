@@ -2,6 +2,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import AssessmentsPage from "../pages/AssessmentsPage";
+import { AppShell } from "../components/layout/AppShell";
 
 export const Route = createFileRoute("/assessments")({
   beforeLoad: ({ location }) => {
@@ -13,5 +14,9 @@ export const Route = createFileRoute("/assessments")({
       });
     }
   },
-  component: AssessmentsPage,
+  component: () => (
+    <AppShell activeNav="all">
+      <AssessmentsPage />
+    </AppShell>
+  ),
 });

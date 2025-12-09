@@ -11,6 +11,16 @@ export type User = {
   full_name: string;
   role: string;
   created_at: string;
+  profile?: {
+    education?: string;
+    experience?: string;
+    social_links?: {
+      linkedin?: string;
+      github?: string;
+      [key: string]: string | undefined;
+    };
+    about?: string;
+  };
 };
 
 type AuthState = {

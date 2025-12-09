@@ -142,13 +142,20 @@ export class AuthController {
   async getProfile(@Req() req: Request) {
     const userId = req.user.sub;
 
+    // Fetch basic user
     const user = await this.userService.findOneById(userId);
-
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
-    return { user };
+    const profile = await this.userService.getUserProfile(userId);
+
+    return {
+      user: {
+        ...user,
+        profile: profile || null,
+      },
+    };
   }
 
   @Post('forgot-password')
@@ -170,13 +177,40 @@ export class AuthController {
   ) {
     const userId = req.user.sub;
 
-    if (!updateDto.full_name && !updateDto.email) {
-      throw new BadRequestException(
-        'At least one field (full_name or email) must be provided',
-      );
+    if (updateDto.full_name || updateDto.email) {
+      await this.userService.updateProfile(userId, {
+        full_name: updateDto.full_name,
+        email: updateDto.email,
+      });
     }
 
-    const updatedUser = await this.userService.updateProfile(userId, updateDto);
-    return { user: updatedUser };
+    if (
+      updateDto.education ||
+      updateDto.experience ||
+      updateDto.social_links ||
+      updateDto.about
+    ) {
+      await this.userService.updateUserProfile(userId, {
+        education: updateDto.education,
+        experience: updateDto.experience,
+        social_links: updateDto.social_links,
+        about: updateDto.about,
+      });
+    }
+
+    const user = await this.userService.findOneById(userId);
+    const profile = await this.userService.getUserProfile(userId);
+
+    return {
+      user: {
+        ...user,
+        profile: profile || {
+          education: '',
+          experience: '',
+          social_links: {},
+          about: '',
+        },
+      },
+    };
   }
 }

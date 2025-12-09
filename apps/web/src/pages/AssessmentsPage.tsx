@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { AppShell } from "../components/layout/AppShell";
 import { Button } from "../components/ui/button";
 import { useTests } from "../hooks/useTests";
 import { useAssessments } from "../hooks/useAssessments";
-
 import type { Assessment } from "../types/assessment";
 import type { Test } from "../types/test";
 
@@ -23,7 +21,7 @@ export default function AssessmentsPage() {
   const assessments = assessmentsData?.data || [];
 
   return (
-    <AppShell activeNav="all">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">{view === "tests" ? "Available Tests" : "My Assessments"}</h1>
         <p className="text-gray-600">
@@ -56,9 +54,6 @@ export default function AssessmentsPage() {
                 variant="primary"
                 fullWidth
                 onClick={() => {
-                  // Start a NEW assessment for this test
-                  // You’ll need an API call to POST /assessments with test_id
-                  // For now, just navigate — you'll handle creation on /test
                   navigate({ to: "/test", search: { testId: test.id } });
                 }}
               >
@@ -84,13 +79,10 @@ export default function AssessmentsPage() {
                   </p>
                 )}
                 <Button
-                  key={assessment.id}
                   onClick={() => {
                     if (assessment.status === "completed") {
-                      // ✅ Use result route
                       navigate({ to: `/results/${assessment.id}` });
                     } else {
-                      // ✅ Start new test (or later: resume via different route)
                       navigate({ to: "/test", search: { testId: assessment.test_id } });
                     }
                   }}
@@ -102,6 +94,6 @@ export default function AssessmentsPage() {
           )}
         </div>
       )}
-    </AppShell>
+    </div>
   );
 }
