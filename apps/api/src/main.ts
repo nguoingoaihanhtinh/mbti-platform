@@ -8,7 +8,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(cookieParser());
 
-  // Configure CORS for both development and production
   const corsOrigin =
     process.env.NODE_ENV === 'production'
       ? [process.env.FRONTEND_URL, 'https://mbti-platform-web.vercel.app']
@@ -21,9 +20,8 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Use PORT from environment or default to 3000
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`Application is running on port ${port}`);
 }
 bootstrap();
