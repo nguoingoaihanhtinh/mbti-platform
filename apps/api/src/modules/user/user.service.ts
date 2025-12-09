@@ -115,4 +115,43 @@ export class UserService {
 
     if (error) throw error;
   }
+  async updateProfile(
+    id: string,
+    updateData: { full_name?: string; email?: string },
+  ) {
+    if (!updateData.full_name && !updateData.email) {
+      throw new BadRequestException(
+        'At least one field (full_name or email) must be provided',
+      );
+    }
+
+    if (updateData.email) {
+      const existing = await this.client
+        .from('users')
+        .select('id')
+        .eq('email', updateData.email)
+        .neq('id', id)
+        .single();
+
+      if (existing.data) {
+        throw new BadRequestException('Email already in use');
+      }
+    }
+
+    const { data, error } = await this.client
+      .from('users')
+      .update(updateData)
+      .eq('id', id)
+      .select('id, email, full_name, role, created_at')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        throw new NotFoundException('User not found');
+      }
+      throw new BadRequestException('Failed to update profile');
+    }
+
+    return data;
+  }
 }

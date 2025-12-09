@@ -60,7 +60,8 @@ export const useAuthStore = create<AuthState>()(
               credentials: "include",
             });
             if (res.ok) {
-              const user = await res.json();
+              const data = await res.json();
+              const user = data.user;
               set({ user, isAuthenticated: true, isLoading: false });
             } else {
               set({ user: null, isAuthenticated: false, isLoading: false });
@@ -77,7 +78,8 @@ export const useAuthStore = create<AuthState>()(
               credentials: "include",
             });
             if (res.ok) {
-              const user = await res.json();
+              const data = await res.json();
+              const user = data.user;
               set({ user, isAuthenticated: true, isLoading: false });
             } else {
               set({ user: null, isAuthenticated: false, isLoading: false });

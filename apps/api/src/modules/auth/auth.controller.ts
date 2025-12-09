@@ -7,6 +7,8 @@ import {
   Get,
   UseGuards,
   UnauthorizedException,
+  Patch,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -19,6 +21,7 @@ import {
 import { JWTPayload, JwtUtil } from '@/utils/jwt.util';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
+import { UpdateProfileDto } from '../user/dto/update-profile.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -136,8 +139,16 @@ export class AuthController {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  getProfile(@Req() req: Request) {
-    return req.user;
+  async getProfile(@Req() req: Request) {
+    const userId = req.user.sub;
+
+    const user = await this.userService.findOneById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return { user };
   }
 
   @Post('forgot-password')
@@ -150,5 +161,22 @@ export class AuthController {
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.authService.resetPassword(dto.otp, dto.newPassword);
     return { message: 'Password updated.' };
+  }
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(
+    @Req() req: Request,
+    @Body() updateDto: UpdateProfileDto,
+  ) {
+    const userId = req.user.sub;
+
+    if (!updateDto.full_name && !updateDto.email) {
+      throw new BadRequestException(
+        'At least one field (full_name or email) must be provided',
+      );
+    }
+
+    const updatedUser = await this.userService.updateProfile(userId, updateDto);
+    return { user: updatedUser };
   }
 }
