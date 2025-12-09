@@ -315,41 +315,48 @@ export default function ResultsPage() {
       </div>
 
       <div className="border-t border-gray-200 my-8"></div>
+      <div className="bg-white pt-5 pl-5 border border-gray-200 rounded-lg shadow-sm mb-5">
+        {/* Responses */}
+        <div className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Your Answers</h2>
+          <ul className="space-y-4 text-sm">
+            {responses.map((resp) => {
+              const q = questionsMap[resp.question_id];
+              const answerText = resp.free_text
+                ? resp.free_text
+                : q?.answers.find((a) => a.id === resp.answer_id)?.text;
+              return (
+                <li key={resp.id} className="pb-4 border-b border-gray-100 last:border-0">
+                  <div className="text-gray-800">
+                    <span className="font-medium">Q:</span> {q?.text}
+                  </div>
+                  <div className="text-gray-800">
+                    <span className="font-medium">A:</span> {answerText || "—"}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
 
-      {/* Responses */}
-      <div className="mb-10">
-        <h2 className="text-xl font-semibold mb-4">Your Answers</h2>
-        <ul className="space-y-4 text-sm">
-          {responses.map((resp) => {
-            const q = questionsMap[resp.question_id];
-            const answerText = resp.free_text ? resp.free_text : q?.answers.find((a) => a.id === resp.answer_id)?.text;
-            return (
-              <li key={resp.id} className="pb-4 border-b border-gray-100 last:border-0">
-                <div className="text-gray-800">
-                  <span className="font-medium">Q:</span> {q?.text}
-                </div>
-                <div className="text-gray-800">
-                  <span className="font-medium">A:</span> {answerText || "—"}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-6 space-x-2">
-            <Button variant="ghost" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
-              ‹ Previous
-            </Button>
-            <span className="px-3 text-gray-600 text-sm">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button variant="ghost" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
-              Next ›
-            </Button>
-          </div>
-        )}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6 space-x-2">
+              <Button variant="ghost" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
+                ‹ Previous
+              </Button>
+              <span className="px-3 text-gray-600 text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="ghost"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next ›
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       <Button variant="primary" onClick={() => window.history.back()}>
