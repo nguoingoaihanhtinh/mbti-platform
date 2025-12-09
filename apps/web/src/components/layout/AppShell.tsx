@@ -17,17 +17,17 @@ import { useNavigate } from "@tanstack/react-router";
 interface AppShellProps {
   children: React.ReactNode;
   rightSidebar?: React.ReactNode;
-  activeNav?: "all" | "analytics" | "seasonal" | "profile";
+  activeNav?: "assessments" | "analytics" | "seasonal" | "profile";
 }
 
 const navItems: { id: string; label: string; icon: LucideIcon }[] = [
-  { id: "all", label: "All Tests", icon: Home },
+  { id: "assessments", label: "All Tests", icon: Home },
   { id: "analytics", label: "Analytics", icon: BookOpen },
   { id: "seasonal", label: "Seasonale", icon: BarChart3 },
   { id: "profile", label: "Profile Settings", icon: Settings },
 ];
 
-export function AppShell({ children, rightSidebar, activeNav = "all" }: AppShellProps) {
+export function AppShell({ children, rightSidebar, activeNav = "assessments" }: AppShellProps) {
   const { user, logout: logoutStore } = useAuthStore();
   // console.log("AppShell user:", user);
   const navigate = useNavigate();

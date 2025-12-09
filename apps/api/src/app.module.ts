@@ -7,6 +7,7 @@ import { QuestionModule } from './modules/quesion/question.module';
 import { AnswerModule } from './modules/answer/answer.module';
 import { PaginationService } from './common/services/pagination.service';
 import { AssessmentModule } from './modules/assessment/assessment.module';
+import { HRModule } from './modules/hr/hr.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AssessmentModule } from './modules/assessment/assessment.module';
     QuestionModule,
     AnswerModule,
     AssessmentModule,
+    HRModule,
   ],
   providers: [PaginationService],
 })

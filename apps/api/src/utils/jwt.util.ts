@@ -4,6 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 export interface JWTPayload {
   sub: string;
   email: string;
+  role: string;
 }
 
 @Injectable()

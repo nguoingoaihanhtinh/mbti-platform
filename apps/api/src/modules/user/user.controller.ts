@@ -21,13 +21,15 @@ export class UserController {
       email: string;
       password: string;
       full_name: string;
+      role?: string;
     },
   ) {
+    const role = body.role || 'candidate';
     const user = await this.service.create({
       email: body.email,
       password: body.password,
       full_name: body.full_name,
-      role: 'user',
+      role,
     });
     return { success: true, data: user };
   }
