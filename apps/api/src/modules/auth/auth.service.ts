@@ -51,6 +51,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      company_id: user.company_id,
     };
     const accessToken = this.jwtUtil.signAccess(payload);
     const refreshToken = this.jwtUtil.signRefresh(payload);

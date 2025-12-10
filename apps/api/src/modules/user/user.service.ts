@@ -38,11 +38,10 @@ export class UserService {
     return data;
   }
 
-  // ✅ Auth needs this
   async findOneByEmail(email: string) {
     const { data, error } = await this.client
       .from('users')
-      .select('id, email, full_name, role, created_at, password')
+      .select('id, email, full_name, role, company_id, created_at, password')
       .eq('email', email)
       .single();
 

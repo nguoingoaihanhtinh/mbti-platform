@@ -11,7 +11,6 @@ export class HRController {
 
   @Get('dashboard/stats')
   async getDashboardStats(@Req() req: any) {
-    console.log('HRController.getDashboardStats - user:', req.user);
     if (req.user.role !== 'company') {
       throw new UnauthorizedException(
         'Only company admins can access HR dashboard',
@@ -33,5 +32,20 @@ export class HRController {
     }
 
     return this.hrService.getCandidatesByTest(testId, +page, +limit);
+  }
+
+  @Get('dashboard/timeline')
+  async getTestTimeline(@Req() req: any) {
+    const companyId = req.user.company_id;
+    return this.hrService.getTestTimeline(companyId);
+  }
+
+  @Get('candidates/:assessmentId/result')
+  async getCandidateResult(
+    @Req() req: any,
+    @Param('assessmentId') assessmentId: string,
+  ) {
+    const companyId = req.user.company_id;
+    return this.hrService.getCandidateResult(assessmentId, companyId);
   }
 }

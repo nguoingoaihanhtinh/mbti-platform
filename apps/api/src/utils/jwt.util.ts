@@ -5,6 +5,7 @@ export interface JWTPayload {
   sub: string;
   email: string;
   role: string;
+  company_id?: string;
 }
 
 @Injectable()
