@@ -15,7 +15,7 @@ export const Route = createFileRoute("/assessments")({
     }
   },
   component: () => (
-    <AppShell activeNav="all">
+    <AppShell activeNav="assessments">
       <AssessmentsPage />
     </AppShell>
   ),

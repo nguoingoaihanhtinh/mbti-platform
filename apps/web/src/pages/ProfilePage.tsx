@@ -32,7 +32,10 @@ export function ProfilePage() {
         education: user.profile?.education || "",
         experience: user.profile?.experience || "",
         about: user.profile?.about || "",
-        social_links: user.profile?.social_links || { linkedin: "", github: "" },
+        social_links: {
+          linkedin: user.profile?.social_links?.linkedin || "",
+          github: user.profile?.social_links?.github || "",
+        },
       });
     }
   }, [user]);

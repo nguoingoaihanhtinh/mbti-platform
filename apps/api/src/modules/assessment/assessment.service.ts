@@ -34,17 +34,47 @@ export class AssessmentService {
     return assessment;
   }
 
-  async getAssessmentById(assessmentId: string, userId: string) {
-    const { data: assessment, error } = await this.supabase.client
+  async getAssessmentById(
+    assessmentId: string,
+    userId: string,
+    companyId?: string,
+  ) {
+    if (companyId) {
+      console.log('🔹 Running company check query');
+
+      const { data: viaCompany, error: viaCompanyErr } =
+        await this.supabase.client
+          .from('assessments')
+          .select('*, test:tests(company_id)')
+          .eq('id', assessmentId)
+          .eq('test.company_id', companyId)
+          .single();
+
+      if (viaCompany) {
+        const { test, ...clean } = viaCompany;
+        return clean;
+      }
+
+      console.log('Company check failed:', viaCompanyErr);
+    }
+
+    console.log('🔹 Running user check query');
+
+    const { data: viaUser, error: viaUserErr } = await this.supabase.client
       .from('assessments')
-      .select('*')
+      .select('*, test:tests(company_id)')
       .eq('id', assessmentId)
       .eq('user_id', userId)
       .single();
 
-    if (error || !assessment)
-      throw new BadRequestException('Assessment not found');
-    return assessment;
+    if (viaUser) {
+      const { test, ...clean } = viaUser;
+      return clean;
+    }
+
+    console.log('User check failed:', viaUserErr);
+
+    throw new BadRequestException('Assessment not found');
   }
 
   async submitResponse(
@@ -154,15 +184,20 @@ export class AssessmentService {
   async getResultByAssessment(
     assessmentId: string,
     userId: string,
+    companyId?: string,
   ): Promise<ResultWithMBTI> {
-    // 1. Verify ownership
-    const { data: assessment } = await this.supabase.client
+    const query = this.supabase.client
       .from('assessments')
-      .select('id')
-      .eq('id', assessmentId)
-      .eq('user_id', userId)
-      .single();
+      .select('id, test_id')
+      .eq('id', assessmentId);
 
+    if (companyId) {
+      query.or(`user_id.eq.${userId},test.company_id.eq.${companyId}`);
+    } else {
+      query.eq('user_id', userId);
+    }
+
+    const { data: assessment } = await query.single();
     if (!assessment) throw new BadRequestException('Assessment not found');
 
     // 2. Fetch result
@@ -174,14 +209,13 @@ export class AssessmentService {
 
     if (!result) throw new BadRequestException('Result not found');
 
-    // 3. Fetch MBTI type details
+    // 3. Fetch MBTI type
     const { data: mbtiType } = await this.supabase.client
       .from('mbti_types')
       .select('*')
       .eq('type_code', result.mbti_type)
       .single();
 
-    // 4. Return enriched result
     return {
       ...result,
       mbti_type_details: mbtiType || undefined,

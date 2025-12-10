@@ -62,7 +62,14 @@ export class AssessmentController {
 
   @Get(':id')
   getAssessment(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
-    return this.assessmentService.getAssessmentById(id, req.user.sub);
+    const companyId =
+      req.user.role === 'company' ? req.user.company_id : undefined;
+    console.log('companyId', companyId);
+    return this.assessmentService.getAssessmentById(
+      id,
+      req.user.sub,
+      companyId,
+    );
   }
 
   @Get(':id/responses')
@@ -78,10 +85,14 @@ export class AssessmentController {
   }
 
   @Get(':id/result')
-  getResult(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Req() req,
-  ): Promise<ResultWithMBTI> {
-    return this.assessmentService.getResultByAssessment(id, req.user.sub);
+  getResult(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
+    const companyId =
+      req.user.role === 'company' ? req.user.company_id : undefined;
+
+    return this.assessmentService.getResultByAssessment(
+      id,
+      req.user.sub,
+      companyId,
+    );
   }
 }

@@ -134,14 +134,14 @@ export default function ResultsPage() {
 
   if (loading)
     return (
-      <AppShell activeNav="all">
+      <AppShell activeNav="assessments">
         <div className="p-6">Loading your result...</div>
       </AppShell>
     );
 
   if (!result)
     return (
-      <AppShell activeNav="all">
+      <AppShell activeNav="assessments">
         <div className="p-6 text-red-500">Result not found</div>
       </AppShell>
     );
@@ -163,7 +163,7 @@ export default function ResultsPage() {
   ];
 
   return (
-    <AppShell activeNav="all">
+    <AppShell activeNav="assessments">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-1">Your MBTI Result</h1>

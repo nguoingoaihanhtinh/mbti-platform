@@ -1,20 +1,41 @@
-// // src/routes/hr/dashboard.tsx
-// import { createFileRoute, redirect } from "@tanstack/react-router";
-// import { useAuthStore } from "../../stores/useAuthStore";
-// import { AppShell } from "../../components/AppShell";
-// import { HRDashboardPage } from "../../pages/HRDashboardPage";
+// src/routes/hr/dashboard.tsx
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-// export const Route = createFileRoute("/hr/dashboard")({
-//   beforeLoad: () => {
-//     const { isAuthenticated, user } = useAuthStore.getState();
-//     // Optional: redirect non-employer early (UX improvement)
-//     if (!isAuthenticated || user?.role !== "employer") {
-//       throw redirect({ to: "/assessments" });
-//     }
-//   },
-//   component: () => (
-//     <AppShell activeNav="hr">
-//       <HRDashboardPage />
-//     </AppShell>
-//   ),
+import { useAuthStore } from "../../stores/useAuthStore";
+import HRDashboard from "../../pages/hr/HRDashboardPage";
+
+export const Route = createFileRoute("/hr/dashboard")({
+  beforeLoad: async () => {
+    const { isAuthenticated, login } = useAuthStore.getState();
+
+    if (!isAuthenticated) {
+      await login();
+    }
+
+    const currentUser = useAuthStore.getState().user;
+
+    if (!currentUser || currentUser.role !== "company") {
+      throw redirect({
+        to: "/login",
+      });
+    }
+  },
+  component: HRDashboard,
+});
+
+// // src/routes/hr/analytics.tsx
+// import { createFileRoute } from "@tanstack/react-router";
+// import HRAnalyticsPage from "../../pages/hr/HRAnalyticsPage";
+
+// export const Route = createFileRoute("/hr/analytics")({
+//   component: HRAnalyticsPage,
+// });
+
+// // src/routes/hr/settings.tsx
+// import { createFileRoute } from "@tanstack/react-router";
+// import HRSettingsPage from "../../pages/hr/HRSettingsPage";
+// import HRDashboard from "../../pages/hr/HRDashboardPage";
+
+// export const Route = createFileRoute("/hr/settings")({
+//   component: HRSettingsPage,
 // });

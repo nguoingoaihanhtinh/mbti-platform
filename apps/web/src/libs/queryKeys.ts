@@ -21,3 +21,12 @@ export const assessmentKeys = {
   responses: (id: string) => [...assessmentKeys.all, id, "responses"] as const,
   result: (id: string) => [...assessmentKeys.all, id, "result"] as const,
 };
+
+export const hrKeys = {
+  all: ["hr"] as const,
+  stats: () => [...hrKeys.all, "stats"] as const,
+  timeline: () => [...hrKeys.all, "timeline"] as const,
+  testCandidates: (testId: string, page?: number, limit?: number) =>
+    [...hrKeys.all, "tests", testId, "candidates", page, limit] as const,
+  candidateResult: (assessmentId: string) => [...hrKeys.all, "candidates", assessmentId, "result"] as const,
+};

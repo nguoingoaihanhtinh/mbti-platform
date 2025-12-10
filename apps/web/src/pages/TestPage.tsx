@@ -102,7 +102,7 @@ export default function TestPage() {
   );
 
   return (
-    <AppShell activeNav="all" rightSidebar={rightSidebar}>
+    <AppShell activeNav="assessments" rightSidebar={rightSidebar}>
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
         {/* Header */}
         <div className="flex justify-between flex-wrap gap-4 items-center mb-6">

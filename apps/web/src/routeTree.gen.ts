@@ -18,6 +18,9 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AssessmentsRouteImport } from './routes/assessments'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
+import { Route as HrDashboardRouteImport } from './routes/hr/dashboard'
+import { Route as HrCandidatesIndexRouteImport } from './routes/hr/candidates/index'
+import { Route as HrCandidatesAssessmentIdRouteImport } from './routes/hr/candidates/$assessmentId'
 
 const TestRoute = TestRouteImport.update({
   id: '/test',
@@ -64,6 +67,22 @@ const ResultsIdRoute = ResultsIdRouteImport.update({
   path: '/results/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HrDashboardRoute = HrDashboardRouteImport.update({
+  id: '/hr/dashboard',
+  path: '/hr/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrCandidatesIndexRoute = HrCandidatesIndexRouteImport.update({
+  id: '/hr/candidates/',
+  path: '/hr/candidates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrCandidatesAssessmentIdRoute =
+  HrCandidatesAssessmentIdRouteImport.update({
+    id: '/hr/candidates/$assessmentId',
+    path: '/hr/candidates/$assessmentId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -74,7 +93,10 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/test': typeof TestRoute
+  '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
+  '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/hr/candidates': typeof HrCandidatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -85,7 +107,10 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/test': typeof TestRoute
+  '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
+  '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/hr/candidates': typeof HrCandidatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -97,7 +122,10 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/test': typeof TestRoute
+  '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
+  '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/hr/candidates/': typeof HrCandidatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -110,7 +138,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/test'
+    | '/hr/dashboard'
     | '/results/$id'
+    | '/hr/candidates/$assessmentId'
+    | '/hr/candidates'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -121,7 +152,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/test'
+    | '/hr/dashboard'
     | '/results/$id'
+    | '/hr/candidates/$assessmentId'
+    | '/hr/candidates'
   id:
     | '__root__'
     | '/'
@@ -132,7 +166,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/test'
+    | '/hr/dashboard'
     | '/results/$id'
+    | '/hr/candidates/$assessmentId'
+    | '/hr/candidates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -144,7 +181,10 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   TestRoute: typeof TestRoute
+  HrDashboardRoute: typeof HrDashboardRoute
   ResultsIdRoute: typeof ResultsIdRoute
+  HrCandidatesAssessmentIdRoute: typeof HrCandidatesAssessmentIdRoute
+  HrCandidatesIndexRoute: typeof HrCandidatesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +252,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hr/dashboard': {
+      id: '/hr/dashboard'
+      path: '/hr/dashboard'
+      fullPath: '/hr/dashboard'
+      preLoaderRoute: typeof HrDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/candidates/': {
+      id: '/hr/candidates/'
+      path: '/hr/candidates'
+      fullPath: '/hr/candidates'
+      preLoaderRoute: typeof HrCandidatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr/candidates/$assessmentId': {
+      id: '/hr/candidates/$assessmentId'
+      path: '/hr/candidates/$assessmentId'
+      fullPath: '/hr/candidates/$assessmentId'
+      preLoaderRoute: typeof HrCandidatesAssessmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -224,7 +285,10 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   TestRoute: TestRoute,
+  HrDashboardRoute: HrDashboardRoute,
   ResultsIdRoute: ResultsIdRoute,
+  HrCandidatesAssessmentIdRoute: HrCandidatesAssessmentIdRoute,
+  HrCandidatesIndexRoute: HrCandidatesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
