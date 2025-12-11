@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestRouteImport } from './routes/test'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -17,16 +16,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AssessmentsRouteImport } from './routes/assessments'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as HrDashboardRouteImport } from './routes/hr/dashboard'
+import { Route as CompanyAssignmentsRouteImport } from './routes/company/assignments'
 import { Route as HrCandidatesIndexRouteImport } from './routes/hr/candidates/index'
 import { Route as HrCandidatesAssessmentIdRouteImport } from './routes/hr/candidates/$assessmentId'
+import { Route as CompanyAssignmentsCreateRouteImport } from './routes/company/assignments.create'
 
-const TestRoute = TestRouteImport.update({
-  id: '/test',
-  path: '/test',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -62,6 +59,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestIndexRoute = TestIndexRouteImport.update({
+  id: '/test/',
+  path: '/test/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsIdRoute = ResultsIdRouteImport.update({
   id: '/results/$id',
   path: '/results/$id',
@@ -70,6 +72,11 @@ const ResultsIdRoute = ResultsIdRouteImport.update({
 const HrDashboardRoute = HrDashboardRouteImport.update({
   id: '/hr/dashboard',
   path: '/hr/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyAssignmentsRoute = CompanyAssignmentsRouteImport.update({
+  id: '/company/assignments',
+  path: '/company/assignments',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HrCandidatesIndexRoute = HrCandidatesIndexRouteImport.update({
@@ -83,6 +90,12 @@ const HrCandidatesAssessmentIdRoute =
     path: '/hr/candidates/$assessmentId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CompanyAssignmentsCreateRoute =
+  CompanyAssignmentsCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => CompanyAssignmentsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -92,9 +105,11 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/test': typeof TestRoute
+  '/company/assignments': typeof CompanyAssignmentsRouteWithChildren
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
+  '/test': typeof TestIndexRoute
+  '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
 }
@@ -106,9 +121,11 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/test': typeof TestRoute
+  '/company/assignments': typeof CompanyAssignmentsRouteWithChildren
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
+  '/test': typeof TestIndexRoute
+  '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
 }
@@ -121,9 +138,11 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/test': typeof TestRoute
+  '/company/assignments': typeof CompanyAssignmentsRouteWithChildren
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
+  '/test/': typeof TestIndexRoute
+  '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
   '/hr/candidates/': typeof HrCandidatesIndexRoute
 }
@@ -137,9 +156,11 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
-    | '/test'
+    | '/company/assignments'
     | '/hr/dashboard'
     | '/results/$id'
+    | '/test'
+    | '/company/assignments/create'
     | '/hr/candidates/$assessmentId'
     | '/hr/candidates'
   fileRoutesByTo: FileRoutesByTo
@@ -151,9 +172,11 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
-    | '/test'
+    | '/company/assignments'
     | '/hr/dashboard'
     | '/results/$id'
+    | '/test'
+    | '/company/assignments/create'
     | '/hr/candidates/$assessmentId'
     | '/hr/candidates'
   id:
@@ -165,9 +188,11 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
-    | '/test'
+    | '/company/assignments'
     | '/hr/dashboard'
     | '/results/$id'
+    | '/test/'
+    | '/company/assignments/create'
     | '/hr/candidates/$assessmentId'
     | '/hr/candidates/'
   fileRoutesById: FileRoutesById
@@ -180,22 +205,16 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
-  TestRoute: typeof TestRoute
+  CompanyAssignmentsRoute: typeof CompanyAssignmentsRouteWithChildren
   HrDashboardRoute: typeof HrDashboardRoute
   ResultsIdRoute: typeof ResultsIdRoute
+  TestIndexRoute: typeof TestIndexRoute
   HrCandidatesAssessmentIdRoute: typeof HrCandidatesAssessmentIdRoute
   HrCandidatesIndexRoute: typeof HrCandidatesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/test': {
-      id: '/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof TestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -245,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/': {
+      id: '/test/'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results/$id': {
       id: '/results/$id'
       path: '/results/$id'
@@ -257,6 +283,13 @@ declare module '@tanstack/react-router' {
       path: '/hr/dashboard'
       fullPath: '/hr/dashboard'
       preLoaderRoute: typeof HrDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company/assignments': {
+      id: '/company/assignments'
+      path: '/company/assignments'
+      fullPath: '/company/assignments'
+      preLoaderRoute: typeof CompanyAssignmentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hr/candidates/': {
@@ -273,8 +306,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HrCandidatesAssessmentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/company/assignments/create': {
+      id: '/company/assignments/create'
+      path: '/create'
+      fullPath: '/company/assignments/create'
+      preLoaderRoute: typeof CompanyAssignmentsCreateRouteImport
+      parentRoute: typeof CompanyAssignmentsRoute
+    }
   }
 }
+
+interface CompanyAssignmentsRouteChildren {
+  CompanyAssignmentsCreateRoute: typeof CompanyAssignmentsCreateRoute
+}
+
+const CompanyAssignmentsRouteChildren: CompanyAssignmentsRouteChildren = {
+  CompanyAssignmentsCreateRoute: CompanyAssignmentsCreateRoute,
+}
+
+const CompanyAssignmentsRouteWithChildren =
+  CompanyAssignmentsRoute._addFileChildren(CompanyAssignmentsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -284,9 +335,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
-  TestRoute: TestRoute,
+  CompanyAssignmentsRoute: CompanyAssignmentsRouteWithChildren,
   HrDashboardRoute: HrDashboardRoute,
   ResultsIdRoute: ResultsIdRoute,
+  TestIndexRoute: TestIndexRoute,
   HrCandidatesAssessmentIdRoute: HrCandidatesAssessmentIdRoute,
   HrCandidatesIndexRoute: HrCandidatesIndexRoute,
 }

@@ -34,44 +34,11 @@ export class CompanyService {
       throw new BadRequestException('Test not owned by your company');
     }
 
-    const { data: candidate } = await this.client
-      .from('users')
-      .select('id')
-      .eq('email', candidateEmail)
-      .single();
-
-    let userId = candidate?.id;
-    if (!userId) {
-      const hashed = await bcrypt.hash('temporary-password-123', 10);
-      const { data: newUser } = await this.client
-        .from('users')
-        .insert({
-          email: candidateEmail,
-          full_name: candidateEmail.split('@')[0],
-          password: hashed,
-          role: 'candidate',
-          company_id: companyId,
-        })
-        .select('id')
-        .single();
-      userId = newUser?.id;
-    }
-
-    const { data: assessment } = await this.client
-      .from('assessments')
-      .insert({
-        user_id: userId!,
-        test_id: testId,
-        status: 'assigned',
-      })
-      .select('id')
-      .single();
-
-    const assessmentId = assessment!.id;
-    const testLink = `https://mbti-platform-web.vercel.app/test?testId=${testId}&assessmentId=${assessmentId}`;
+    // Send email (no user/assessment creation)
+    const testLink = `https://mbti-platform-web.vercel.app/test?testId=${testId}&candidateEmail=${candidateEmail}`;
     await sendAssignmentEmail(candidateEmail, testLink, note);
 
-    return { success: true, assessment_id: assessmentId };
+    return { success: true };
   }
 
   async getAssignments(companyId: string, page: number, limit: number) {

@@ -10,19 +10,20 @@ import type { Answer, Question } from "../types/test";
 const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
-  const { testId } = useSearch({ from: "/test" });
-  console.log("testId:", testId);
-  if (!testId) {
-    return <div>Invalid test ID</div>;
-  }
+  const { testId } = useSearch({ from: "/test/" });
+
   const navigate = useNavigate();
 
   const { data: test, isLoading, error } = useTest(testId, undefined, { enabled: !!testId });
 
   const [page, setPage] = useState(1);
-  const [selectedAnswer, setSelectedAnswer] = useState<Record<string, string>>({});
+  const [selectedAnswer, setSelectedAnswer] = useState({});
   const [timeLeft, setTimeLeft] = useState(INITIAL_SECONDS);
 
+  if (!testId) {
+    // console.log("⛔ testId NULL → return Invalid test ID");
+    return <div>Invalid test ID</div>;
+  }
   if (isLoading) return <div>Loading test...</div>;
   if (error || !test) return <div>Failed to load test.</div>;
 
