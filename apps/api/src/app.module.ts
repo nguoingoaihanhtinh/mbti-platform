@@ -8,6 +8,7 @@ import { AnswerModule } from './modules/answer/answer.module';
 import { PaginationService } from './common/services/pagination.service';
 import { AssessmentModule } from './modules/assessment/assessment.module';
 import { HRModule } from './modules/hr/hr.module';
+import { CompanyModule } from './modules/company/company.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { HRModule } from './modules/hr/hr.module';
     AnswerModule,
     AssessmentModule,
     HRModule,
+    CompanyModule,
   ],
   providers: [PaginationService],
 })

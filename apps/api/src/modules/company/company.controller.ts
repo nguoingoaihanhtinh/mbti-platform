@@ -1,0 +1,70 @@
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Req,
+  BadRequestException,
+  Param,
+  Get,
+  Query,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CompanyService } from './company.service';
+
+class CreateAssignmentDto {
+  candidate_email: string;
+  test_id: string;
+  note?: string;
+}
+
+@Controller('company')
+@UseGuards(JwtAuthGuard)
+export class CompanyController {
+  constructor(private companyService: CompanyService) {}
+
+  @Post('assignments')
+  async createAssignment(@Req() req: any, @Body() dto: CreateAssignmentDto) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Only company admins can assign tests');
+    }
+
+    return this.companyService.createAssignment(
+      req.user.company_id,
+      dto.candidate_email,
+      dto.test_id,
+      dto.note,
+    );
+  }
+
+  @Post('assignments/:id/notify')
+  async notifyCandidate(@Req() req: any, @Param('id') id: string) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Access denied');
+    }
+
+    return this.companyService.notifyCandidate(id, req.user.company_id);
+  }
+
+  @Get('assignments')
+  async getAssignments(
+    @Req() req: any,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Access denied');
+    }
+
+    return this.companyService.getAssignments(req.user.company_id, page, limit);
+  }
+
+  @Get('assignments/:id')
+  async getAssignment(@Req() req: any, @Param('id') id: string) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Access denied');
+    }
+
+    return this.companyService.getAssignment(id, req.user.company_id);
+  }
+}
