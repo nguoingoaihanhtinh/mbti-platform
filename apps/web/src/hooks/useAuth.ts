@@ -24,6 +24,21 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const redirectAfterLogin = async () => {
+    try {
+      const res = await api.get("/auth/profile");
+      const user = res.data.user;
+      console.log("Logged in user:", user);
+      if (user.role === "company") {
+        navigate({ to: "/hr/dashboard" });
+      } else {
+        navigate({ to: "/assessments" });
+      }
+    } catch (err) {
+      navigate({ to: "/assessments" });
+    }
+  };
+
   const register = async (data: RegisterData) => {
     setLoading(true);
     setError(null);
@@ -44,7 +59,7 @@ export const useAuth = () => {
     setError(null);
     try {
       await api.post("/auth/login", data);
-      navigate({ to: "/assessments" });
+      await redirectAfterLogin();
     } catch (err: any) {
       const message = err.response?.data?.message || "Login failed";
       setError(message);
@@ -94,7 +109,7 @@ export const useAuth = () => {
     setError(null);
     try {
       await api.post("/auth/login/verify", { email, otp });
-      navigate({ to: "/assessments" });
+      await redirectAfterLogin();
     } catch (err: any) {
       const message = err.response?.data?.message || "Invalid OTP";
       setError(message);

@@ -32,3 +32,17 @@ export class ResetPasswordDto {
   otp: string;
   newPassword: string;
 }
+export class VerifyRegisterOtpDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  otp: string;
+
+  @MinLength(6)
+  password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  full_name: string;
+}

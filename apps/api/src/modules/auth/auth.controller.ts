@@ -17,6 +17,7 @@ import {
   LoginDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  VerifyRegisterOtpDto,
 } from './dto/auth.dto';
 import { JWTPayload, JwtUtil } from '@/utils/jwt.util';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -217,5 +218,23 @@ export class AuthController {
         },
       },
     };
+  }
+
+  @Post('register/otp')
+  async sendRegisterOtp(@Body('email') email: string) {
+    await this.authService.sendRegisterOtp(email);
+    return { message: 'OTP sent to your email' };
+  }
+
+  @Post('register/verify')
+  async verifyRegisterOtp(@Body() dto: VerifyRegisterOtpDto) {
+    const { email, otp, full_name, password } = dto;
+
+    const user = await this.authService.verifyRegisterOtp(email, otp, {
+      full_name,
+      password,
+    });
+
+    return { user };
   }
 }

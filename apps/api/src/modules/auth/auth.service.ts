@@ -65,7 +65,7 @@ export class AuthService {
   }
   async generateAndStoreOtp(
     email: string,
-    purpose: 'login' | 'password_reset',
+    purpose: 'login' | 'password_reset' | 'register',
   ) {
     const otp = crypto.randomInt(100000, 999999).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -83,7 +83,7 @@ export class AuthService {
   async verifyOtp(
     email: string,
     otp: string,
-    purpose: 'login' | 'password_reset',
+    purpose: 'login' | 'password_reset' | 'register',
   ) {
     const now = new Date().toISOString();
     const { data, error } = await this.supabase.client
@@ -144,5 +144,42 @@ export class AuthService {
     const otp = await this.generateAndStoreOtp(email, 'login');
     // console.log(`[OTP] Sending login OTP ${otp} to ${email}`);
     await sendPasswordResetEmail(email, otp);
+  }
+  async sendRegisterOtp(email: string) {
+    const existing = await this.userService.findOneByEmail(email);
+    if (existing) {
+      throw new BadRequestException('Email already in use');
+    }
+
+    const otp = await this.generateAndStoreOtp(email, 'register');
+    await sendPasswordResetEmail(email, otp);
+  }
+
+  async verifyRegisterOtp(
+    email: string,
+    otp: string,
+    data: { full_name: string; password: string },
+  ) {
+    const isValid = await this.verifyOtp(email, otp, 'register');
+    if (!isValid) {
+      throw new BadRequestException('Invalid or expired OTP');
+    }
+
+    const existing = await this.userService.findOneByEmail(email);
+    if (existing) {
+      throw new BadRequestException('Email already in use');
+    }
+
+    const hashed = await bcrypt.hash(data.password, 10);
+
+    const user = await this.userService.create({
+      email,
+      full_name: data.full_name,
+      password: hashed,
+      role: 'candidate',
+    });
+
+    const { password: _, ...safeUser } = user;
+    return safeUser;
   }
 }

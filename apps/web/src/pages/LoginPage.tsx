@@ -16,7 +16,6 @@ export default function LoginPage() {
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     await login({ email, password });
-    navigate({ to: "/assessments" });
   };
 
   const handleSendOtp = async () => {
