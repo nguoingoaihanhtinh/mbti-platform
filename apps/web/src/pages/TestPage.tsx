@@ -14,10 +14,17 @@ export default function TestPage() {
 
   const navigate = useNavigate();
 
-  const { data: test, isLoading, error } = useTest(testId, undefined, { enabled: !!testId });
+  const {
+    data: test,
+    isLoading,
+    error,
+  } = useTest(testId ?? "", undefined, {
+    enabled: !!testId,
+  });
 
   const [page, setPage] = useState(1);
-  const [selectedAnswer, setSelectedAnswer] = useState({});
+  const [selectedAnswer, setSelectedAnswer] = useState<Record<string, string>>({});
+
   const [timeLeft, setTimeLeft] = useState(INITIAL_SECONDS);
 
   if (!testId) {
@@ -144,7 +151,7 @@ export default function TestPage() {
               <h2 className="text-lg font-semibold mb-6">{question.text}</h2>
               <div className="space-y-3">
                 {answers.map((ans: Answer) => {
-                  const active = selectedAnswer[question.id] === ans.id;
+                  const active = selectedAnswer[question.id as string] === ans.id;
                   return (
                     <button
                       key={ans.id}
@@ -200,7 +207,7 @@ export default function TestPage() {
           {questions.map((q: Question, i: number) => {
             const num = i + 1;
             const isCurrent = num === page;
-            const isAnswered = selectedAnswer[q.id] != null;
+            const isAnswered = selectedAnswer[q.id as string] != null;
 
             return (
               <Button

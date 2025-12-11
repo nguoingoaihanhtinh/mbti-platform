@@ -5,7 +5,7 @@ import CompanyCreateAssignmentPage from "../../pages/company/CompanyCreateAssign
 
 export const Route = createFileRoute("/company/assignments/create")({
   beforeLoad: async () => {
-    const { user, isAuthenticated, login } = useAuthStore.getState();
+    const { isAuthenticated, login } = useAuthStore.getState();
 
     if (!isAuthenticated) {
       await login();

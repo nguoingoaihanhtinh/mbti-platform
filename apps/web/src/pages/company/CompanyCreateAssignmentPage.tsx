@@ -44,7 +44,7 @@ export default function CompanyCreateAssignmentPage() {
       await createAssignment.mutateAsync(formData);
       setSuccess(true);
       setTimeout(() => {
-        navigate({ to: "/hr/assignments" });
+        navigate({ to: "/company/assignments" });
       }, 2000);
     } catch (error: any) {
       setErrors({

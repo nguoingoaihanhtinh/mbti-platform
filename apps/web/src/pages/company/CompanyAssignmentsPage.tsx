@@ -1,5 +1,5 @@
 // src/pages/hr/HRAssignmentsPage.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { HRShell } from "../../components/layout/HRShell";
 import { useNavigate } from "@tanstack/react-router";
 import { useAssignments } from "../../hooks/useAssignments";
@@ -7,7 +7,6 @@ import {
   Plus,
   Eye,
   Search,
-  Filter,
   ChevronLeft,
   ChevronRight,
   User,
@@ -76,7 +75,7 @@ export default function CompanyAssignmentsPage() {
             <p className="text-gray-500 mt-1">Theo dõi bài test đã gửi và kết quả ứng viên</p>
           </div>
           <button
-            onClick={() => navigate({ to: "/hr/assignments/create" })}
+            onClick={() => navigate({ to: "/company/assignments/create" })}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow"
           >
             <Plus className="w-4 h-4" />

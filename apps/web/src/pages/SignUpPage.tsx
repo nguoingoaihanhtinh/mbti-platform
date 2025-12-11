@@ -14,7 +14,7 @@ export default function SignupPage() {
     confirmPassword: "",
   });
   const [otp, setOtp] = useState("");
-  const { register, sendRegisterOtp, verifyRegisterOtp } = useAuth();
+  const { sendRegisterOtp, verifyRegisterOtp } = useAuth();
   const navigate = useNavigate();
 
   const handleSendOtp = async (e: React.FormEvent) => {
