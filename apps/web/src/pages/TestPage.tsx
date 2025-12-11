@@ -1,6 +1,7 @@
 // src/pages/TestPage.tsx
 import { useState, useEffect } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Route as TestRoute } from "../routes/test";
+import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "../components/layout/AppShell";
 import { Button } from "../components/ui/button";
 import { useTest } from "../hooks/useTests";
@@ -10,7 +11,7 @@ import type { Answer, Question } from "../types/test";
 const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
-  const { testId } = useSearch({ from: "/test/" });
+  const { testId } = TestRoute.useSearch();
 
   const navigate = useNavigate();
 
@@ -22,29 +23,20 @@ export default function TestPage() {
     enabled: !!testId,
   });
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(1);
   const [selectedAnswer, setSelectedAnswer] = useState<Record<string, string>>({});
+  const [timeLeft, setTimeLeft] = useState<number>(INITIAL_SECONDS);
 
-  const [timeLeft, setTimeLeft] = useState(INITIAL_SECONDS);
-
-  if (!testId) {
-    // console.log("⛔ testId NULL → return Invalid test ID");
-    return <div>Invalid test ID</div>;
-  }
-  if (isLoading) return <div>Loading test...</div>;
-  if (error || !test) return <div>Failed to load test.</div>;
-
-  const questions = test.questions || [];
-  const totalQuestions = questions.length;
-  const question = questions[page - 1];
-
-  const answers = question?.answers || [];
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
     const id = setInterval(() => setTimeLeft((t) => (t > 0 ? t - 1 : 0)), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [timeLeft]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -52,14 +44,29 @@ export default function TestPage() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
+  if (!mounted) {
+    return null;
+  }
+
+  if (!testId) {
+    return <div>Invalid test ID</div>;
+  }
+  if (isLoading) return <div>Loading test...</div>;
+  if (error || !test) return <div>Failed to load test.</div>;
+
+  const questions: Question[] = test.questions || [];
+  const totalQuestions = questions.length;
+  const question = questions[page - 1];
+  const answers: Answer[] = question?.answers || [];
+
   const progressPct = totalQuestions ? Math.round(((page - 1) / totalQuestions) * 100) : 0;
+
   const handleSubmitTest = async () => {
     if (!testId || !test) {
       alert("Test not ready");
       return;
     }
-    console.log("Test data:", test);
-    // Extract version ID
+
     const testVersionId = test.version?.id || test.test_version_id;
     if (!testVersionId) {
       alert("Test version missing");
@@ -72,6 +79,7 @@ export default function TestPage() {
         test_version_id: testVersionId,
         status: "started",
       });
+
       const assessmentId = createRes.data.id;
 
       const responseEntries = Object.entries(selectedAnswer);
@@ -83,13 +91,13 @@ export default function TestPage() {
       }
 
       await api.post(`/assessments/${assessmentId}/complete`, {});
-
       navigate({ to: `/results/${assessmentId}` });
     } catch (err) {
       console.error("Submission failed:", err);
       alert("Failed to submit test.");
     }
   };
+
   const rightSidebar = (
     <div className="space-y-6">
       <div>
@@ -151,22 +159,18 @@ export default function TestPage() {
               <h2 className="text-lg font-semibold mb-6">{question.text}</h2>
               <div className="space-y-3">
                 {answers.map((ans: Answer) => {
-                  const active = selectedAnswer[question.id as string] === ans.id;
+                  const active = selectedAnswer[question.id] === ans.id;
                   return (
                     <button
                       key={ans.id}
                       type="button"
                       disabled={timeLeft === 0}
                       onClick={() => setSelectedAnswer((s) => ({ ...s, [question.id]: ans.id }))}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                        active ? "border-primary bg-white" : "border-gray-200 bg-white"
-                      } ${timeLeft === 0 ? "opacity-50 cursor-not-allowed" : "hover:shadow-sm"}`}
+                      className={`w-full text-left p-4 rounded-lg border-2 transition ${active ? "border-primary bg-white" : "border-gray-200 bg-white"} ${timeLeft === 0 ? "opacity-50 cursor-not-allowed" : "hover:shadow-sm"}`}
                     >
                       <div className="flex items-start gap-3">
                         <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-0.5 ${
-                            active ? "border-primary-500 bg-primary-500" : "border-primary-300 bg-white"
-                          }`}
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-0.5 ${active ? "border-primary-500 bg-primary-500" : "border-primary-300 bg-white"}`}
                         >
                           {active && <div className="w-2 h-2 bg-white rounded-full" />}
                         </div>
@@ -207,7 +211,7 @@ export default function TestPage() {
           {questions.map((q: Question, i: number) => {
             const num = i + 1;
             const isCurrent = num === page;
-            const isAnswered = selectedAnswer[q.id as string] != null;
+            const isAnswered = selectedAnswer[q.id] != null;
 
             return (
               <Button
