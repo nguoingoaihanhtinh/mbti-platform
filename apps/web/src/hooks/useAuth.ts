@@ -44,7 +44,7 @@ export const useAuth = () => {
     setError(null);
     try {
       await api.post("/auth/register", data);
-      navigate({ to: "/assessments" });
+      navigate({ to: "/login" });
     } catch (err: any) {
       const message = err.response?.data?.message || "Registration failed";
       setError(message);
@@ -118,7 +118,34 @@ export const useAuth = () => {
       setLoading(false);
     }
   };
+  const sendRegisterOtp = async (email: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.post("/auth/register/otp", { email });
+      return true;
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Failed to send OTP";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const verifyRegisterOtp = async (dto: { email: string; otp: string; full_name: string; password: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.post("/auth/register/verify", dto);
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Invalid OTP";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
   return {
     register,
     login,
@@ -126,6 +153,8 @@ export const useAuth = () => {
     forgotPassword,
     sendLoginOtp,
     verifyLoginOtp,
+    sendRegisterOtp,
+    verifyRegisterOtp,
     loading,
     error,
   };

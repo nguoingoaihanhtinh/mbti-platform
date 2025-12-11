@@ -3,29 +3,83 @@ import { useNavigate } from "@tanstack/react-router";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../hooks/useAuth";
 
+type SignupStep = "form" | "otp";
+
 export default function SignupPage() {
+  const [step, setStep] = useState<SignupStep>("form");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-  const { register } = useAuth();
+  const [otp, setOtp] = useState("");
+  const { register, sendRegisterOtp, verifyRegisterOtp } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords don't match");
       return;
     }
-    await register({
-      email: formData.email,
-      full_name: formData.fullName,
-      password: formData.password,
-      confirm_password: formData.confirmPassword,
-    });
+    try {
+      await sendRegisterOtp(formData.email);
+      setStep("otp");
+    } catch (err) {
+      alert("Failed to send OTP. Please try again.");
+    }
   };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await verifyRegisterOtp({
+        email: formData.email,
+        otp,
+        full_name: formData.fullName,
+        password: formData.password,
+      });
+      navigate({ to: "/login" });
+    } catch (err) {
+      alert("Invalid OTP. Please try again.");
+    }
+  };
+
+  if (step === "otp") {
+    return (
+      <div className="min-h-screen flex flex-col justify-center px-4">
+        <div className="max-w-md w-full mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify Email</h1>
+            <p className="text-gray-600">Enter the OTP sent to {formData.email}</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">One-Time Code</label>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter 6-digit code"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                  required
+                />
+              </div>
+              <Button type="submit" variant="primary" size="md" fullWidth>
+                Verify OTP
+              </Button>
+              <Button type="button" variant="link" className="w-full text-center" onClick={() => setStep("form")}>
+                ← Back to signup
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-4">
@@ -39,7 +93,7 @@ export default function SignupPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <form onSubmit={handleSignup} className="space-y-5">
+          <form onSubmit={handleSendOtp} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input
