@@ -1,9 +1,10 @@
 // src/pages/hr/HRCreateAssignmentPage.tsx
 import React, { useState } from "react";
-import { HRShell } from "../../components/layout/HRShell";
+
 import { useNavigate } from "@tanstack/react-router";
 import { useAvailableTests, useCreateAssignment } from "../../hooks/useAssignments";
 import { Send, ArrowLeft, FileText, Mail, User, CheckCircle, AlertCircle } from "lucide-react";
+import { AppShell } from "../../components/layout/AppShell";
 
 export default function CompanyCreateAssignmentPage() {
   const navigate = useNavigate();
@@ -57,16 +58,16 @@ export default function CompanyCreateAssignmentPage() {
 
   if (testsLoading) {
     return (
-      <HRShell activeNav="dashboard">
+      <AppShell>
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">Đang tải danh sách test...</div>
         </div>
-      </HRShell>
+      </AppShell>
     );
   }
 
   return (
-    <HRShell activeNav="dashboard">
+    <AppShell>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -198,6 +199,6 @@ export default function CompanyCreateAssignmentPage() {
           </div>
         </form>
       </div>
-    </HRShell>
+    </AppShell>
   );
 }

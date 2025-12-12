@@ -11,7 +11,7 @@ import type { Answer, Question } from "../types/test";
 const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
-  const { testId } = TestRoute.useSearch();
+  const { testId, candidateEmail } = TestRoute.useSearch();
 
   const navigate = useNavigate();
 
@@ -26,8 +26,8 @@ export default function TestPage() {
   const [page, setPage] = useState<number>(1);
   const [selectedAnswer, setSelectedAnswer] = useState<Record<string, string>>({});
   const [timeLeft, setTimeLeft] = useState<number>(INITIAL_SECONDS);
-
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -44,13 +44,8 @@ export default function TestPage() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  if (!mounted) {
-    return null;
-  }
-
-  if (!testId) {
-    return <div>Invalid test ID</div>;
-  }
+  if (!mounted) return null;
+  if (!testId) return <div>Invalid test ID</div>;
   if (isLoading) return <div>Loading test...</div>;
   if (error || !test) return <div>Failed to load test.</div>;
 
@@ -58,7 +53,6 @@ export default function TestPage() {
   const totalQuestions = questions.length;
   const question = questions[page - 1];
   const answers: Answer[] = question?.answers || [];
-
   const progressPct = totalQuestions ? Math.round(((page - 1) / totalQuestions) * 100) : 0;
 
   const handleSubmitTest = async () => {
@@ -74,27 +68,52 @@ export default function TestPage() {
     }
 
     try {
-      const createRes = await api.post("/assessments", {
-        test_id: testId,
-        test_version_id: testVersionId,
-        status: "started",
-      });
+      let assessmentId: string;
 
-      const assessmentId = createRes.data.id;
-
-      const responseEntries = Object.entries(selectedAnswer);
-      for (const [question_id, answer_id] of responseEntries) {
-        await api.post(`/assessments/${assessmentId}/responses`, {
-          question_id,
-          answer_id,
+      if (candidateEmail) {
+        const createRes = await api.post("/assessments/guest", {
+          test_id: testId,
+          test_version_id: testVersionId,
+          status: "started",
+          email: candidateEmail,
+          fullname: "Guest",
         });
+        assessmentId = createRes.data.id;
+
+        const responseEntries = Object.entries(selectedAnswer);
+        for (const [question_id, answer_id] of responseEntries) {
+          await api.post(`/assessments/${assessmentId}/responses`, {
+            question_id,
+            answer_id,
+          });
+        }
+
+        await api.post(`/assessments/${assessmentId}/guest-complete`, {
+          email: candidateEmail,
+        });
+      } else {
+        const createRes = await api.post("/assessments", {
+          test_id: testId,
+          test_version_id: testVersionId,
+          status: "started",
+        });
+        assessmentId = createRes.data.id;
+
+        const responseEntries = Object.entries(selectedAnswer);
+        for (const [question_id, answer_id] of responseEntries) {
+          await api.post(`/assessments/${assessmentId}/responses`, {
+            question_id,
+            answer_id,
+          });
+        }
+
+        await api.post(`/assessments/${assessmentId}/complete`, {});
       }
 
-      await api.post(`/assessments/${assessmentId}/complete`, {});
       navigate({ to: `/results/${assessmentId}` });
     } catch (err) {
       console.error("Submission failed:", err);
-      alert("Failed to submit test.");
+      alert("Failed to submit test. Please try again.");
     }
   };
 

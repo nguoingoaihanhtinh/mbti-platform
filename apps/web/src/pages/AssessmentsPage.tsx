@@ -54,7 +54,13 @@ export default function AssessmentsPage() {
                 variant="primary"
                 fullWidth
                 onClick={() => {
-                  navigate({ to: "/test", search: { testId: test.id } });
+                  navigate({
+                    to: "/test",
+                    search: {
+                      testId: test.id,
+                      candidateEmail: undefined,
+                    },
+                  });
                 }}
               >
                 Take Test
@@ -83,7 +89,13 @@ export default function AssessmentsPage() {
                     if (assessment.status === "completed") {
                       navigate({ to: `/results/${assessment.id}` });
                     } else {
-                      navigate({ to: "/test", search: { testId: assessment.test_id } });
+                      navigate({
+                        to: "/test",
+                        search: {
+                          testId: assessment.test_id,
+                          candidateEmail: undefined,
+                        },
+                      });
                     }
                   }}
                 >

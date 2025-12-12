@@ -1,6 +1,6 @@
 // src/pages/hr/HRAssignmentsPage.tsx
 import { useState } from "react";
-import { HRShell } from "../../components/layout/HRShell";
+
 import { useNavigate } from "@tanstack/react-router";
 import { useAssignments } from "../../hooks/useAssignments";
 import {
@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Send,
 } from "lucide-react";
+import { AppShell } from "../../components/layout/AppShell";
 
 export default function CompanyAssignmentsPage() {
   const navigate = useNavigate();
@@ -22,7 +23,19 @@ export default function CompanyAssignmentsPage() {
   const [limit] = useState(20);
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  const { data, isLoading } = useAssignments(page, limit, statusFilter);
+  const { data: rawData, isLoading } = useAssignments(page, limit, statusFilter);
+
+  // Map backend fields to frontend expectations
+  const data = rawData
+    ? {
+        ...rawData,
+        data: rawData.data.map((a: any) => ({
+          ...a,
+          user: a.user || a.users,
+          test: a.test || a.tests,
+        })),
+      }
+    : undefined;
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -57,16 +70,16 @@ export default function CompanyAssignmentsPage() {
 
   if (isLoading) {
     return (
-      <HRShell activeNav="dashboard">
+      <AppShell>
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">Đang tải danh sách assignments...</div>
         </div>
-      </HRShell>
+      </AppShell>
     );
   }
 
   return (
-    <HRShell activeNav="dashboard">
+    <AppShell>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -304,6 +317,6 @@ export default function CompanyAssignmentsPage() {
           </div>
         </div>
       </div>
-    </HRShell>
+    </AppShell>
   );
 }

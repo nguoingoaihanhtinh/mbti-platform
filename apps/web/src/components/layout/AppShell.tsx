@@ -20,10 +20,11 @@ interface AppShellProps {
   activeNav?: "assessments" | "analytics" | "seasonal" | "profile";
 }
 
-const navItems: { id: string; label: string; icon: LucideIcon }[] = [
+const navItems: { id: string; label: string; icon: LucideIcon; companyOnly?: boolean }[] = [
   { id: "assessments", label: "All Tests", icon: Home },
   { id: "analytics", label: "Analytics", icon: BookOpen },
   { id: "seasonal", label: "Seasonale", icon: BarChart3 },
+  { id: "company-assignments", label: "Company Assignments", icon: BarChart3, companyOnly: true },
   { id: "profile", label: "Profile Settings", icon: Settings },
 ];
 
@@ -146,22 +147,38 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
 
             {/* Navigation */}
             <nav className="pt-4 border-t border-secondary-200">
-              {navItems.map((n) => {
-                const Icon = n.icon;
-                const active = n.id === activeNav;
-                return (
-                  <button
-                    key={n.id}
-                    onClick={() => navigate({ to: n.id === "profile" ? "/profile" : "/" + n.id })}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
-                      active ? "bg-primary text-primary-foreground" : "text-neutral-700 hover:bg-secondary-100"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{n.label}</span>
-                  </button>
-                );
-              })}
+              {navItems
+                .filter((n) => !n.companyOnly || user.role === "company")
+                .map((n) => {
+                  const Icon = n.icon;
+                  const active = n.id === activeNav;
+                  let to;
+                  if (n.id === "profile") to = "/profile";
+                  else if (n.id === "company-assignments") to = "/company/assignments";
+                  else to = "/" + n.id;
+                  return (
+                    <button
+                      key={n.id}
+                      onClick={() => navigate({ to })}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
+                        active ? "bg-primary text-primary-foreground" : "text-neutral-700 hover:bg-secondary-100"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{n.label}</span>
+                    </button>
+                  );
+                })}
+              {/* Company Assignments - only for company users */}
+              {user.role === "company" && (
+                <button
+                  onClick={() => navigate({ to: "/company/assignments" })}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-neutral-700 hover:bg-secondary-100 mt-2"
+                >
+                  <BarChart3 className="w-5 h-5" />
+                  <span>Company Assignments</span>
+                </button>
+              )}
             </nav>
           </div>
         </aside>

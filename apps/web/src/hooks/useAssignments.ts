@@ -55,7 +55,7 @@ export function useAssignments(page: number = 1, limit: number = 10, status?: st
   return useQuery({
     queryKey: assignmentKeys.list(page, limit, status),
     queryFn: async () => {
-      const { data } = await api.get<AssignmentsListResponse>("/hr/assignments", {
+      const { data } = await api.get<AssignmentsListResponse>("/company/assignments", {
         params: { page, limit, status },
       });
       return data;
@@ -68,7 +68,7 @@ export function useAssignmentDetail(assessmentId: string) {
   return useQuery({
     queryKey: assignmentKeys.detail(assessmentId),
     queryFn: async () => {
-      const { data } = await api.get<Assignment>(`/hr/assignments/${assessmentId}`);
+      const { data } = await api.get<Assignment>(`/company/assignments/${assessmentId}`);
       return data;
     },
     enabled: !!assessmentId,
@@ -81,7 +81,7 @@ export function useCreateAssignment() {
 
   return useMutation({
     mutationFn: async (data: CreateAssignmentData) => {
-      const response = await api.post("/hr/assignments", data);
+      const response = await api.post("/company/assignments", data);
       return response.data;
     },
     onSuccess: () => {
