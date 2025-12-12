@@ -16,7 +16,7 @@ export default function TestPage() {
   const navigate = useNavigate();
 
   const {
-    data: test,
+    data: testResponse,
     isLoading,
     error,
   } = useTest(testId ?? "", undefined, {
@@ -45,25 +45,28 @@ export default function TestPage() {
   };
 
   if (!mounted) return null;
-  if (!testId) return <div>Invalid test ID</div>;
-  if (isLoading) return <div>Loading test...</div>;
-  if (error || !test) return <div>Failed to load test.</div>;
+  if (!testId) return <div className="p-8">Invalid test ID</div>;
+  if (isLoading) return <div className="p-8">Loading test...</div>;
+  if (error || !testResponse) return <div className="p-8">Failed to load test.</div>;
 
-  const questions: Question[] = test.questions || [];
+  const test = testResponse.test;
+  const version = testResponse.version;
+  const questions: Question[] = testResponse.questions || [];
+
   const totalQuestions = questions.length;
   const question = questions[page - 1];
   const answers: Answer[] = question?.answers || [];
   const progressPct = totalQuestions ? Math.round(((page - 1) / totalQuestions) * 100) : 0;
 
-  const handleSubmitTest = async () => {
-    if (!testId || !test) {
-      alert("Test not ready");
-      return;
-    }
+  const testVersionId = version?.id;
+  console.log("testVersionId =", testVersionId);
+  if (!testVersionId) {
+    return <div className="p-8 text-red-600">Test version not available</div>;
+  }
 
-    const testVersionId = test.version?.id || test.test_version_id;
-    if (!testVersionId) {
-      alert("Test version missing");
+  const handleSubmitTest = async () => {
+    if (!testId || !testResponse) {
+      alert("Test not ready");
       return;
     }
 
