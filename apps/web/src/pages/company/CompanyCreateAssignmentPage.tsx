@@ -1,4 +1,3 @@
-// src/pages/hr/HRCreateAssignmentPage.tsx
 import React, { useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
@@ -8,7 +7,8 @@ import { AppShell } from "../../components/layout/AppShell";
 
 export default function CompanyCreateAssignmentPage() {
   const navigate = useNavigate();
-  const { data: tests, isLoading: testsLoading } = useAvailableTests();
+  const { data: testsResponse, isLoading: testsLoading } = useAvailableTests();
+  const tests = testsResponse?.data || [];
   const createAssignment = useCreateAssignment();
 
   const [formData, setFormData] = useState({
@@ -72,7 +72,7 @@ export default function CompanyCreateAssignmentPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => navigate({ to: "/hr/dashboard" })}
+            onClick={() => navigate({ to: "/company/assignments" })}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />

@@ -19,10 +19,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as HrDashboardRouteImport } from './routes/hr/dashboard'
-import { Route as CompanyAssignmentsRouteImport } from './routes/company/assignments'
 import { Route as HrCandidatesIndexRouteImport } from './routes/hr/candidates/index'
+import { Route as CompanyAssignmentsIndexRouteImport } from './routes/company/assignments/index'
 import { Route as HrCandidatesAssessmentIdRouteImport } from './routes/hr/candidates/$assessmentId'
-import { Route as CompanyAssignmentsCreateRouteImport } from './routes/company/assignments.create'
+import { Route as CompanyAssignmentsCreateRouteImport } from './routes/company/assignments/create'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -74,14 +74,14 @@ const HrDashboardRoute = HrDashboardRouteImport.update({
   path: '/hr/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompanyAssignmentsRoute = CompanyAssignmentsRouteImport.update({
-  id: '/company/assignments',
-  path: '/company/assignments',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HrCandidatesIndexRoute = HrCandidatesIndexRouteImport.update({
   id: '/hr/candidates/',
   path: '/hr/candidates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyAssignmentsIndexRoute = CompanyAssignmentsIndexRouteImport.update({
+  id: '/company/assignments/',
+  path: '/company/assignments/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HrCandidatesAssessmentIdRoute =
@@ -92,9 +92,9 @@ const HrCandidatesAssessmentIdRoute =
   } as any)
 const CompanyAssignmentsCreateRoute =
   CompanyAssignmentsCreateRouteImport.update({
-    id: '/create',
-    path: '/create',
-    getParentRoute: () => CompanyAssignmentsRoute,
+    id: '/company/assignments/create',
+    path: '/company/assignments/create',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -105,12 +105,12 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/company/assignments': typeof CompanyAssignmentsRouteWithChildren
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/company/assignments': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -121,12 +121,12 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/company/assignments': typeof CompanyAssignmentsRouteWithChildren
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/company/assignments': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
 }
 export interface FileRoutesById {
@@ -138,12 +138,12 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/company/assignments': typeof CompanyAssignmentsRouteWithChildren
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
   '/test/': typeof TestIndexRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/company/assignments/': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates/': typeof HrCandidatesIndexRoute
 }
 export interface FileRouteTypes {
@@ -156,12 +156,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
-    | '/company/assignments'
     | '/hr/dashboard'
     | '/results/$id'
     | '/test'
     | '/company/assignments/create'
     | '/hr/candidates/$assessmentId'
+    | '/company/assignments'
     | '/hr/candidates'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,12 +172,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
-    | '/company/assignments'
     | '/hr/dashboard'
     | '/results/$id'
     | '/test'
     | '/company/assignments/create'
     | '/hr/candidates/$assessmentId'
+    | '/company/assignments'
     | '/hr/candidates'
   id:
     | '__root__'
@@ -188,12 +188,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
-    | '/company/assignments'
     | '/hr/dashboard'
     | '/results/$id'
     | '/test/'
     | '/company/assignments/create'
     | '/hr/candidates/$assessmentId'
+    | '/company/assignments/'
     | '/hr/candidates/'
   fileRoutesById: FileRoutesById
 }
@@ -205,11 +205,12 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
-  CompanyAssignmentsRoute: typeof CompanyAssignmentsRouteWithChildren
   HrDashboardRoute: typeof HrDashboardRoute
   ResultsIdRoute: typeof ResultsIdRoute
   TestIndexRoute: typeof TestIndexRoute
+  CompanyAssignmentsCreateRoute: typeof CompanyAssignmentsCreateRoute
   HrCandidatesAssessmentIdRoute: typeof HrCandidatesAssessmentIdRoute
+  CompanyAssignmentsIndexRoute: typeof CompanyAssignmentsIndexRoute
   HrCandidatesIndexRoute: typeof HrCandidatesIndexRoute
 }
 
@@ -285,18 +286,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HrDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company/assignments': {
-      id: '/company/assignments'
-      path: '/company/assignments'
-      fullPath: '/company/assignments'
-      preLoaderRoute: typeof CompanyAssignmentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/hr/candidates/': {
       id: '/hr/candidates/'
       path: '/hr/candidates'
       fullPath: '/hr/candidates'
       preLoaderRoute: typeof HrCandidatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company/assignments/': {
+      id: '/company/assignments/'
+      path: '/company/assignments'
+      fullPath: '/company/assignments'
+      preLoaderRoute: typeof CompanyAssignmentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hr/candidates/$assessmentId': {
@@ -308,24 +309,13 @@ declare module '@tanstack/react-router' {
     }
     '/company/assignments/create': {
       id: '/company/assignments/create'
-      path: '/create'
+      path: '/company/assignments/create'
       fullPath: '/company/assignments/create'
       preLoaderRoute: typeof CompanyAssignmentsCreateRouteImport
-      parentRoute: typeof CompanyAssignmentsRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface CompanyAssignmentsRouteChildren {
-  CompanyAssignmentsCreateRoute: typeof CompanyAssignmentsCreateRoute
-}
-
-const CompanyAssignmentsRouteChildren: CompanyAssignmentsRouteChildren = {
-  CompanyAssignmentsCreateRoute: CompanyAssignmentsCreateRoute,
-}
-
-const CompanyAssignmentsRouteWithChildren =
-  CompanyAssignmentsRoute._addFileChildren(CompanyAssignmentsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -335,11 +325,12 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
-  CompanyAssignmentsRoute: CompanyAssignmentsRouteWithChildren,
   HrDashboardRoute: HrDashboardRoute,
   ResultsIdRoute: ResultsIdRoute,
   TestIndexRoute: TestIndexRoute,
+  CompanyAssignmentsCreateRoute: CompanyAssignmentsCreateRoute,
   HrCandidatesAssessmentIdRoute: HrCandidatesAssessmentIdRoute,
+  CompanyAssignmentsIndexRoute: CompanyAssignmentsIndexRoute,
   HrCandidatesIndexRoute: HrCandidatesIndexRoute,
 }
 export const routeTree = rootRouteImport

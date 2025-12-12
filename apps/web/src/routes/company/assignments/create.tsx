@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { useAuthStore } from "../../stores/useAuthStore";
-import CompanyCreateAssignmentPage from "../../pages/company/CompanyCreateAssignmentPage";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import CompanyCreateAssignmentPage from "../../../pages/company/CompanyCreateAssignmentPage";
 
 export const Route = createFileRoute("/company/assignments/create")({
   beforeLoad: async () => {

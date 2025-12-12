@@ -1,9 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import CompanyAssignmentsPage from "../../../pages/company/CompanyAssignmentsPage";
 
-import { useAuthStore } from "../../stores/useAuthStore";
-import CompanyAssignmentsPage from "../../pages/company/CompanyAssignmentsPage";
-
-export const Route = createFileRoute("/company/assignments")({
+export const Route = createFileRoute("/company/assignments/")({
   beforeLoad: async () => {
     const { isAuthenticated, login } = useAuthStore.getState();
 

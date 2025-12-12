@@ -1,4 +1,3 @@
-// src/pages/hr/HRAssignmentsPage.tsx
 import { useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
@@ -25,7 +24,6 @@ export default function CompanyAssignmentsPage() {
 
   const { data: rawData, isLoading } = useAssignments(page, limit, statusFilter);
 
-  // Map backend fields to frontend expectations
   const data = rawData
     ? {
         ...rawData,
