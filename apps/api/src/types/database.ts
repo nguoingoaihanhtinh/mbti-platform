@@ -232,10 +232,12 @@ export type Database = {
           completed_at: string | null;
           created_at: string;
           updated_at: string;
+          guest_email: string | null;
+          guest_fullname: string | null;
         };
         Insert: {
           id?: string;
-          user_id: string;
+          user_id?: string;
           test_id: string;
           test_version_id?: string | null;
           status: string;
@@ -243,6 +245,8 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          guest_email?: string | null;
+          guest_fullname?: string | null;
         };
         Update: {
           id?: string;
@@ -254,6 +258,8 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          guest_email?: string | null;
+          guest_fullname?: string | null;
         };
         Relationships: [
           {

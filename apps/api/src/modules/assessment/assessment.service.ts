@@ -11,6 +11,7 @@ import {
   ResultWithMBTI,
 } from '@/types/common';
 import { PaginationService } from '@/common/services/pagination.service';
+import { CreateAssessmentGuestDto } from './dto/create-assessment-guest.dto';
 
 @Injectable()
 export class AssessmentService {
@@ -19,10 +20,75 @@ export class AssessmentService {
     private pagination: PaginationService,
   ) {}
 
+  async createAssessmentGuest(dto: CreateAssessmentGuestDto) {
+    const { test_id, test_version_id, status, email, fullname } = dto;
+
+    //  prevent status = 'completed' on creation
+    if (status === 'completed') {
+      throw new BadRequestException(
+        'Cannot create assessment with status "completed"',
+      );
+    }
+
+    const { data: assessment, error } = await this.supabase.client
+      .from('assessments')
+      .insert({
+        test_id,
+        test_version_id,
+        status,
+        guest_email: email,
+        guest_fullname: fullname,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return assessment;
+  }
+
+  async completeAssessmentGuest(assessmentId: string, email: string) {
+    if (!email) throw new BadRequestException('Email required');
+
+    const { data: assessment, error } = await this.supabase.client
+      .from('assessments')
+      .select('*')
+      .eq('id', assessmentId)
+      .eq('guest_email', email)
+      .single();
+
+    if (error || !assessment)
+      throw new BadRequestException('Assessment not found for guest');
+
+    const { data: updated, error: updateErr } = await this.supabase.client
+      .from('assessments')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      })
+      .eq('id', assessmentId)
+      .eq('guest_email', email)
+      .select()
+      .single();
+
+    if (updateErr || !updated)
+      throw new BadRequestException('Failed to complete guest assessment');
+
+    const result = await this.calculateAndSaveResult(assessmentId);
+
+    return { assessment: updated, result };
+  }
+
   async createAssessment(
     userId: string,
     assessmentData: Omit<AssessmentInsert, 'user_id'>,
   ) {
+    const { status } = assessmentData;
+    if (status === 'completed') {
+      throw new BadRequestException(
+        'Cannot create assessment with status "completed"',
+      );
+    }
+
     const { data: assessment, error } = await this.supabase.client
       .from('assessments')
       .insert({ ...assessmentData, user_id: userId })
@@ -30,7 +96,6 @@ export class AssessmentService {
       .single();
 
     if (error) throw error;
-    if (!assessment) throw new Error('Failed to create assessment');
     return assessment;
   }
 
@@ -40,27 +105,20 @@ export class AssessmentService {
     companyId?: string,
   ) {
     if (companyId) {
-      console.log('🔹 Running company check query');
-
-      const { data: viaCompany, error: viaCompanyErr } =
-        await this.supabase.client
-          .from('assessments')
-          .select('*, test:tests(company_id)')
-          .eq('id', assessmentId)
-          .eq('test.company_id', companyId)
-          .single();
+      const { data: viaCompany } = await this.supabase.client
+        .from('assessments')
+        .select('*, test:tests(company_id)')
+        .eq('id', assessmentId)
+        .eq('test.company_id', companyId)
+        .single();
 
       if (viaCompany) {
         const { test, ...clean } = viaCompany;
         return clean;
       }
-
-      console.log('Company check failed:', viaCompanyErr);
     }
 
-    console.log('🔹 Running user check query');
-
-    const { data: viaUser, error: viaUserErr } = await this.supabase.client
+    const { data: viaUser } = await this.supabase.client
       .from('assessments')
       .select('*, test:tests(company_id)')
       .eq('id', assessmentId)
@@ -71,8 +129,6 @@ export class AssessmentService {
       const { test, ...clean } = viaUser;
       return clean;
     }
-
-    console.log('User check failed:', viaUserErr);
 
     throw new BadRequestException('Assessment not found');
   }
@@ -88,7 +144,6 @@ export class AssessmentService {
       .single();
 
     if (error) throw error;
-    if (!response) throw new Error('Failed to submit response');
     return response;
   }
 
@@ -115,10 +170,12 @@ export class AssessmentService {
   }
 
   async completeAssessment(assessmentId: string, userId: string) {
-    // 1. Mark assessment as completed
     const { data: updated, error: updateErr } = await this.supabase.client
       .from('assessments')
-      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      })
       .eq('id', assessmentId)
       .eq('user_id', userId)
       .select()
@@ -128,7 +185,12 @@ export class AssessmentService {
       throw new BadRequestException('Failed to complete assessment');
     }
 
-    // 2. Fetch all responses
+    const result = await this.calculateAndSaveResult(assessmentId);
+
+    return { assessment: updated, result };
+  }
+
+  private async calculateAndSaveResult(assessmentId: string) {
     const { data: responses, error: resErr } = await this.supabase.client
       .from('responses')
       .select('answer_id')
@@ -136,13 +198,12 @@ export class AssessmentService {
 
     if (resErr) throw resErr;
 
-    const validResponses = responses.filter(
+    const validResponses = (responses ?? []).filter(
       (r): r is { answer_id: string } => r.answer_id !== null,
     );
 
-    // 3. Calculate MBTI type
     const mbtiType = this.calculateMBTI(validResponses);
-    // 4. Save result
+
     const { data: result, error: resultErr } = await this.supabase.client
       .from('results')
       .insert({
@@ -154,9 +215,7 @@ export class AssessmentService {
       .single();
 
     if (resultErr) throw resultErr;
-    if (!result) throw new Error('Failed to save result');
-
-    return { assessment: updated, result };
+    return result;
   }
 
   private calculateMBTI(responses: { answer_id: string }[]): string {
@@ -200,7 +259,6 @@ export class AssessmentService {
     const { data: assessment } = await query.single();
     if (!assessment) throw new BadRequestException('Assessment not found');
 
-    // 2. Fetch result
     const { data: result } = await this.supabase.client
       .from('results')
       .select('*')
@@ -209,7 +267,6 @@ export class AssessmentService {
 
     if (!result) throw new BadRequestException('Result not found');
 
-    // 3. Fetch MBTI type
     const { data: mbtiType } = await this.supabase.client
       .from('mbti_types')
       .select('*')
@@ -221,6 +278,7 @@ export class AssessmentService {
       mbti_type_details: mbtiType || undefined,
     };
   }
+
   async getUserAssessments(
     userId: string,
     page: number = 1,

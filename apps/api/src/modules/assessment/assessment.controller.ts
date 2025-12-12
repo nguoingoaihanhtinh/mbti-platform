@@ -16,11 +16,27 @@ import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { SubmitResponseDto } from './dto/submit-response.dto';
 import { CompleteAssessmentDto } from './dto/complete-assessment.dto';
 import { ResultWithMBTI } from '@/types/common';
+import { CreateAssessmentGuestDto } from './dto/create-assessment-guest.dto';
+import { CompleteAssessmentGuestDto } from './dto/complete-assessment-guest.dto';
 
 @Controller('assessments')
-@UseGuards(JwtAuthGuard)
 export class AssessmentController {
   constructor(private assessmentService: AssessmentService) {}
+
+  @Post('guest')
+  createAssessmentGuest(@Body() dto: CreateAssessmentGuestDto) {
+    return this.assessmentService.createAssessmentGuest(dto);
+  }
+
+  @Post(':id/guest-complete')
+  completeAssessmentGuest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CompleteAssessmentGuestDto,
+  ) {
+    return this.assessmentService.completeAssessmentGuest(id, dto.email);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('me')
   getMyAssessments(
     @Req() req,
@@ -36,6 +52,7 @@ export class AssessmentController {
 
     return this.assessmentService.getUserAssessments(req.user.sub, page, limit);
   }
+  @UseGuards(JwtAuthGuard)
   @Post()
   createAssessment(@Body() dto: CreateAssessmentDto, @Req() req) {
     return this.assessmentService.createAssessment(req.user.sub, dto);
