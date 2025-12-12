@@ -63,7 +63,22 @@ export default function ResultsPage() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const resultRes = await api.get(`/assessments/${id}/result`);
+        let resultRes;
+
+        // Check if email is in URL (guest mode)
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get("email");
+
+        if (email) {
+          // Guest: use guest endpoint
+          resultRes = await api.get(`/assessments/${id}/guest-result`, {
+            params: { email },
+          });
+        } else {
+          // Authenticated: use regular endpoint
+          resultRes = await api.get(`/assessments/${id}/result`);
+        }
+
         setResult(resultRes.data);
 
         const assessmentRes = await api.get(`/assessments/${id}`);
@@ -113,6 +128,7 @@ export default function ResultsPage() {
 
         setLoading(false);
       } catch (err) {
+        console.error("Failed to load result:", err);
         setLoading(false);
       }
     };

@@ -113,7 +113,14 @@ export default function TestPage() {
         await api.post(`/assessments/${assessmentId}/complete`, {});
       }
 
-      navigate({ to: `/results/${assessmentId}` });
+      if (candidateEmail) {
+        navigate({
+          to: `/guest/results/${assessmentId}`,
+          search: { email: candidateEmail },
+        });
+      } else {
+        navigate({ to: `/results/${assessmentId}` });
+      }
     } catch (err) {
       console.error("Submission failed:", err);
       alert("Failed to submit test. Please try again.");

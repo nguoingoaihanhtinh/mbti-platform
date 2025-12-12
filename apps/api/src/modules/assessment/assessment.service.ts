@@ -296,4 +296,41 @@ export class AssessmentService {
       limit,
     );
   }
+
+  async getGuestResult(assessmentId: string, email: string) {
+    // First verify this email owns the assessment
+    const { data: assessment, error: assessmentErr } =
+      await this.supabase.client
+        .from('assessments')
+        .select('id')
+        .eq('id', assessmentId)
+        .eq('guest_email', email)
+        .single();
+
+    if (assessmentErr || !assessment) {
+      throw new BadRequestException('Assessment not found for guest');
+    }
+
+    // Then fetch the result
+    const { data: result, error: resultErr } = await this.supabase.client
+      .from('results')
+      .select('*')
+      .eq('assessment_id', assessmentId)
+      .single();
+
+    if (resultErr || !result) {
+      throw new BadRequestException('Result not found');
+    }
+
+    const { data: mbtiType, error: mbtiErr } = await this.supabase.client
+      .from('mbti_types')
+      .select('*')
+      .eq('type_code', result.mbti_type)
+      .single();
+
+    return {
+      ...result,
+      mbti_type_details: mbtiType || undefined,
+    };
+  }
 }

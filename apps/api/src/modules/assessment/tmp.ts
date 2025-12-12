@@ -77,13 +77,16 @@ export class AssessmentController {
     return this.assessmentService.completeAssessment(id, req.user.sub);
   }
 
-  @UseGuards(JwtAuthGuard) // Add this guard
   @Get(':id')
   getAssessment(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
-    const userId = req.user.sub;
     const companyId =
       req.user.role === 'company' ? req.user.company_id : undefined;
-    return this.assessmentService.getAssessmentById(id, userId, companyId);
+    console.log('companyId', companyId);
+    return this.assessmentService.getAssessmentById(
+      id,
+      req.user.sub,
+      companyId,
+    );
   }
 
   @Get(':id/responses')
@@ -101,6 +104,7 @@ export class AssessmentController {
   @UseGuards(JwtAuthGuard)
   @Get(':id/result')
   getResult(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
+    // Safe access - won't crash if req.user is undefined
     const userId = req.user?.sub;
     const companyId =
       req.user?.role === 'company' ? req.user.company_id : undefined;

@@ -51,7 +51,8 @@ export class CompanyService {
         `
         id,
         status,
-        
+        guest_email,          
+        guest_fullname,  
         completed_at,
         users(email, full_name),
         tests(title)

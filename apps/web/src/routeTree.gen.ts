@@ -22,6 +22,7 @@ import { Route as HrDashboardRouteImport } from './routes/hr/dashboard'
 import { Route as HrCandidatesIndexRouteImport } from './routes/hr/candidates/index'
 import { Route as CompanyAssignmentsIndexRouteImport } from './routes/company/assignments/index'
 import { Route as HrCandidatesAssessmentIdRouteImport } from './routes/hr/candidates/$assessmentId'
+import { Route as GuestResultsAssessmentIdRouteImport } from './routes/guest/results.$assessmentId'
 import { Route as CompanyAssignmentsCreateRouteImport } from './routes/company/assignments/create'
 
 const SignupRoute = SignupRouteImport.update({
@@ -90,6 +91,12 @@ const HrCandidatesAssessmentIdRoute =
     path: '/hr/candidates/$assessmentId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuestResultsAssessmentIdRoute =
+  GuestResultsAssessmentIdRouteImport.update({
+    id: '/guest/results/$assessmentId',
+    path: '/guest/results/$assessmentId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CompanyAssignmentsCreateRoute =
   CompanyAssignmentsCreateRouteImport.update({
     id: '/company/assignments/create',
@@ -109,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
+  '/guest/results/$assessmentId': typeof GuestResultsAssessmentIdRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
   '/company/assignments': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
@@ -125,6 +133,7 @@ export interface FileRoutesByTo {
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
+  '/guest/results/$assessmentId': typeof GuestResultsAssessmentIdRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
   '/company/assignments': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
@@ -142,6 +151,7 @@ export interface FileRoutesById {
   '/results/$id': typeof ResultsIdRoute
   '/test/': typeof TestIndexRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
+  '/guest/results/$assessmentId': typeof GuestResultsAssessmentIdRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
   '/company/assignments/': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates/': typeof HrCandidatesIndexRoute
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/results/$id'
     | '/test'
     | '/company/assignments/create'
+    | '/guest/results/$assessmentId'
     | '/hr/candidates/$assessmentId'
     | '/company/assignments'
     | '/hr/candidates'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/results/$id'
     | '/test'
     | '/company/assignments/create'
+    | '/guest/results/$assessmentId'
     | '/hr/candidates/$assessmentId'
     | '/company/assignments'
     | '/hr/candidates'
@@ -192,6 +204,7 @@ export interface FileRouteTypes {
     | '/results/$id'
     | '/test/'
     | '/company/assignments/create'
+    | '/guest/results/$assessmentId'
     | '/hr/candidates/$assessmentId'
     | '/company/assignments/'
     | '/hr/candidates/'
@@ -209,6 +222,7 @@ export interface RootRouteChildren {
   ResultsIdRoute: typeof ResultsIdRoute
   TestIndexRoute: typeof TestIndexRoute
   CompanyAssignmentsCreateRoute: typeof CompanyAssignmentsCreateRoute
+  GuestResultsAssessmentIdRoute: typeof GuestResultsAssessmentIdRoute
   HrCandidatesAssessmentIdRoute: typeof HrCandidatesAssessmentIdRoute
   CompanyAssignmentsIndexRoute: typeof CompanyAssignmentsIndexRoute
   HrCandidatesIndexRoute: typeof HrCandidatesIndexRoute
@@ -307,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HrCandidatesAssessmentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guest/results/$assessmentId': {
+      id: '/guest/results/$assessmentId'
+      path: '/guest/results/$assessmentId'
+      fullPath: '/guest/results/$assessmentId'
+      preLoaderRoute: typeof GuestResultsAssessmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/company/assignments/create': {
       id: '/company/assignments/create'
       path: '/company/assignments/create'
@@ -329,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResultsIdRoute: ResultsIdRoute,
   TestIndexRoute: TestIndexRoute,
   CompanyAssignmentsCreateRoute: CompanyAssignmentsCreateRoute,
+  GuestResultsAssessmentIdRoute: GuestResultsAssessmentIdRoute,
   HrCandidatesAssessmentIdRoute: HrCandidatesAssessmentIdRoute,
   CompanyAssignmentsIndexRoute: CompanyAssignmentsIndexRoute,
   HrCandidatesIndexRoute: HrCandidatesIndexRoute,

@@ -245,11 +245,16 @@ export default function CompanyAssignmentsPage() {
                         <div className="flex items-center gap-2">
                           {assignment.status === "completed" ? (
                             <button
-                              onClick={() =>
-                                navigate({
-                                  to: `/hr/candidates/${assignment.id}`,
-                                })
-                              }
+                              onClick={() => {
+                                if (assignment.guest_email) {
+                                  navigate({
+                                    to: `/results/${assignment.id}`,
+                                    search: { email: assignment.guest_email },
+                                  });
+                                } else {
+                                  navigate({ to: `/results/${assignment.id}` });
+                                }
+                              }}
                               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                               title="Xem kết quả"
                             >
