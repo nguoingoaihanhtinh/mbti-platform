@@ -13,8 +13,8 @@ export default function CompanyCreateAssignmentPage() {
 
   const [formData, setFormData] = useState({
     test_id: "",
-    user_email: "",
-    user_name: "",
+    candidate_email: "",
+    full_name: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -30,10 +30,10 @@ export default function CompanyCreateAssignmentPage() {
     if (!formData.test_id) {
       newErrors.test_id = "Vui lòng chọn bài test";
     }
-    if (!formData.user_email) {
-      newErrors.user_email = "Vui lòng nhập email ứng viên";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.user_email)) {
-      newErrors.user_email = "Email không hợp lệ";
+    if (!formData.candidate_email) {
+      newErrors.candidate_email = "Vui lòng nhập email ứng viên";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.candidate_email)) {
+      newErrors.candidate_email = "Email không hợp lệ";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -153,14 +153,14 @@ export default function CompanyCreateAssignmentPage() {
               </label>
               <input
                 type="email"
-                value={formData.user_email}
-                onChange={(e) => setFormData({ ...formData, user_email: e.target.value })}
+                value={formData.candidate_email}
+                onChange={(e) => setFormData({ ...formData, candidate_email: e.target.value })}
                 placeholder="candidate@example.com"
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
-                  errors.user_email ? "border-red-500" : "border-gray-300"
+                  errors.candidate_email ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.user_email && <p className="text-red-500 text-sm mt-2">{errors.user_email}</p>}
+              {errors.candidate_email && <p className="text-red-500 text-sm mt-2">{errors.candidate_email}</p>}
             </div>
 
             {/* Name (Optional) */}
@@ -171,8 +171,8 @@ export default function CompanyCreateAssignmentPage() {
               </label>
               <input
                 type="text"
-                value={formData.user_name}
-                onChange={(e) => setFormData({ ...formData, user_name: e.target.value })}
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                 placeholder="Nguyễn Văn A"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
               />

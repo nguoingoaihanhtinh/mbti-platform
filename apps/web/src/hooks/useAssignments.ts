@@ -38,7 +38,7 @@ export interface Assignment {
 
 export interface CreateAssignmentData {
   test_id: string;
-  user_email: string;
+  candidate_email: string;
   user_name?: string;
 }
 
