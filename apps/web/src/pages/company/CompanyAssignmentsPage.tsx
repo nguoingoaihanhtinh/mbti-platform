@@ -205,8 +205,19 @@ export default function CompanyAssignmentsPage() {
                             <User className="w-5 h-5 text-purple-600" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{assignment.user?.full_name || "N/A"}</p>
-                            <p className="text-sm text-gray-500">{assignment.user?.email}</p>
+                            {assignment.user ? (
+                              <>
+                                <p className="font-medium text-gray-900">{assignment.user.full_name}</p>
+                                <p className="text-sm text-gray-500">{assignment.user.email}</p>
+                              </>
+                            ) : assignment.guest_email ? (
+                              <>
+                                <p className="font-medium text-gray-900">Guest Candidate</p>
+                                <p className="text-sm text-gray-500">{assignment.guest_email}</p>
+                              </>
+                            ) : (
+                              <p className="font-medium text-gray-900">N/A</p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -248,15 +259,21 @@ export default function CompanyAssignmentsPage() {
                               onClick={() => {
                                 if (assignment.guest_email) {
                                   navigate({
-                                    to: `/results/${assignment.id}`,
+                                    to: "/company/results/$id",
+                                    params: { id: assignment.id },
                                     search: { email: assignment.guest_email },
                                   });
                                 } else {
-                                  navigate({ to: `/results/${assignment.id}` });
+                                  navigate({
+                                    to: "/company/results/$id",
+                                    params: { id: assignment.id },
+
+                                    search: { email: undefined },
+                                  });
                                 }
                               }}
                               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="Xem kết quả"
+                              title="View result"
                             >
                               <Eye className="w-4 h-4 text-gray-600" />
                             </button>
