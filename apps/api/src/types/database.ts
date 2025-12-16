@@ -232,6 +232,7 @@ export type Database = {
           completed_at: string | null;
           created_at: string;
           updated_at: string;
+          company_id: string | null;
           guest_email: string | null;
           guest_fullname: string | null;
         };
@@ -245,6 +246,7 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          company_id?: string | null;
           guest_email?: string | null;
           guest_fullname?: string | null;
         };
@@ -258,6 +260,7 @@ export type Database = {
           completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          company_id?: string | null;
           guest_email?: string | null;
           guest_fullname?: string | null;
         };
@@ -342,7 +345,7 @@ export type Database = {
         ];
       };
 
-      // ✅ RESULTS
+      // RESULTS
       results: {
         Row: {
           id: string;
@@ -434,6 +437,85 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      packages: {
+        Row: {
+          id: string;
+          name: string;
+          code: string;
+          max_assignments: number;
+          price_per_month: number;
+          description: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          code: string;
+          max_assignments: number;
+          price_per_month: number;
+          description?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          code?: string;
+          max_assignments?: number;
+          price_per_month?: number;
+          description?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+
+      company_subscriptions: {
+        Row: {
+          id: string;
+          company_id: string;
+          package_id: string;
+          used_assignments: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          package_id: string;
+          used_assignments?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          package_id?: string;
+          used_assignments?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'company_subscriptions_company_id_fkey';
+            columns: ['company_id'];
+            isOneToOne: false;
+            referencedRelation: 'companies';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'company_subscriptions_package_id_fkey';
+            columns: ['package_id'];
+            isOneToOne: false;
+            referencedRelation: 'packages';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
 

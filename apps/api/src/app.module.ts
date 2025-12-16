@@ -9,6 +9,7 @@ import { PaginationService } from './common/services/pagination.service';
 import { AssessmentModule } from './modules/assessment/assessment.module';
 import { HRModule } from './modules/hr/hr.module';
 import { CompanyModule } from './modules/company/company.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CompanyModule } from './modules/company/company.module';
     AssessmentModule,
     HRModule,
     CompanyModule,
+    AdminModule,
   ],
   providers: [PaginationService],
 })

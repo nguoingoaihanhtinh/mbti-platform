@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CompanyService } from './company.service';
+import { SubscribePackageDto } from './dto/subcribe-package.dto';
 
 class CreateAssignmentDto {
   candidate_email: string;
@@ -66,5 +67,33 @@ export class CompanyController {
     }
 
     return this.companyService.getAssignment(id, req.user.company_id);
+  }
+
+  @Post('subscription')
+  async subscribePackage(@Req() req: any, @Body() dto: SubscribePackageDto) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Company access required');
+    }
+    await this.companyService.subscribePackage(
+      req.user.company_id,
+      dto.package_code,
+    );
+    return { success: true };
+  }
+
+  @Get('subscription')
+  async getSubscription(@Req() req: any) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Company access required');
+    }
+    return this.companyService.getCurrentSubscription(req.user.company_id);
+  }
+
+  @Get('dashboard/stats')
+  async getDashboardStats(@Req() req: any) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Company access required');
+    }
+    return this.companyService.getDashboardStats(req.user.company_id);
   }
 }

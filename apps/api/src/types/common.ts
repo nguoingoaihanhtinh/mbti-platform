@@ -62,3 +62,18 @@ export type MBTIType = Database['public']['Tables']['mbti_types']['Row'];
 export interface ResultWithMBTI extends Result {
   mbti_type_details?: MBTIType;
 }
+export type Package = Database['public']['Tables']['packages']['Row'];
+export type PackageInsert = Database['public']['Tables']['packages']['Insert'];
+export type PackageUpdate = Database['public']['Tables']['packages']['Update'];
+
+// === COMPANY SUBSCRIPTIONS (company sử dụng) ===
+export type CompanySubscription =
+  Database['public']['Tables']['company_subscriptions']['Row'];
+export type CompanySubscriptionInsert =
+  Database['public']['Tables']['company_subscriptions']['Insert'];
+export type CompanySubscriptionUpdate =
+  Database['public']['Tables']['company_subscriptions']['Update'];
+
+export interface SubscribePackageDto {
+  package_code: string;
+}
