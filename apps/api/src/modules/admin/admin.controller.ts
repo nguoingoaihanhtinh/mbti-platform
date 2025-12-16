@@ -18,7 +18,6 @@ import { CreatePackageDto } from './dto/create-package.dto';
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
-  // === PACKAGE MANAGEMENT ===
   @Post('packages')
   async createPackage(@Req() req: any, @Body() dto: CreatePackageDto) {
     if (req.user.role !== 'admin') {
@@ -35,7 +34,6 @@ export class AdminController {
     return this.adminService.getPackages();
   }
 
-  // === DASHBOARD ANALYTICS ===
   @Get('dashboard/stats')
   async getAdminDashboardStats(@Req() req: any) {
     if (req.user.role !== 'admin') {
@@ -49,10 +47,9 @@ export class AdminController {
     if (req.user.role !== 'admin') {
       throw new UnauthorizedException('Admin access required');
     }
-    return this.adminService.getTestTimeline(); // toàn hệ thống, không filter theo company
+    return this.adminService.getTestTimeline();
   }
 
-  // === LISTS ===
   @Get('users')
   async getUsers(
     @Req() req: any,
@@ -89,7 +86,6 @@ export class AdminController {
     return this.adminService.getTests(+page, +limit);
   }
 
-  // === CANDIDATE & TEST ANALYTICS ===
   @Get('tests/:testId/candidates')
   async getCandidatesByTest(
     @Req() req: any,

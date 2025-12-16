@@ -67,8 +67,7 @@ export class CompanyService {
     const { data: assessments, error: assessErr } = await this.client
       .from('assessments')
       .select('id')
-      .eq('test_id', 'tests.company_id')
-      .eq('tests.company_id', companyId);
+      .eq('company_id', companyId);
 
     if (assessErr) throw assessErr;
 
@@ -183,7 +182,7 @@ export class CompanyService {
       tests(title)
     `,
       )
-      .eq('company_id', companyId) // ← Lọc theo company_id trong assessments
+      .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .range(from, to);
   }
@@ -207,7 +206,7 @@ export class CompanyService {
     `,
       )
       .eq('id', assessmentId)
-      .eq('company_id', companyId) // ← Kiểm tra quyền sở hữu
+      .eq('company_id', companyId)
       .single();
   }
 
@@ -218,8 +217,8 @@ export class CompanyService {
     );
     if (!assessment) throw new BadRequestException('Assignment not found');
 
-    const testId = assessment.test_id; // ✅ ĐÚNG: test_id là field trực tiếp
-    const candidateEmail = assessment.guest_email; // ✅ ĐÚNG: không có users, dùng guest_email
+    const testId = assessment.test_id;
+    const candidateEmail = assessment.guest_email;
 
     if (!testId || !candidateEmail) {
       throw new BadRequestException('Assignment data incomplete');
