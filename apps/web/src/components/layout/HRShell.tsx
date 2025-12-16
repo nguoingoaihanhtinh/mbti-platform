@@ -3,13 +3,27 @@ import { Bell, User, Home, Users, BarChart3, Settings, LogOut, type LucideIcon }
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useNavigate } from "@tanstack/react-router";
 
+export type HRNav =
+  | "dashboard"
+  | "candidates"
+  | "analytics"
+  | "settings"
+  | "companies"
+  | "packages"
+  | "tests"
+  | "users";
+
 interface HRShellProps {
   children: React.ReactNode;
-  activeNav?: "dashboard" | "candidates" | "analytics" | "settings";
+  activeNav?: HRNav;
 }
 
-const navItems: { id: string; label: string; icon: LucideIcon }[] = [
+const navItems: { id: HRNav; label: string; icon: LucideIcon }[] = [
   { id: "dashboard", label: "Tổng quan", icon: Home },
+  { id: "companies", label: "Công ty", icon: Home },
+  { id: "packages", label: "Gói dịch vụ", icon: BarChart3 },
+  { id: "tests", label: "Bài test", icon: BarChart3 },
+  { id: "users", label: "Người dùng", icon: Users },
   { id: "candidates", label: "Danh sách khách hàng", icon: Users },
   { id: "analytics", label: "Phân tích", icon: BarChart3 },
   { id: "settings", label: "Cài đặt", icon: Settings },

@@ -1,0 +1,237 @@
+// src/pages/admin/AdminCompaniesPage.tsx
+import { useState } from "react";
+
+import { useQuery } from "@tanstack/react-query";
+import api from "../../libs/api";
+import { Search, ChevronLeft, ChevronRight, Building2, Mail, Calendar, Package, Users, FileText } from "lucide-react";
+
+interface Company {
+  id: string;
+  email: string;
+  full_name: string;
+  created_at: string;
+  subscription?: {
+    package_name: string;
+    package_code: string;
+    end_date: string;
+    status: string;
+  };
+  stats?: {
+    total_assignments: number;
+    total_candidates: number;
+  };
+}
+
+interface CompaniesResponse {
+  data: Company[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
+export default function AdminCompaniesPage() {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "companies", page, limit],
+    queryFn: async () => {
+      const { data } = await api.get<CompaniesResponse>("/admin/companies", {
+        params: { page, limit },
+      });
+      return data;
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Đang tải danh sách companies...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Quản lý Companies</h1>
+          <p className="text-gray-500 mt-1">Tổng số {data?.total || 0} companies</p>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{data?.total || 0}</p>
+              <p className="text-sm text-gray-500">Tổng companies</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-600 to-green-400 flex items-center justify-center">
+              <Package className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">
+                {data?.data.filter((c) => c.subscription?.status === "active").length || 0}
+              </p>
+              <p className="text-sm text-gray-500">Đang hoạt động</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">
+                {data?.data.reduce((acc, c) => acc + (c.stats?.total_assignments || 0), 0)}
+              </p>
+              <p className="text-sm text-gray-500">Tổng assignments</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-600 to-orange-400 flex items-center justify-center">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">
+                {data?.data.reduce((acc, c) => acc + (c.stats?.total_candidates || 0), 0)}
+              </p>
+              <p className="text-sm text-gray-500">Tổng candidates</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên hoặc email..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+          />
+        </div>
+      </div>
+
+      {/* Companies Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Company</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Email</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Gói hiện tại</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Assignments</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Candidates</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Ngày tạo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.data.map((company) => {
+                return (
+                  <tr key={company.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                          <Building2 className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{company.full_name}</p>
+                          <p className="text-xs text-gray-400">{company.id.substring(0, 8)}...</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-700">{company.email}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      {company.subscription ? (
+                        <div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              company.subscription.status === "active"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {company.subscription.package_name}
+                          </span>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Đến {new Date(company.subscription.end_date).toLocaleDateString("vi-VN")}
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">Chưa có</span>
+                      )}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm font-medium text-gray-900">{company.stats?.total_assignments || 0}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-sm font-medium text-gray-900">{company.stats?.total_candidates || 0}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        {new Date(company.created_at).toLocaleDateString("vi-VN")}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+          <div className="text-sm text-gray-600">
+            Hiển thị {(page - 1) * limit + 1} - {Math.min(page * limit, data?.total || 0)} của {data?.total || 0} kết
+            quả
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="px-4 py-2 text-sm text-gray-700">
+              Trang {page} / {data?.total_pages || 1}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= (data?.total_pages || 1)}
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

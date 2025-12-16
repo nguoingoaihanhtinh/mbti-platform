@@ -63,28 +63,31 @@ export default function ResultsPage() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        let resultRes;
-
-        // Check if email is in URL (guest mode)
         const urlParams = new URLSearchParams(window.location.search);
         const email = urlParams.get("email");
 
+        let resultRes, assessmentRes, testRes, allResp;
+
         if (email) {
-          // Guest: use guest endpoint
-          resultRes = await api.get(`/assessments/${id}/guest-result`, {
-            params: { email },
+          // Guest flow
+          resultRes = await api.get(`/assessments/${id}/guest-result`, { params: { email } });
+          assessmentRes = await api.get(`/assessments/${id}/guest`, { params: { email } });
+          allResp = await api.get(`/assessments/${id}/guest-responses`, {
+            params: { email, page: 1, limit: 1000 },
           });
         } else {
-          // Authenticated: use regular endpoint
+          // Authenticated flow
           resultRes = await api.get(`/assessments/${id}/result`);
+          assessmentRes = await api.get(`/assessments/${id}`);
+          allResp = await api.get(`/assessments/${id}/responses`, {
+            params: { page: 1, limit: 1000 },
+          });
         }
 
         setResult(resultRes.data);
 
-        const assessmentRes = await api.get(`/assessments/${id}`);
         const testId = assessmentRes.data.test_id;
-
-        const testRes = await api.get(`/tests/${testId}`);
+        testRes = await api.get(`/tests/${testId}`);
         const qMap: Record<string, QuestionWithAnswers> = {};
         for (const q of testRes.data.questions || []) {
           qMap[q.id] = {
@@ -99,12 +102,7 @@ export default function ResultsPage() {
         }
         setQuestionsMap(qMap);
 
-        const allResp = await api.get(`/assessments/${id}/responses`, {
-          params: { page: 1, limit: 1000 },
-        });
-
         const allResponses = allResp.data.data || [];
-
         const dimCount: Record<string, number> = {};
         const ansCount: Record<string, number> = {};
 
@@ -125,7 +123,6 @@ export default function ResultsPage() {
 
         setDimensionCounts(dimCount);
         setAnswerCounts(ansCount);
-
         setLoading(false);
       } catch (err) {
         console.error("Failed to load result:", err);
@@ -138,11 +135,28 @@ export default function ResultsPage() {
 
   useEffect(() => {
     const fetchPageResponses = async () => {
-      const resp = await api.get(`/assessments/${id}/responses`, {
-        params: { page: currentPage, limit },
-      });
-      setResponses(resp.data.data || []);
-      setTotalPages(resp.data.total_pages);
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get("email");
+
+        let resp;
+        if (email) {
+          resp = await api.get(`/assessments/${id}/guest-responses`, {
+            params: { email, page: currentPage, limit },
+          });
+        } else {
+          resp = await api.get(`/assessments/${id}/responses`, {
+            params: { page: currentPage, limit },
+          });
+        }
+
+        setResponses(resp.data.data || []);
+        setTotalPages(resp.data.total_pages || 1);
+      } catch (err) {
+        console.error("Failed to fetch page responses:", err);
+        setResponses([]);
+        setTotalPages(1);
+      }
     };
 
     fetchPageResponses();

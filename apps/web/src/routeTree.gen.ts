@@ -15,16 +15,27 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AssessmentsRouteImport } from './routes/assessments'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
 import { Route as HrDashboardRouteImport } from './routes/hr/dashboard'
+import { Route as CompanyPackagesRouteImport } from './routes/company/packages'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminTestsRouteImport } from './routes/admin/tests'
+import { Route as AdminCompaniesRouteImport } from './routes/admin/companies'
 import { Route as HrCandidatesIndexRouteImport } from './routes/hr/candidates/index'
 import { Route as CompanyAssignmentsIndexRouteImport } from './routes/company/assignments/index'
+import { Route as AdminTestsIndexRouteImport } from './routes/admin/tests/index'
+import { Route as AdminPackagesIndexRouteImport } from './routes/admin/packages/index'
 import { Route as HrCandidatesAssessmentIdRouteImport } from './routes/hr/candidates/$assessmentId'
 import { Route as GuestResultsAssessmentIdRouteImport } from './routes/guest/results.$assessmentId'
 import { Route as CompanyResultsIdRouteImport } from './routes/company/results.$id'
 import { Route as CompanyAssignmentsCreateRouteImport } from './routes/company/assignments/create'
+import { Route as AdminTestsCreateRouteImport } from './routes/admin/tests/create'
+import { Route as AdminTestsTestIdRouteImport } from './routes/admin/tests/$testId'
+import { Route as AdminPackagesCreateRouteImport } from './routes/admin/packages/create'
+import { Route as AdminPackagesPackageIdEditRouteImport } from './routes/admin/packages/$packageId.edit'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -56,6 +67,11 @@ const AssessmentsRoute = AssessmentsRouteImport.update({
   path: '/assessments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -76,6 +92,26 @@ const HrDashboardRoute = HrDashboardRouteImport.update({
   path: '/hr/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompanyPackagesRoute = CompanyPackagesRouteImport.update({
+  id: '/company/packages',
+  path: '/company/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminTestsRoute = AdminTestsRouteImport.update({
+  id: '/tests',
+  path: '/tests',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const HrCandidatesIndexRoute = HrCandidatesIndexRouteImport.update({
   id: '/hr/candidates/',
   path: '/hr/candidates/',
@@ -85,6 +121,16 @@ const CompanyAssignmentsIndexRoute = CompanyAssignmentsIndexRouteImport.update({
   id: '/company/assignments/',
   path: '/company/assignments/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTestsIndexRoute = AdminTestsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminTestsRoute,
+} as any)
+const AdminPackagesIndexRoute = AdminPackagesIndexRouteImport.update({
+  id: '/packages/',
+  path: '/packages/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const HrCandidatesAssessmentIdRoute =
   HrCandidatesAssessmentIdRouteImport.update({
@@ -109,127 +155,214 @@ const CompanyAssignmentsCreateRoute =
     path: '/company/assignments/create',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminTestsCreateRoute = AdminTestsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AdminTestsRoute,
+} as any)
+const AdminTestsTestIdRoute = AdminTestsTestIdRouteImport.update({
+  id: '/$testId',
+  path: '/$testId',
+  getParentRoute: () => AdminTestsRoute,
+} as any)
+const AdminPackagesCreateRoute = AdminPackagesCreateRouteImport.update({
+  id: '/packages/create',
+  path: '/packages/create',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPackagesPackageIdEditRoute =
+  AdminPackagesPackageIdEditRouteImport.update({
+    id: '/packages/$packageId/edit',
+    path: '/packages/$packageId/edit',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/assessments': typeof AssessmentsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/tests': typeof AdminTestsRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
+  '/company/packages': typeof CompanyPackagesRoute
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
+  '/admin/packages/create': typeof AdminPackagesCreateRoute
+  '/admin/tests/$testId': typeof AdminTestsTestIdRoute
+  '/admin/tests/create': typeof AdminTestsCreateRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/company/results/$id': typeof CompanyResultsIdRoute
   '/guest/results/$assessmentId': typeof GuestResultsAssessmentIdRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/admin/packages': typeof AdminPackagesIndexRoute
+  '/admin/tests/': typeof AdminTestsIndexRoute
   '/company/assignments': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
+  '/admin/packages/$packageId/edit': typeof AdminPackagesPackageIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/assessments': typeof AssessmentsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/company/packages': typeof CompanyPackagesRoute
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
+  '/admin/packages/create': typeof AdminPackagesCreateRoute
+  '/admin/tests/$testId': typeof AdminTestsTestIdRoute
+  '/admin/tests/create': typeof AdminTestsCreateRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/company/results/$id': typeof CompanyResultsIdRoute
   '/guest/results/$assessmentId': typeof GuestResultsAssessmentIdRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/admin/packages': typeof AdminPackagesIndexRoute
+  '/admin/tests': typeof AdminTestsIndexRoute
   '/company/assignments': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates': typeof HrCandidatesIndexRoute
+  '/admin/packages/$packageId/edit': typeof AdminPackagesPackageIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/assessments': typeof AssessmentsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/tests': typeof AdminTestsRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
+  '/company/packages': typeof CompanyPackagesRoute
   '/hr/dashboard': typeof HrDashboardRoute
   '/results/$id': typeof ResultsIdRoute
   '/test/': typeof TestIndexRoute
+  '/admin/packages/create': typeof AdminPackagesCreateRoute
+  '/admin/tests/$testId': typeof AdminTestsTestIdRoute
+  '/admin/tests/create': typeof AdminTestsCreateRoute
   '/company/assignments/create': typeof CompanyAssignmentsCreateRoute
   '/company/results/$id': typeof CompanyResultsIdRoute
   '/guest/results/$assessmentId': typeof GuestResultsAssessmentIdRoute
   '/hr/candidates/$assessmentId': typeof HrCandidatesAssessmentIdRoute
+  '/admin/packages/': typeof AdminPackagesIndexRoute
+  '/admin/tests/': typeof AdminTestsIndexRoute
   '/company/assignments/': typeof CompanyAssignmentsIndexRoute
   '/hr/candidates/': typeof HrCandidatesIndexRoute
+  '/admin/packages/$packageId/edit': typeof AdminPackagesPackageIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/assessments'
     | '/forgot-password'
     | '/login'
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/admin/companies'
+    | '/admin/tests'
+    | '/admin/users'
+    | '/company/packages'
     | '/hr/dashboard'
     | '/results/$id'
     | '/test'
+    | '/admin/packages/create'
+    | '/admin/tests/$testId'
+    | '/admin/tests/create'
     | '/company/assignments/create'
     | '/company/results/$id'
     | '/guest/results/$assessmentId'
     | '/hr/candidates/$assessmentId'
+    | '/admin/packages'
+    | '/admin/tests/'
     | '/company/assignments'
     | '/hr/candidates'
+    | '/admin/packages/$packageId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/assessments'
     | '/forgot-password'
     | '/login'
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/admin/companies'
+    | '/admin/users'
+    | '/company/packages'
     | '/hr/dashboard'
     | '/results/$id'
     | '/test'
+    | '/admin/packages/create'
+    | '/admin/tests/$testId'
+    | '/admin/tests/create'
     | '/company/assignments/create'
     | '/company/results/$id'
     | '/guest/results/$assessmentId'
     | '/hr/candidates/$assessmentId'
+    | '/admin/packages'
+    | '/admin/tests'
     | '/company/assignments'
     | '/hr/candidates'
+    | '/admin/packages/$packageId/edit'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/assessments'
     | '/forgot-password'
     | '/login'
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/admin/companies'
+    | '/admin/tests'
+    | '/admin/users'
+    | '/company/packages'
     | '/hr/dashboard'
     | '/results/$id'
     | '/test/'
+    | '/admin/packages/create'
+    | '/admin/tests/$testId'
+    | '/admin/tests/create'
     | '/company/assignments/create'
     | '/company/results/$id'
     | '/guest/results/$assessmentId'
     | '/hr/candidates/$assessmentId'
+    | '/admin/packages/'
+    | '/admin/tests/'
     | '/company/assignments/'
     | '/hr/candidates/'
+    | '/admin/packages/$packageId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AssessmentsRoute: typeof AssessmentsRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  CompanyPackagesRoute: typeof CompanyPackagesRoute
   HrDashboardRoute: typeof HrDashboardRoute
   ResultsIdRoute: typeof ResultsIdRoute
   TestIndexRoute: typeof TestIndexRoute
@@ -285,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssessmentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -313,6 +453,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HrDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/company/packages': {
+      id: '/company/packages'
+      path: '/company/packages'
+      fullPath: '/company/packages'
+      preLoaderRoute: typeof CompanyPackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/tests': {
+      id: '/admin/tests'
+      path: '/tests'
+      fullPath: '/admin/tests'
+      preLoaderRoute: typeof AdminTestsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/companies': {
+      id: '/admin/companies'
+      path: '/companies'
+      fullPath: '/admin/companies'
+      preLoaderRoute: typeof AdminCompaniesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/hr/candidates/': {
       id: '/hr/candidates/'
       path: '/hr/candidates'
@@ -326,6 +494,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/company/assignments'
       preLoaderRoute: typeof CompanyAssignmentsIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/tests/': {
+      id: '/admin/tests/'
+      path: '/'
+      fullPath: '/admin/tests/'
+      preLoaderRoute: typeof AdminTestsIndexRouteImport
+      parentRoute: typeof AdminTestsRoute
+    }
+    '/admin/packages/': {
+      id: '/admin/packages/'
+      path: '/packages'
+      fullPath: '/admin/packages'
+      preLoaderRoute: typeof AdminPackagesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/hr/candidates/$assessmentId': {
       id: '/hr/candidates/$assessmentId'
@@ -355,17 +537,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompanyAssignmentsCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/tests/create': {
+      id: '/admin/tests/create'
+      path: '/create'
+      fullPath: '/admin/tests/create'
+      preLoaderRoute: typeof AdminTestsCreateRouteImport
+      parentRoute: typeof AdminTestsRoute
+    }
+    '/admin/tests/$testId': {
+      id: '/admin/tests/$testId'
+      path: '/$testId'
+      fullPath: '/admin/tests/$testId'
+      preLoaderRoute: typeof AdminTestsTestIdRouteImport
+      parentRoute: typeof AdminTestsRoute
+    }
+    '/admin/packages/create': {
+      id: '/admin/packages/create'
+      path: '/packages/create'
+      fullPath: '/admin/packages/create'
+      preLoaderRoute: typeof AdminPackagesCreateRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/packages/$packageId/edit': {
+      id: '/admin/packages/$packageId/edit'
+      path: '/packages/$packageId/edit'
+      fullPath: '/admin/packages/$packageId/edit'
+      preLoaderRoute: typeof AdminPackagesPackageIdEditRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
+interface AdminTestsRouteChildren {
+  AdminTestsTestIdRoute: typeof AdminTestsTestIdRoute
+  AdminTestsCreateRoute: typeof AdminTestsCreateRoute
+  AdminTestsIndexRoute: typeof AdminTestsIndexRoute
+}
+
+const AdminTestsRouteChildren: AdminTestsRouteChildren = {
+  AdminTestsTestIdRoute: AdminTestsTestIdRoute,
+  AdminTestsCreateRoute: AdminTestsCreateRoute,
+  AdminTestsIndexRoute: AdminTestsIndexRoute,
+}
+
+const AdminTestsRouteWithChildren = AdminTestsRoute._addFileChildren(
+  AdminTestsRouteChildren,
+)
+
+interface AdminRouteRouteChildren {
+  AdminCompaniesRoute: typeof AdminCompaniesRoute
+  AdminTestsRoute: typeof AdminTestsRouteWithChildren
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminPackagesCreateRoute: typeof AdminPackagesCreateRoute
+  AdminPackagesIndexRoute: typeof AdminPackagesIndexRoute
+  AdminPackagesPackageIdEditRoute: typeof AdminPackagesPackageIdEditRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminCompaniesRoute: AdminCompaniesRoute,
+  AdminTestsRoute: AdminTestsRouteWithChildren,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminPackagesCreateRoute: AdminPackagesCreateRoute,
+  AdminPackagesIndexRoute: AdminPackagesIndexRoute,
+  AdminPackagesPackageIdEditRoute: AdminPackagesPackageIdEditRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   AssessmentsRoute: AssessmentsRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  CompanyPackagesRoute: CompanyPackagesRoute,
   HrDashboardRoute: HrDashboardRoute,
   ResultsIdRoute: ResultsIdRoute,
   TestIndexRoute: TestIndexRoute,

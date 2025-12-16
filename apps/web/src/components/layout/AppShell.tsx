@@ -1,13 +1,17 @@
+// src/components/layout/AppShell.tsx (for Company + Candidate)
 import React from "react";
 import {
   Bell,
   User,
   Home,
-  BookOpen,
+  Users,
   BarChart3,
   Settings,
   LogOut,
   type LucideIcon,
+  FileText,
+  Package,
+  CreditCard,
   Linkedin,
   Github,
 } from "lucide-react";
@@ -17,20 +21,29 @@ import { useNavigate } from "@tanstack/react-router";
 interface AppShellProps {
   children: React.ReactNode;
   rightSidebar?: React.ReactNode;
-  activeNav?: "assessments" | "analytics" | "seasonal" | "profile";
+  activeNav?: string;
 }
 
-const navItems: { id: string; label: string; icon: LucideIcon; companyOnly?: boolean }[] = [
-  { id: "assessments", label: "All Tests", icon: Home },
-  { id: "analytics", label: "Analytics", icon: BookOpen },
-  { id: "seasonal", label: "Seasonale", icon: BarChart3 },
-  { id: "company-assignments", label: "Company Assignments", icon: BarChart3, companyOnly: true },
-  { id: "profile", label: "Profile Settings", icon: Settings },
+// Navigation for Company
+const companyNavItems: { id: string; label: string; icon: LucideIcon; path: string }[] = [
+  { id: "dashboard", label: "Dashboard", icon: Home, path: "/company/dashboard" },
+  { id: "assignments", label: "Assignments", icon: FileText, path: "/company/assignments" },
+  { id: "candidates", label: "Ứng viên", icon: Users, path: "/company/candidates" },
+  { id: "packages", label: "Gói dịch vụ", icon: Package, path: "/company/packages" },
+  { id: "subscription", label: "Gói hiện tại", icon: CreditCard, path: "/company/subscription" },
+  { id: "analytics", label: "Phân tích", icon: BarChart3, path: "/company/analytics" },
+  { id: "settings", label: "Cài đặt", icon: Settings, path: "/company/settings" },
+];
+
+// Navigation for Candidate
+const candidateNavItems: { id: string; label: string; icon: LucideIcon; path: string }[] = [
+  { id: "assessments", label: "All Tests", icon: Home, path: "/assessments" },
+  { id: "analytics", label: "Analytics", icon: BarChart3, path: "/analytics" },
+  { id: "profile", label: "Profile Settings", icon: Settings, path: "/profile" },
 ];
 
 export function AppShell({ children, rightSidebar, activeNav = "assessments" }: AppShellProps) {
   const { user, logout: logoutStore } = useAuthStore();
-  // console.log("AppShell user:", user);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -52,6 +65,10 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
   if (!user) {
     return <div className="min-h-screen bg-secondary-50 flex items-center justify-center">Loading...</div>;
   }
+
+  // Determine which nav items to show
+  const navItems = user.role === "company" ? companyNavItems : candidateNavItems;
+  const isCompany = user.role === "company";
 
   return (
     <div className="min-h-screen bg-secondary-50">
@@ -96,98 +113,84 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
             {user.id && <p className="text-xs text-neutral-400 mt-1">User ID: {user.id.substring(0, 8)}</p>}
           </div>
 
-          {/* Profile Summary */}
-          <div className="space-y-4">
-            {/* Role */}
-            <div>
-              <h4 className="text-xs font-semibold text-neutral-500 mb-1">ROLE</h4>
-              <p className="text-sm font-medium text-primary-900 capitalize">{user.role}</p>
-            </div>
-
-            {/* Education (only if exists) */}
-            {user.profile?.education && (
+          {/* Profile Summary (Candidate only) */}
+          {!isCompany && (
+            <div className="space-y-4 mb-6">
+              {/* Role */}
               <div>
-                <h4 className="text-xs font-semibold text-neutral-500 mb-1">EDUCATION</h4>
-                <p className="text-sm text-neutral-700">{user.profile.education}</p>
+                <h4 className="text-xs font-semibold text-neutral-500 mb-1">ROLE</h4>
+                <p className="text-sm font-medium text-primary-900 capitalize">{user.role}</p>
               </div>
-            )}
 
-            {/* Social Links (only if any exist) */}
-            {(user.profile?.social_links?.linkedin || user.profile?.social_links?.github) && (
-              <div>
-                <h4 className="text-xs font-semibold text-neutral-500 mb-1">SOCIAL</h4>
-                <div className="flex flex-col gap-1">
-                  {user.profile.social_links.linkedin && (
-                    <a
-                      href={user.profile.social_links.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                      title="LinkedIn"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                      <span>LinkedIn</span>
-                    </a>
-                  )}
-                  {user.profile.social_links.github && (
-                    <a
-                      href={user.profile.social_links.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-gray-800 hover:text-black"
-                      title="GitHub"
-                    >
-                      <Github className="w-4 h-4" />
-                      <span>GitHub</span>
-                    </a>
-                  )}
+              {/* Education (only if exists) */}
+              {user.profile?.education && (
+                <div>
+                  <h4 className="text-xs font-semibold text-neutral-500 mb-1">EDUCATION</h4>
+                  <p className="text-sm text-neutral-700">{user.profile.education}</p>
                 </div>
-              </div>
-            )}
-
-            {/* Navigation */}
-            <nav className="pt-4 border-t border-secondary-200">
-              {navItems
-                .filter((n) => !n.companyOnly || user.role === "company")
-                .map((n) => {
-                  const Icon = n.icon;
-                  const active = n.id === activeNav;
-                  let to;
-                  if (n.id === "profile") to = "/profile";
-                  else if (n.id === "company-assignments") to = "/company/assignments";
-                  else to = "/" + n.id;
-                  return (
-                    <button
-                      key={n.id}
-                      onClick={() => navigate({ to })}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
-                        active ? "bg-primary text-primary-foreground" : "text-neutral-700 hover:bg-secondary-100"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span>{n.label}</span>
-                    </button>
-                  );
-                })}
-              {/* Company Assignments - only for company users */}
-              {user.role === "company" && (
-                <button
-                  onClick={() => navigate({ to: "/company/assignments" })}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition text-neutral-700 hover:bg-secondary-100 mt-2"
-                >
-                  <BarChart3 className="w-5 h-5" />
-                  <span>Company Assignments</span>
-                </button>
               )}
-            </nav>
-          </div>
+
+              {/* Social Links (only if any exist) */}
+              {(user.profile?.social_links?.linkedin || user.profile?.social_links?.github) && (
+                <div>
+                  <h4 className="text-xs font-semibold text-neutral-500 mb-1">SOCIAL</h4>
+                  <div className="flex flex-col gap-1">
+                    {user.profile.social_links.linkedin && (
+                      <a
+                        href={user.profile.social_links.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                        title="LinkedIn"
+                      >
+                        <Linkedin className="w-4 h-4" />
+                        <span>LinkedIn</span>
+                      </a>
+                    )}
+                    {user.profile.social_links.github && (
+                      <a
+                        href={user.profile.social_links.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-gray-800 hover:text-black"
+                        title="GitHub"
+                      >
+                        <Github className="w-4 h-4" />
+                        <span>GitHub</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className={`${!isCompany ? "pt-4 border-t border-secondary-200" : ""}`}>
+            {navItems.map((n) => {
+              const Icon = n.icon;
+              const active = n.id === activeNav;
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => navigate({ to: n.path })}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
+                    active ? "bg-primary text-primary-foreground" : "text-neutral-700 hover:bg-secondary-100"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span>{n.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 p-8 text-primary-900">{children}</main>
 
-        {/* Right Sidebar */}
-        {rightSidebar && (
+        {/* Right Sidebar (Candidate only) */}
+        {rightSidebar && !isCompany && (
           <aside className="w-64 bg-white border-l border-secondary-200 min-h-screen p-6">{rightSidebar}</aside>
         )}
       </div>
