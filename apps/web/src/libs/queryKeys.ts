@@ -22,11 +22,25 @@ export const assessmentKeys = {
   result: (id: string) => [...assessmentKeys.all, id, "result"] as const,
 };
 
-export const hrKeys = {
-  all: ["hr"] as const,
-  stats: () => [...hrKeys.all, "stats"] as const,
-  timeline: () => [...hrKeys.all, "timeline"] as const,
-  testCandidates: (testId: string, page?: number, limit?: number) =>
-    [...hrKeys.all, "tests", testId, "candidates", page, limit] as const,
-  candidateResult: (assessmentId: string) => [...hrKeys.all, "candidates", assessmentId, "result"] as const,
+export const adminKeys = {
+  all: ["admin"] as const,
+
+  packages: () => [...adminKeys.all, "packages"] as const,
+  packageDetail: (id: string) => [...adminKeys.packages(), id] as const,
+
+  dashboard: {
+    stats: () => [...adminKeys.all, "dashboard", "stats"] as const,
+    timeline: () => [...adminKeys.all, "dashboard", "timeline"] as const,
+  },
+
+  users: (page: number, limit: number) => [...adminKeys.all, "users", page, limit] as const,
+
+  companies: (page: number, limit: number) => [...adminKeys.all, "companies", page, limit] as const,
+
+  tests: (page: number, limit: number) => [...adminKeys.all, "tests", page, limit] as const,
+
+  testCandidates: (testId: string, page: number, limit: number) =>
+    [...adminKeys.all, "tests", testId, "candidates", page, limit] as const,
+
+  candidateResult: (assessmentId: string) => [...adminKeys.all, "candidates", assessmentId, "result"] as const,
 };

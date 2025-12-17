@@ -57,9 +57,8 @@ export default function AdminTestsPage() {
     if (!confirm("Bạn có chắc chắn muốn xóa test này?")) return;
 
     try {
-      await api.delete(`/admin/tests/${testId}`);
+      await api.delete(`/tests/${testId}`);
       alert("Xóa test thành công!");
-      // Refresh data
       window.location.reload();
     } catch (error: any) {
       alert(error.response?.data?.message || "Có lỗi xảy ra");
@@ -203,7 +202,7 @@ export default function AdminTestsPage() {
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
                       <button
-                        onClick={() => navigate({ to: `/admin/tests/${test.id}/edit` })}
+                        onClick={() => navigate({ to: `/admin/tests/${test.id}` })}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Chỉnh sửa"
                       >

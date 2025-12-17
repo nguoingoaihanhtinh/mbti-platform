@@ -1,58 +1,83 @@
-import React, { useState, useEffect } from "react";
-
-import { useNavigate } from "@tanstack/react-router";
-import { Route as TestRoute } from "../../routes/admin/tests/$testId";
+import { useState, useEffect } from "react";
+import { useMatch, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../libs/api";
-import { ArrowLeft, Save, Plus, Trash2, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, FileText, CheckCircle, AlertCircle, GripVertical } from "lucide-react";
+
+interface Answer {
+  id?: string;
+  text: string;
+  score: number;
+  dimension?: string | null;
+  order_index: number;
+}
 
 interface Question {
   id?: string;
   text: string;
-  dimension?: string;
-  answers: {
-    id?: string;
-    text: string;
-    score?: number;
-  }[];
+  type?: string | null;
+  dimension?: string | null;
+  order_index: number;
+  answers: Answer[];
 }
 
 interface TestFormData {
   title: string;
-  description?: string;
+  description?: string | null;
+  is_active?: boolean;
   questions: Question[];
+  version: {
+    version_number: number;
+    description?: string | null;
+  };
 }
 
 export default function AdminTestFormPage() {
   const navigate = useNavigate();
-  const { testId } = TestRoute.useParams();
-  const isEdit = !!testId;
+
+  const editMatch = useMatch({ from: "/admin/tests/$testId", shouldThrow: false });
+
+  const isEdit = !!editMatch;
+  const testId = editMatch?.params.testId;
 
   const [formData, setFormData] = useState<TestFormData>({
     title: "",
-    description: "",
+    description: null,
+    is_active: true,
     questions: [],
+    version: {
+      version_number: 1,
+      description: null,
+    },
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
 
-  // Fetch test data if editing
   const { data: testData, isLoading: loadingTest } = useQuery({
-    queryKey: ["admin", "test", testId],
+    queryKey: ["test", testId],
     queryFn: async () => {
-      const { data } = await api.get(`/admin/tests/${testId}`);
+      const { data } = await api.get(`/tests/${testId}`);
       return data;
     },
     enabled: isEdit,
   });
 
-  // Populate form when data loads
   useEffect(() => {
     if (testData && isEdit) {
       setFormData({
-        title: testData.title || "",
-        description: testData.description || "",
-        questions: testData.questions || [],
+        title: testData.test?.title || "",
+        description: testData.test?.description || null,
+        is_active: testData.test?.is_active ?? true,
+        questions: (testData.questions || []).map((q: any, idx: number) => ({
+          ...q,
+          order_index: q.order_index ?? idx,
+          answers: (q.answers || []).map((a: any, aIdx: number) => ({
+            ...a,
+            order_index: a.order_index ?? aIdx,
+            score: a.score ?? 0,
+          })),
+        })),
+        version: testData.version || { version_number: 1, description: null },
       });
     }
   }, [testData, isEdit]);
@@ -60,10 +85,10 @@ export default function AdminTestFormPage() {
   const saveMutation = useMutation({
     mutationFn: async (data: TestFormData) => {
       if (isEdit) {
-        const response = await api.put(`/admin/tests/${testId}`, data);
+        const response = await api.put(`/tests/${testId}`, data);
         return response.data;
       } else {
-        const response = await api.post("/admin/tests", data);
+        const response = await api.post("/tests", data);
         return response.data;
       }
     },
@@ -71,7 +96,7 @@ export default function AdminTestFormPage() {
       setSuccess(true);
       setTimeout(() => {
         navigate({ to: "/admin/tests" });
-      }, 2000);
+      }, 1500);
     },
     onError: (error: any) => {
       setErrors({
@@ -81,14 +106,20 @@ export default function AdminTestFormPage() {
   });
 
   const handleAddQuestion = () => {
+    const newOrderIndex = formData.questions.length;
     setFormData({
       ...formData,
       questions: [
         ...formData.questions,
         {
           text: "",
-          dimension: "",
-          answers: [{ text: "" }, { text: "" }],
+          type: "single_choice",
+          dimension: null,
+          order_index: newOrderIndex,
+          answers: [
+            { text: "", score: 0, dimension: null, order_index: 0 },
+            { text: "", score: 0, dimension: null, order_index: 1 },
+          ],
         },
       ],
     });
@@ -96,10 +127,15 @@ export default function AdminTestFormPage() {
 
   const handleRemoveQuestion = (index: number) => {
     const newQuestions = formData.questions.filter((_, i) => i !== index);
-    setFormData({ ...formData, questions: newQuestions });
+
+    const reorderedQuestions = newQuestions.map((q, idx) => ({
+      ...q,
+      order_index: idx,
+    }));
+    setFormData({ ...formData, questions: reorderedQuestions });
   };
 
-  const handleQuestionChange = (index: number, field: string, value: string) => {
+  const handleQuestionChange = (index: number, field: string, value: any) => {
     const newQuestions = [...formData.questions];
     (newQuestions[index] as any)[field] = value;
     setFormData({ ...formData, questions: newQuestions });
@@ -107,45 +143,53 @@ export default function AdminTestFormPage() {
 
   const handleAddAnswer = (questionIndex: number) => {
     const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].answers.push({ text: "" });
+    const newOrderIndex = newQuestions[questionIndex].answers.length;
+    newQuestions[questionIndex].answers.push({
+      text: "",
+      score: 0,
+      dimension: null,
+      order_index: newOrderIndex,
+    });
     setFormData({ ...formData, questions: newQuestions });
   };
 
   const handleRemoveAnswer = (questionIndex: number, answerIndex: number) => {
     const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].answers = newQuestions[questionIndex].answers.filter((_, i) => i !== answerIndex);
+    newQuestions[questionIndex].answers = newQuestions[questionIndex].answers
+      .filter((_, i) => i !== answerIndex)
+      .map((a, idx) => ({ ...a, order_index: idx }));
     setFormData({ ...formData, questions: newQuestions });
   };
 
-  const handleAnswerChange = (questionIndex: number, answerIndex: number, value: string) => {
+  const handleAnswerChange = (questionIndex: number, answerIndex: number, field: string, value: any) => {
     const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].answers[answerIndex].text = value;
+    (newQuestions[questionIndex].answers[answerIndex] as any)[field] = value;
     setFormData({ ...formData, questions: newQuestions });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setErrors({});
 
-    // Validation
     const newErrors: Record<string, string> = {};
-    if (!formData.title) {
+
+    if (!formData.title?.trim()) {
       newErrors.title = "Vui lòng nhập tiêu đề test";
     }
+
     if (formData.questions.length === 0) {
       newErrors.questions = "Vui lòng thêm ít nhất 1 câu hỏi";
     }
 
-    // Validate questions
     formData.questions.forEach((q, i) => {
-      if (!q.text) {
+      if (!q.text?.trim()) {
         newErrors[`question_${i}`] = "Câu hỏi không được để trống";
       }
       if (q.answers.length < 2) {
         newErrors[`question_${i}_answers`] = "Cần ít nhất 2 câu trả lời";
       }
+
       q.answers.forEach((a, j) => {
-        if (!a.text) {
+        if (!a.text?.trim()) {
           newErrors[`question_${i}_answer_${j}`] = "Câu trả lời không được để trống";
         }
       });
@@ -168,20 +212,18 @@ export default function AdminTestFormPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
+    <div className="max-w-5xl mx-auto space-y-6 p-6">
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate({ to: "/admin/tests" })}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Quay lại danh sách</span>
+          <span>Quay lại</span>
         </button>
         <h1 className="text-2xl font-bold text-gray-900">{isEdit ? "Chỉnh sửa Test" : "Tạo Test Mới"}</h1>
       </div>
 
-      {/* Success Message */}
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
           <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -192,7 +234,6 @@ export default function AdminTestFormPage() {
         </div>
       )}
 
-      {/* Error Message */}
       {errors.submit && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -203,14 +244,16 @@ export default function AdminTestFormPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-6">
         {/* Basic Info */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông tin cơ bản</h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tiêu đề test *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tiêu đề test <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={formData.title}
@@ -224,14 +267,27 @@ export default function AdminTestFormPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả (tùy chọn)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
               <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                value={formData.description || ""}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value || null })}
                 placeholder="Mô tả về test..."
                 rows={3}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="is_active"
+                checked={formData.is_active}
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                className="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-600"
+              />
+              <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
+                Kích hoạt test
+              </label>
             </div>
           </div>
         </div>
@@ -254,16 +310,23 @@ export default function AdminTestFormPage() {
 
           <div className="space-y-6">
             {formData.questions.map((question, qIndex) => (
-              <div key={qIndex} className="p-4 border-2 border-gray-200 rounded-lg">
+              <div
+                key={qIndex}
+                className="p-5 border-2 border-gray-200 rounded-lg hover:border-purple-300 transition-colors"
+              >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-purple-600" />
-                    <span className="font-medium text-gray-900">Câu hỏi {qIndex + 1}</span>
+                  <div className="flex items-center gap-3">
+                    <GripVertical className="w-5 h-5 text-gray-400 cursor-move" />
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-purple-600" />
+                      <span className="font-medium text-gray-900">Câu {qIndex + 1}</span>
+                    </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveQuestion(qIndex)}
                     className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Xóa câu hỏi"
                   >
                     <Trash2 className="w-4 h-4 text-red-600" />
                   </button>
@@ -272,11 +335,14 @@ export default function AdminTestFormPage() {
                 <div className="space-y-4">
                   {/* Question Text */}
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nội dung câu hỏi <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={question.text}
                       onChange={(e) => handleQuestionChange(qIndex, "text", e.target.value)}
-                      placeholder="Nội dung câu hỏi..."
+                      placeholder="Nhập nội dung câu hỏi..."
                       className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
                         errors[`question_${qIndex}`] ? "border-red-500" : "border-gray-300"
                       }`}
@@ -286,25 +352,41 @@ export default function AdminTestFormPage() {
                     )}
                   </div>
 
-                  {/* Dimension */}
-                  <div>
-                    <input
-                      type="text"
-                      value={question.dimension || ""}
-                      onChange={(e) => handleQuestionChange(qIndex, "dimension", e.target.value)}
-                      placeholder="Dimension (E-I, S-N, T-F, J-P)..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Loại câu hỏi</label>
+                      <select
+                        value={question.type || "single_choice"}
+                        onChange={(e) => handleQuestionChange(qIndex, "type", e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      >
+                        <option value="single_choice">Chọn 1 đáp án</option>
+                        <option value="multiple_choice">Chọn nhiều đáp án</option>
+                        <option value="scale">Thang đo</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Dimension (E-I, S-N, T-F, J-P)</label>
+                      <input
+                        type="text"
+                        value={question.dimension || ""}
+                        onChange={(e) => handleQuestionChange(qIndex, "dimension", e.target.value || null)}
+                        placeholder="Ví dụ: E-I"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      />
+                    </div>
                   </div>
 
                   {/* Answers */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700">Câu trả lời</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Câu trả lời <span className="text-red-500">*</span>
+                      </label>
                       <button
                         type="button"
                         onClick={() => handleAddAnswer(qIndex)}
-                        className="text-sm text-purple-600 hover:text-purple-700"
+                        className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                       >
                         + Thêm câu trả lời
                       </button>
@@ -312,21 +394,37 @@ export default function AdminTestFormPage() {
 
                     <div className="space-y-2">
                       {question.answers.map((answer, aIndex) => (
-                        <div key={aIndex} className="flex items-center gap-2">
+                        <div key={aIndex} className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              value={answer.text}
+                              onChange={(e) => handleAnswerChange(qIndex, aIndex, "text", e.target.value)}
+                              placeholder={`Câu trả lời ${aIndex + 1}`}
+                              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
+                                errors[`question_${qIndex}_answer_${aIndex}`] ? "border-red-500" : "border-gray-300"
+                              }`}
+                            />
+                            {errors[`question_${qIndex}_answer_${aIndex}`] && (
+                              <p className="text-red-500 text-xs mt-1">
+                                {errors[`question_${qIndex}_answer_${aIndex}`]}
+                              </p>
+                            )}
+                          </div>
                           <input
-                            type="text"
-                            value={answer.text}
-                            onChange={(e) => handleAnswerChange(qIndex, aIndex, e.target.value)}
-                            placeholder={`Câu trả lời ${aIndex + 1}...`}
-                            className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
-                              errors[`question_${qIndex}_answer_${aIndex}`] ? "border-red-500" : "border-gray-300"
-                            }`}
+                            type="number"
+                            value={answer.score}
+                            onChange={(e) => handleAnswerChange(qIndex, aIndex, "score", parseInt(e.target.value) || 0)}
+                            placeholder="Điểm"
+                            title="Điểm số của câu trả lời"
+                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                           />
                           {question.answers.length > 2 && (
                             <button
                               type="button"
                               onClick={() => handleRemoveAnswer(qIndex, aIndex)}
-                              className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                              title="Xóa câu trả lời"
                             >
                               <Trash2 className="w-4 h-4 text-red-600" />
                             </button>
@@ -341,11 +439,25 @@ export default function AdminTestFormPage() {
                 </div>
               </div>
             ))}
+
+            {formData.questions.length === 0 && (
+              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500 mb-4">Chưa có câu hỏi nào</p>
+                <button
+                  type="button"
+                  onClick={handleAddQuestion}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Thêm câu hỏi đầu tiên</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Submit Buttons */}
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex items-center justify-end gap-4 sticky bottom-0 bg-white p-4 border-t border-gray-200 -mx-6 -mb-6 rounded-b-xl">
           <button
             type="button"
             onClick={() => navigate({ to: "/admin/tests" })}
@@ -354,15 +466,16 @@ export default function AdminTestFormPage() {
             Hủy
           </button>
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             disabled={saveMutation.isPending}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
-            <span>{saveMutation.isPending ? "Đang lưu..." : isEdit ? "Cập nhật" : "Tạo test"}</span>
+            <span>{saveMutation.isPending ? "Đang lưu..." : isEdit ? "Cập nhật Test" : "Tạo Test"}</span>
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

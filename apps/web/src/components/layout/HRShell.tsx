@@ -49,7 +49,7 @@ export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {
     }
   };
 
-  if (!user || user.role !== "company") {
+  if (!user || user.role !== "admin") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -120,7 +120,7 @@ export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {
               return (
                 <button
                   key={item.id}
-                  onClick={() => navigate({ to: `/hr/${item.id}` })}
+                  onClick={() => navigate({ to: `/admin/${item.id}` })}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive
                       ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"

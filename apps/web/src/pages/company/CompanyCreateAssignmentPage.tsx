@@ -183,7 +183,7 @@ export default function CompanyCreateAssignmentPage() {
           <div className="flex items-center justify-end gap-4">
             <button
               type="button"
-              onClick={() => navigate({ to: "/hr/dashboard" })}
+              onClick={() => navigate({ to: "/company/assignments" })}
               className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Hủy

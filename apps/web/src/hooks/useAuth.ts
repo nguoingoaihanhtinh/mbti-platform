@@ -28,9 +28,11 @@ export const useAuth = () => {
     try {
       const res = await api.get("/auth/profile");
       const user = res.data.user;
-      console.log("Logged in user:", user);
-      if (user.role === "company") {
-        navigate({ to: "/hr/dashboard" });
+
+      if (user.role === "admin") {
+        navigate({ to: "/admin/dashboard" });
+      } else if (user.role === "company") {
+        navigate({ to: "/company/assignments" });
       } else {
         navigate({ to: "/assessments" });
       }

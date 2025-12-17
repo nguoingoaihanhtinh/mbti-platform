@@ -7,7 +7,7 @@ interface PackageItem {
   id: string;
   name: string;
   code: string;
-  price: number;
+  price_per_month: number;
   duration_days: number;
   max_tests: number;
   max_candidates: number;
@@ -21,14 +21,14 @@ export default function AdminPackagesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: packages, isLoading } = useQuery({
+  const { data: packages = [], isLoading } = useQuery({
     queryKey: ["admin", "packages"],
     queryFn: async () => {
       const { data } = await api.get<PackageItem[]>("/admin/packages");
       return data;
     },
   });
-
+  console.log("packages:", packages);
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       await api.delete(`/admin/packages/${id}`);
@@ -120,7 +120,7 @@ export default function AdminPackagesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {packages?.reduce((acc, p) => Math.max(acc, p.price), 0).toLocaleString()}
+                {packages?.reduce((acc, p) => Math.max(acc, p.price_per_month), 0).toLocaleString()}
               </p>
               <p className="text-sm text-gray-500">Giá cao nhất (VNĐ)</p>
             </div>
@@ -156,7 +156,7 @@ export default function AdminPackagesPage() {
             {/* Price */}
             <div className="mb-6">
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-gray-900">{pkg.price.toLocaleString()}</span>
+                <span className="text-4xl font-bold text-gray-900">{pkg.price_per_month.toLocaleString()}</span>
                 <span className="text-gray-500">VNĐ</span>
               </div>
               <p className="text-sm text-gray-500 mt-1">/{pkg.duration_days} ngày</p>

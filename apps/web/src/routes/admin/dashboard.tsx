@@ -1,10 +1,10 @@
-// src/routes/hr/dashboard.tsx
+// src/routes/admin/dashboard.tsx
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { useAuthStore } from "../../stores/useAuthStore";
-import HRDashboard from "../../pages/hr/HRDashboardPage";
+import AdminDashboard from "../../pages/admin/AdminDashboardPage";
 
-export const Route = createFileRoute("/hr/dashboard")({
+export const Route = createFileRoute("/admin/dashboard")({
   beforeLoad: async () => {
     const { isAuthenticated, login } = useAuthStore.getState();
 
@@ -14,13 +14,13 @@ export const Route = createFileRoute("/hr/dashboard")({
 
     const currentUser = useAuthStore.getState().user;
 
-    if (!currentUser || currentUser.role !== "company") {
+    if (!currentUser || currentUser.role !== "admin") {
       throw redirect({
         to: "/login",
       });
     }
   },
-  component: HRDashboard,
+  component: AdminDashboard,
 });
 
 // // src/routes/hr/analytics.tsx
