@@ -8,11 +8,16 @@ import {
   Put,
   Delete,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+
+import { UnauthorizedException } from '@nestjs/common';
 import { TestService } from './test.service';
 import { CreateTestDto } from './dto/create-test.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
 import { UpdateTestVersionDto } from './dto/update-test-version.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('tests')
 export class TestController {
@@ -26,8 +31,12 @@ export class TestController {
     return this.testService.getAllTests(page, limit);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  createTest(@Body() dto: CreateTestDto) {
+  createTest(@Req() req: any, @Body() dto: CreateTestDto) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Chỉ admin mới có thể tạo test');
+    }
     return this.testService.createTest(
       {
         title: dto.title,
@@ -62,11 +71,18 @@ export class TestController {
     return this.testService.getTestVersionById(versionId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':testId/versions')
   createVersion(
+    @Req() req: any,
     @Param('testId', ParseUUIDPipe) testId: string,
     @Body() dto: { version_number: number; description?: string },
   ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException(
+        'Chỉ admin mới có thể tạo phiên bản test',
+      );
+    }
     return this.testService.createTestVersion(testId, dto);
   }
 
@@ -78,33 +94,54 @@ export class TestController {
     return this.testService.getTestWithContent(testId, versionId);
   }
 
-  // ✅ UPDATE TEST
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   updateTest(
+    @Req() req: any,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTestDto,
   ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Chỉ admin mới có thể cập nhật test');
+    }
     return this.testService.updateTest(id, dto);
   }
 
-  // ✅ UPDATE TEST VERSION
+  @UseGuards(JwtAuthGuard)
   @Put('versions/:versionId')
   updateTestVersion(
+    @Req() req: any,
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @Body() dto: UpdateTestVersionDto,
   ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException(
+        'Chỉ admin mới có thể cập nhật phiên bản test',
+      );
+    }
     return this.testService.updateTestVersion(versionId, dto);
   }
 
-  // ✅ DELETE TEST
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  deleteTest(@Param('id', ParseUUIDPipe) id: string) {
+  deleteTest(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Chỉ admin mới có thể xóa test');
+    }
     return this.testService.deleteTest(id);
   }
 
-  // ✅ DELETE TEST VERSION
+  @UseGuards(JwtAuthGuard)
   @Delete('versions/:versionId')
-  deleteTestVersion(@Param('versionId', ParseUUIDPipe) versionId: string) {
+  deleteTestVersion(
+    @Req() req: any,
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException(
+        'Chỉ admin mới có thể xóa phiên bản test',
+      );
+    }
     return this.testService.deleteTestVersion(versionId);
   }
 }

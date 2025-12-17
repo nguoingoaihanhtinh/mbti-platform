@@ -107,27 +107,36 @@ export class AssessmentService {
     if (companyId) {
       const { data: viaCompany } = await this.supabase.client
         .from('assessments')
-        .select('*, test:tests(company_id)')
+        .select('*')
         .eq('id', assessmentId)
-        .eq('test.company_id', companyId)
+        .eq('company_id', companyId)
         .single();
 
       if (viaCompany) {
-        const { test, ...clean } = viaCompany;
-        return clean;
+        return viaCompany;
       }
     }
 
     const { data: viaUser } = await this.supabase.client
       .from('assessments')
-      .select('*, test:tests(company_id)')
+      .select('*')
       .eq('id', assessmentId)
       .eq('user_id', userId)
       .single();
 
     if (viaUser) {
-      const { test, ...clean } = viaUser;
-      return clean;
+      return viaUser;
+    }
+
+    const { data: viaGuest } = await this.supabase.client
+      .from('assessments')
+      .select('*')
+      .eq('id', assessmentId)
+      .eq('guest_email', userId)
+      .single();
+
+    if (viaGuest) {
+      return viaGuest;
     }
 
     throw new BadRequestException('Assessment not found');
@@ -153,17 +162,12 @@ export class AssessmentService {
     limit: number = 20,
   ) {
     return this.pagination.paginate<Response>(
-      (page, limit) => {
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
-
-        return this.supabase.client
+      () =>
+        this.supabase.client
           .from('responses')
-          .select('*', { count: 'exact' })
+          .select('*')
           .eq('assessment_id', assessmentId)
-          .order('created_at')
-          .range(from, to);
-      },
+          .order('created_at'),
       page,
       limit,
     );
@@ -245,19 +249,7 @@ export class AssessmentService {
     userId: string,
     companyId?: string,
   ): Promise<ResultWithMBTI> {
-    const query = this.supabase.client
-      .from('assessments')
-      .select('id, test_id')
-      .eq('id', assessmentId);
-
-    if (companyId) {
-      query.or(`user_id.eq.${userId},test.company_id.eq.${companyId}`);
-    } else {
-      query.eq('user_id', userId);
-    }
-
-    const { data: assessment } = await query.single();
-    if (!assessment) throw new BadRequestException('Assessment not found');
+    await this.getAssessmentById(assessmentId, userId, companyId);
 
     const { data: result } = await this.supabase.client
       .from('results')
@@ -285,20 +277,18 @@ export class AssessmentService {
     limit: number = 10,
   ) {
     return this.pagination.paginate<Assessment>(
-      (page, limit) => {
-        return this.supabase.client
+      () =>
+        this.supabase.client
           .from('assessments')
-          .select('*', { count: 'exact' })
+          .select('*')
           .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-      },
+          .order('created_at', { ascending: false }),
       page,
       limit,
     );
   }
 
   async getGuestResult(assessmentId: string, email: string) {
-    // First verify this email owns the assessment
     const { data: assessment, error: assessmentErr } =
       await this.supabase.client
         .from('assessments')
@@ -311,7 +301,6 @@ export class AssessmentService {
       throw new BadRequestException('Assessment not found for guest');
     }
 
-    // Then fetch the result
     const { data: result, error: resultErr } = await this.supabase.client
       .from('results')
       .select('*')

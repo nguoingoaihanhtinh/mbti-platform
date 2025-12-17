@@ -7,11 +7,14 @@ import {
   Query,
   Post,
   Body,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreatePackageDto } from './dto/create-package.dto';
+import { UpdatePackageDto } from './dto/update-package.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
@@ -32,6 +35,32 @@ export class AdminController {
       throw new UnauthorizedException('Admin access required');
     }
     return this.adminService.getPackages();
+  }
+  @Get('packages/:id')
+  async getPackageById(@Req() req: any, @Param('id') id: string) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+    return this.adminService.getPackageById(id);
+  }
+  @Put('packages/:id')
+  async updatePackage(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdatePackageDto,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+    return this.adminService.updatePackage(id, dto);
+  }
+
+  @Delete('packages/:id')
+  async deletePackage(@Req() req: any, @Param('id') id: string) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+    return this.adminService.deletePackage(id);
   }
 
   @Get('dashboard/stats')

@@ -39,15 +39,12 @@ export class AnswerService {
     limit: number = 20,
   ) {
     return this.pagination.paginate<Answer>(
-      (page, limit) => {
-        let query = this.supabase.client
+      () =>
+        this.supabase.client
           .from('answers')
           .select('*', { count: 'exact' })
           .eq('question_id', questionId)
-          .order('order_index');
-
-        return query;
-      },
+          .order('order_index'),
       page,
       limit,
     );

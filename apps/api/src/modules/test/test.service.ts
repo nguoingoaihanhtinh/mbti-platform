@@ -5,13 +5,12 @@ import {
   TestUpdate,
   TestVersionInsert,
   TestVersionUpdate,
-  QuestionInsert,
-  AnswerInsert,
   Test,
   TestVersion,
 } from '@/types/common';
-import { CreateQuestionDto } from '../quesion/dto/create-question.dto';
+
 import { PaginationService } from '@/common/services/pagination.service';
+import { CreateQuestionDto } from '../quesion/dto/create-question.dto';
 
 @Injectable()
 export class TestService {
@@ -20,13 +19,11 @@ export class TestService {
     private pagination: PaginationService,
   ) {}
 
-  //CREATE TEST (with version + questions + answers)
   async createTest(
     testInput: TestInsert,
     versionInput: Omit<TestVersionInsert, 'test_id'>,
     questionsInput: CreateQuestionDto[],
   ) {
-    // Insert test
     const { data: test, error: testErr } = await this.supabase.client
       .from('tests')
       .insert(testInput)
@@ -35,7 +32,6 @@ export class TestService {
     if (testErr) throw testErr;
     if (!test) throw new Error('Failed to create test');
 
-    // Insert version
     const { data: version, error: verErr } = await this.supabase.client
       .from('test_versions')
       .insert({ ...versionInput, test_id: test.id })
@@ -44,17 +40,26 @@ export class TestService {
     if (verErr) throw verErr;
     if (!version) throw new Error('Failed to create version');
 
-    // Insert questions + answers
+    await this.createQuestionsWithAnswers(test.id, version.id, questionsInput);
+
+    return { test, version };
+  }
+
+  private async createQuestionsWithAnswers(
+    testId: string,
+    versionId: string,
+    questionsInput: CreateQuestionDto[],
+  ) {
     for (const q of questionsInput) {
       const { data: question, error: qErr } = await this.supabase.client
         .from('questions')
         .insert({
+          test_id: testId,
+          test_version_id: versionId,
           text: q.text,
-          type: q.type,
-          dimension: q.dimension,
+          type: q.type || 'single_choice',
+          dimension: q.dimension || null,
           order_index: q.order_index,
-          test_id: test.id,
-          test_version_id: version.id,
         })
         .select()
         .single();
@@ -62,18 +67,22 @@ export class TestService {
       if (qErr) throw qErr;
       if (!question) continue;
 
-      for (const a of q.answers || []) {
-        await this.supabase.client.from('answers').insert({
+      if (q.answers && q.answers.length > 0) {
+        const answersToInsert = q.answers.map((a) => ({
+          question_id: question.id,
           text: a.text,
           score: a.score,
-          dimension: a.dimension,
+          dimension: a.dimension || null,
           order_index: a.order_index,
-          question_id: question.id,
-        });
+        }));
+
+        const { error: aErr } = await this.supabase.client
+          .from('answers')
+          .insert(answersToInsert);
+
+        if (aErr) throw aErr;
       }
     }
-
-    return { test, version };
   }
 
   async getTestWithContent(testId: string, versionId?: string) {
@@ -110,11 +119,11 @@ export class TestService {
       .select('*')
       .eq('test_id', testId)
       .eq('test_version_id', version.id)
-      .order('order_index');
+      .order('order_index', { ascending: true });
 
     if (qErr) throw qErr;
 
-    if (questions.length === 0) {
+    if (!questions || questions.length === 0) {
       return { test, version, questions: [] };
     }
 
@@ -123,11 +132,11 @@ export class TestService {
       .from('answers')
       .select('*')
       .in('question_id', questionIds)
-      .order('order_index');
+      .order('order_index', { ascending: true });
 
     if (aErr) throw aErr;
 
-    const answersByQuestion = answers.reduce(
+    const answersByQuestion = (answers || []).reduce(
       (acc, ans) => {
         if (!acc[ans.question_id]) acc[ans.question_id] = [];
         acc[ans.question_id].push(ans);
@@ -148,72 +157,56 @@ export class TestService {
 
   async getAllTests(page = 1, limit = 10) {
     return this.pagination.paginate(
-      (page, limit) =>
+      () =>
         this.supabase.client
           .from('tests')
-          .select('*', { count: 'exact' })
+          .select('*')
           .order('created_at', { ascending: false }),
       page,
       limit,
     );
   }
 
-  async getTestVersions(testId: string): Promise<TestVersion[]> {
-    const { data: versions, error } = await this.supabase.client
-      .from('test_versions')
-      .select('*')
-      .eq('test_id', testId)
-      .order('version_number', { ascending: false });
-    if (error) throw error;
-    return versions;
-  }
+  async updateTest(
+    id: string,
+    data: TestUpdate & { questions?: CreateQuestionDto[] },
+  ): Promise<Test> {
+    const updateData: TestUpdate = {
+      title: data.title,
+      description: data.description,
+      is_active: data.is_active,
+    };
 
-  async getTestVersionById(versionId: string): Promise<TestVersion> {
-    const { data: version, error } = await this.supabase.client
-      .from('test_versions')
-      .select('*')
-      .eq('id', versionId)
-      .single();
-    if (error || !version) throw new BadRequestException('Version not found');
-    return version;
-  }
-
-  async createTestVersion(
-    testId: string,
-    data: Omit<TestVersionInsert, 'test_id' | 'id'>,
-  ): Promise<TestVersion> {
-    const { data: existing } = await this.supabase.client
-      .from('test_versions')
-      .select('id')
-      .eq('test_id', testId)
-      .eq('version_number', data.version_number)
-      .single();
-
-    if (existing) {
-      throw new BadRequestException(
-        `Version ${data.version_number} already exists`,
-      );
-    }
-
-    const { data: newVersion, error } = await this.supabase.client
-      .from('test_versions')
-      .insert({ ...data, test_id: testId })
-      .select()
-      .single();
-    if (error) throw error;
-    if (!newVersion) throw new Error('Failed to create version');
-    return newVersion;
-  }
-
-  async updateTest(id: string, data: TestUpdate): Promise<Test> {
     const { data: updated, error } = await this.supabase.client
       .from('tests')
-      .update(data)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
+
     if (error) throw error;
     if (!updated) throw new BadRequestException('Test not found');
+
+    if (data.questions && data.questions.length > 0) {
+      const { data: version } = await this.supabase.client
+        .from('test_versions')
+        .select('id')
+        .eq('test_id', id)
+        .order('version_number', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (version) {
+        await this.supabase.client
+          .from('questions')
+          .delete()
+          .eq('test_id', id)
+          .eq('test_version_id', version.id);
+
+        await this.createQuestionsWithAnswers(id, version.id, data.questions);
+      }
+    }
+
     return updated;
   }
 
@@ -240,12 +233,58 @@ export class TestService {
     if (error) throw error;
   }
 
-  //DELETE TEST VERSION (with cascade to questions/answers in DB)
   async deleteTestVersion(id: string): Promise<void> {
     const { error } = await this.supabase.client
       .from('test_versions')
       .delete()
       .eq('id', id);
     if (error) throw error;
+  }
+
+  async getTestVersions(testId: string): Promise<TestVersion[]> {
+    const { data: versions, error } = await this.supabase.client
+      .from('test_versions')
+      .select('*')
+      .eq('test_id', testId)
+      .order('version_number', { ascending: false });
+    if (error) throw error;
+    return versions || [];
+  }
+
+  async getTestVersionById(versionId: string): Promise<TestVersion> {
+    const { data: version, error } = await this.supabase.client
+      .from('test_versions')
+      .select('*')
+      .eq('id', versionId)
+      .single();
+    if (error || !version) throw new BadRequestException('Version not found');
+    return version;
+  }
+
+  async createTestVersion(
+    testId: string,
+    data: Omit<TestVersionInsert, 'test_id'>,
+  ): Promise<TestVersion> {
+    const { data: existing } = await this.supabase.client
+      .from('test_versions')
+      .select('id')
+      .eq('test_id', testId)
+      .eq('version_number', data.version_number)
+      .single();
+
+    if (existing) {
+      throw new BadRequestException(
+        `Version ${data.version_number} already exists`,
+      );
+    }
+
+    const { data: newVersion, error } = await this.supabase.client
+      .from('test_versions')
+      .insert({ ...data, test_id: testId })
+      .select()
+      .single();
+    if (error) throw error;
+    if (!newVersion) throw new Error('Failed to create version');
+    return newVersion;
   }
 }

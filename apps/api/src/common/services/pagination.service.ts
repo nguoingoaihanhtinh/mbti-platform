@@ -2,42 +2,18 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class PaginationService {
-  async paginate<T>(
-    queryFn: (page: number, limit: number) => any,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{
-    data: T[];
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
-  }> {
-    const countQuery = queryFn(page, limit)
-      .range(0, 0)
-      .select('*', { count: 'exact' });
-
-    const { count, error: countError } = await countQuery;
-    if (countError) throw countError;
-
-    if (count === 0) {
-      return { data: [], total: 0, page, limit, total_pages: 0 };
-    }
-
+  async paginate<T>(baseQuery: () => any, page = 1, limit = 10) {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    const { data, error } = await queryFn(page, limit).range(from, to);
+    const { count, error: countError } = await baseQuery().select('*', {
+      count: 'exact',
+      head: true,
+    });
 
-    if (error?.code === 'PGRST116') {
-      return {
-        data: [],
-        total: count,
-        page,
-        limit,
-        total_pages: Math.ceil(count / limit),
-      };
-    }
+    if (countError) throw countError;
+
+    const { data, error } = await baseQuery().range(from, to);
 
     if (error) throw error;
 
@@ -46,7 +22,7 @@ export class PaginationService {
       total: count || 0,
       page,
       limit,
-      total_pages: Math.ceil(count / limit),
+      total_pages: Math.ceil((count || 0) / limit),
     };
   }
 }

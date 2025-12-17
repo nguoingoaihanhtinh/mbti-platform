@@ -2,12 +2,17 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CreatePackageDto } from './dto/create-package.dto';
+import { PaginationService } from '@/common/services/pagination.service';
+import { UpdatePackageDto } from './dto/update-package.dto';
 
 @Injectable()
 export class AdminService {
   private client: SupabaseClient;
 
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private pagination: PaginationService,
+  ) {
     const url = this.config.get<string>('SUPABASE_URL');
     const key = this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY');
     if (!url || !key) {
@@ -16,6 +21,7 @@ export class AdminService {
     this.client = createClient(url, key);
   }
 
+  // === PACKAGE MANAGEMENT ===
   async createPackage(dto: CreatePackageDto) {
     const { data, error } = await this.client
       .from('packages')
@@ -42,19 +48,63 @@ export class AdminService {
     if (error) throw error;
     return data;
   }
+  async getPackageById(id: string) {
+    const { data, error } = await this.client
+      .from('packages')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async updatePackage(id: string, dto: UpdatePackageDto) {
+    const { data, error } = await this.client
+      .from('packages')
+      .update({
+        name: dto.name,
+
+        max_assignments: dto.max_assignments,
+        price_per_month: dto.price_per_month,
+        description: dto.description || null,
+        is_active: dto.is_active,
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+  async deletePackage(id: string) {
+    const { data: existing, error: findErr } = await this.client
+      .from('packages')
+      .select('id')
+      .eq('id', id)
+      .single();
+
+    if (findErr || !existing) {
+      throw new BadRequestException('Package không tồn tại');
+    }
+
+    const { error } = await this.client.from('packages').delete().eq('id', id);
+
+    if (error) throw error;
+
+    return { success: true };
+  }
 
   async getAdminDashboardStats() {
     const { count: totalCompleted, error: compErr } = await this.client
       .from('assessments')
       .select('id', { count: 'exact' })
       .not('completed_at', 'is', null);
-
     if (compErr) throw compErr;
 
     const { count: activeCompanies, error: compErr2 } = await this.client
       .from('companies')
       .select('id', { count: 'exact' });
-
     if (compErr2) throw compErr2;
 
     const { mbtiDistribution } = await this.getMbtiDistribution();
@@ -63,7 +113,6 @@ export class AdminService {
       .from('assessments')
       .select('test_id, tests(title)')
       .not('completed_at', 'is', null);
-
     if (assessErr) throw assessErr;
 
     const mostTakenTests = this.groupByTestAndCount(assessments || []);
@@ -110,52 +159,53 @@ export class AdminService {
     });
   }
 
-  async getUsers(page: number, limit: number) {
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    const { data, error } = await this.client
-      .from('users')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .range(from, to);
-
-    if (error) throw error;
-    return data;
+  async getUsers(page: number = 1, limit: number = 20) {
+    return this.pagination.paginate(
+      () =>
+        this.client
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false }),
+      page,
+      limit,
+    );
   }
 
-  async getCompanies(page: number, limit: number) {
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    const { data, error } = await this.client
-      .from('companies')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .range(from, to);
-
-    if (error) throw error;
-    return data;
+  async getCompanies(page: number = 1, limit: number = 20) {
+    return this.pagination.paginate(
+      () =>
+        this.client
+          .from('companies')
+          .select('*')
+          .order('created_at', { ascending: false }),
+      page,
+      limit,
+    );
   }
 
-  async getTests(page: number, limit: number) {
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    const { data, error } = await this.client
-      .from('tests')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .range(from, to);
-
-    if (error) throw error;
-    return data;
+  async getTests(page: number = 1, limit: number = 20) {
+    return this.pagination.paginate(
+      () =>
+        this.client
+          .from('tests')
+          .select('*')
+          .order('created_at', { ascending: false }),
+      page,
+      limit,
+    );
   }
 
-  async getCandidatesByTest(testId: string, page: number, limit: number) {
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    const { data, error } = await this.client
-      .from('assessments')
-      .select(
-        `
+  async getCandidatesByTest(
+    testId: string,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    return this.pagination.paginate(
+      () =>
+        this.client
+          .from('assessments')
+          .select(
+            `
         id,
         completed_at,
         status,
@@ -174,13 +224,13 @@ export class AdminService {
         ),
         tests!inner(title)
       `,
-      )
-      .eq('test_id', testId)
-      .not('completed_at', 'is', null)
-      .range(from, to);
-
-    if (error) throw error;
-    return data;
+            { count: 'exact' },
+          )
+          .eq('test_id', testId)
+          .not('completed_at', 'is', null),
+      page,
+      limit,
+    );
   }
 
   async getCandidateResult(assessmentId: string) {
@@ -214,6 +264,7 @@ export class AdminService {
     return data;
   }
 
+  // === UTILS ===
   private async getMbtiDistribution() {
     const { data: results, error: mbtiErr } = await this.client.from('results')
       .select(`

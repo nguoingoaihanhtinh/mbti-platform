@@ -40,7 +40,7 @@ export class QuestionService {
     limit: number = 20,
   ) {
     return this.pagination.paginate<Question>(
-      (page, limit) => {
+      () => {
         let query = this.supabase.client
           .from('questions')
           .select('*', { count: 'exact' })

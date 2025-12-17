@@ -197,7 +197,7 @@ export class CompanyService {
       completed_at,
       guest_email,
       guest_fullname,
-      tests(title),
+      tests(title), 
       test_id,
       results(
         mbti_type_id,
