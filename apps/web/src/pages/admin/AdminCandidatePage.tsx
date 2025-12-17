@@ -12,7 +12,7 @@ export default function AdminCandidatesPage() {
   const { data, isLoading, isFetching } = useAdminTestCandidates(DEFAULT_TEST_ID, page, limit);
 
   const candidates = Array.isArray(data?.data) ? data.data : [];
-  console.log("Candidates:", candidates);
+  //   console.log("Candidates:", candidates);
   if (isLoading) {
     return <div className="h-64 flex items-center justify-center text-gray-500">Đang tải danh sách ứng viên...</div>;
   }

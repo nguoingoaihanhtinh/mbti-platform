@@ -317,8 +317,7 @@ export default function AdminCandidateDetailPage() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Dimension Radar Chart */}
+      {/* <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <Target className="w-5 h-5 text-purple-600 mr-2" />
@@ -335,7 +334,6 @@ export default function AdminCandidateDetailPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Answer Distribution */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <BarChart3 className="w-5 h-5 text-purple-600 mr-2" />
@@ -355,7 +353,7 @@ export default function AdminCandidateDetailPage() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div> */}
 
       {/* Strengths & Weaknesses */}
       <div className="grid lg:grid-cols-2 gap-6">
@@ -463,7 +461,7 @@ export default function AdminCandidateDetailPage() {
       </div>
 
       {/* Responses Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold mb-6">Chi tiết câu trả lời</h2>
         <div className="space-y-4">
           {responses.map((resp, index) => {
@@ -487,7 +485,6 @@ export default function AdminCandidateDetailPage() {
           })}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
             <button
@@ -509,7 +506,7 @@ export default function AdminCandidateDetailPage() {
             </button>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
