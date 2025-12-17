@@ -134,11 +134,17 @@ export function useAdminTestCandidates(testId: string, page = 1, limit = 20) {
   return useQuery({
     queryKey: adminKeys.testCandidates(testId, page, limit),
     queryFn: async () => {
-      const { data } = await api.get<PaginatedResponse<AdminCandidate>>(`/admin/tests/${testId}/candidates`, {
+      const res = await api.get<PaginatedResponse<AdminCandidate>>(`/admin/tests/${testId}/candidates`, {
         params: { page, limit },
       });
 
-      return data;
+      return {
+        data: Array.isArray(res.data.data) ? res.data.data : [],
+        total: res.data.total ?? 0,
+        page: res.data.page ?? page,
+        limit: res.data.limit ?? limit,
+        total_pages: res.data.total_pages ?? 1,
+      };
     },
     enabled: !!testId,
   });
