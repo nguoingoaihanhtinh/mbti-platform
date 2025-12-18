@@ -1,9 +1,20 @@
 // src/pages/admin/AdminUsersPage.tsx
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../libs/api";
-import { Search, ChevronLeft, ChevronRight, User, Mail, Calendar, Shield, Building2, UserCircle } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  Building2,
+  UserCircle,
+  Trash2,
+} from "lucide-react";
 
 interface UserItem {
   id: string;
@@ -30,7 +41,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [roleFilter, setRoleFilter] = useState<string>("");
-
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "users", page, limit],
     queryFn: async () => {
@@ -41,6 +52,47 @@ export default function AdminUsersPage() {
     },
   });
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: "",
+    full_name: "",
+    password: "",
+    role: "candidate" as "admin" | "company" | "candidate",
+  });
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const handleCreateUser = async () => {
+    setCreateError(null);
+    if (!newUser.email || !newUser.full_name || !newUser.password) {
+      setCreateError("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      await api.post("/admin/users", newUser);
+      setIsModalOpen(false);
+      setNewUser({ email: "", full_name: "", password: "", role: "candidate" });
+
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    } catch (err: any) {
+      setCreateError(err.response?.data?.message || "Có lỗi xảy ra khi tạo user");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xoá user này? Hành động này không thể hoàn tác.")) {
+      return;
+    }
+
+    try {
+      await api.post(`/admin/users/${userId}/soft-delete`);
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Có lỗi xảy ra khi xoá user");
+    }
+  };
   const getRoleBadge = (role: string) => {
     const styles = {
       admin: { bg: "bg-red-100", text: "text-red-700", icon: Shield },
@@ -71,6 +123,13 @@ export default function AdminUsersPage() {
           <h1 className="text-2xl font-bold text-gray-900">Quản lý Users</h1>
           <p className="text-gray-500 mt-1">Tổng số {data?.total || 0} users trong hệ thống</p>
         </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg"
+        >
+          <User className="w-4 h-4" />
+          Thêm user
+        </button>
       </div>
 
       {/* Stats Cards */}
@@ -206,10 +265,19 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      {user.profile?.education && <p className="text-sm text-gray-600">{user.profile.education}</p>}
-                      {user.company_id && (
-                        <p className="text-xs text-gray-400">Company ID: {user.company_id.substring(0, 8)}</p>
-                      )}
+                      <div className="flex gap-2">
+                        {user.profile?.education && <p className="text-sm text-gray-600">{user.profile.education}</p>}
+                        {user.company_id && (
+                          <p className="text-xs text-gray-400">Company ID: {user.company_id.substring(0, 8)}</p>
+                        )}
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Xoá user"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -245,6 +313,81 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Tạo người dùng mới</h2>
+
+              {createError && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{createError}</div>}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
+                  <input
+                    type="text"
+                    value={newUser.full_name}
+                    onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    placeholder="Nguyễn Văn A"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    placeholder="user@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu *</label>
+                  <input
+                    type="password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Vai trò *</label>
+                  <select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  >
+                    <option value="candidate">Ứng viên</option>
+                    <option value="company">Công ty</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleCreateUser}
+                  disabled={isCreating}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg disabled:opacity-50"
+                >
+                  {isCreating ? "Đang tạo..." : "Tạo user"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

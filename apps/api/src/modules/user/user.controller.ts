@@ -5,17 +5,28 @@ import {
   Body,
   Param,
   Query,
-  ParseIntPipe,
+  UseGuards,
+  Req,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 
-@Controller('users')
+@Controller('admin/users')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private service: UserService) {}
 
+  private checkAdmin(req: any) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+  }
+
   @Post()
   async create(
+    @Req() req: any,
     @Body()
     body: {
       email: string;
@@ -24,6 +35,8 @@ export class UserController {
       role?: string;
     },
   ) {
+    this.checkAdmin(req);
+
     const role = body.role || 'candidate';
     const user = await this.service.create({
       email: body.email,
@@ -35,17 +48,21 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Req() req: any, @Param('id') id: string) {
+    this.checkAdmin(req);
     const user = await this.service.findOneById(id);
     return { success: true, data: user };
   }
 
   @Get()
   async findAll(
+    @Req() req: any,
     @Query('page') pageStr?: string,
     @Query('limit') limitStr?: string,
     @Query('email') email?: string,
   ) {
+    this.checkAdmin(req);
+
     const page = pageStr ? parseInt(pageStr, 10) : undefined;
     const limit = limitStr ? parseInt(limitStr, 10) : undefined;
 
@@ -67,5 +84,11 @@ export class UserController {
         total_pages: result.total_pages,
       },
     };
+  }
+  @Post(':id/soft-delete')
+  async softDelete(@Req() req: any, @Param('id') id: string) {
+    this.checkAdmin(req);
+    await this.service.softDelete(id);
+    return { success: true };
   }
 }

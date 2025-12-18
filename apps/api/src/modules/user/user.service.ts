@@ -55,6 +55,7 @@ export class UserService {
       .from('users')
       .select('id, email, full_name, role, created_at')
       .eq('id', id)
+      .is('deleted_at', null)
       .single();
 
     if (error?.code === 'PGRST116')
@@ -186,5 +187,17 @@ export class UserService {
 
     if (error) throw error;
     return data;
+  }
+  async softDelete(id: string) {
+    const { error } = await this.client
+      .from('users')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error?.code === 'PGRST116') {
+      throw new NotFoundException('User not found');
+    }
+    if (error) throw error;
+    return { success: true };
   }
 }
