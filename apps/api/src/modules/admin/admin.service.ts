@@ -135,11 +135,13 @@ export class AdminService {
       .from('assessments')
       .select(
         `
-        completed_at,
-        users!inner(full_name, email),
-        test:tests!inner(title),
-        companies!inner(name)
-      `,
+      completed_at,
+      user:users(full_name, email),        
+      guest_email,
+      guest_fullname,
+      test:tests(title),
+      company:companies(name)              
+    `,
       )
       .not('completed_at', 'is', null)
       .gte(
@@ -151,15 +153,21 @@ export class AdminService {
     if (error) throw error;
 
     return (data || []).map((a) => {
-      const user = a.users as any;
-      const company = a.companies as any;
-      const test = a.test as any;
+      const user = Array.isArray(a.user) ? a.user[0] : a.user;
+      const company = Array.isArray(a.company) ? a.company[0] : a.company;
+      const test = Array.isArray(a.test) ? a.test[0] : a.test;
+
+      const candidateName = user?.full_name || a.guest_fullname || 'Anonymous';
+      const email = user?.email || a.guest_email || null;
+      const companyName = company?.name || 'N/A';
+      const testName = test?.title || 'N/A';
+
       return {
         date: a.completed_at,
-        candidate: user?.full_name || 'Anonymous',
-        email: user?.email || null,
-        company: company?.name || 'N/A',
-        test: test?.title || 'N/A',
+        candidate: candidateName,
+        email,
+        company: companyName,
+        test: testName,
       };
     });
   }
@@ -177,15 +185,130 @@ export class AdminService {
   }
 
   async getCompanies(page: number = 1, limit: number = 20) {
-    return this.pagination.paginate(
-      () =>
-        this.client
-          .from('companies')
-          .select('*')
-          .order('created_at', { ascending: false }),
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { data: companies, error } = await this.client
+      .from('companies')
+      .select(
+        `
+      id,
+      name,
+      created_at,
+      company_subscriptions!inner(
+        id,
+        used_assignments,
+        created_at,       
+        updated_at,      
+        packages!inner(
+          name,
+          code,
+          is_active,
+          max_assignments,
+          price_per_month
+        )
+      )
+    `,
+      )
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+
+    const companyIds = companies.map((c) => c.id);
+    let assignmentsMap = new Map<string, number>();
+    let candidatesMap = new Map<string, number>();
+
+    if (companyIds.length > 0) {
+      const { data: allAssessments, error: assessErr } = await this.client
+        .from('assessments')
+        .select('company_id, completed_at')
+        .in('company_id', companyIds);
+
+      if (assessErr) throw assessErr;
+
+      allAssessments.forEach((assessment) => {
+        const companyId = assessment.company_id;
+        assignmentsMap.set(companyId, (assignmentsMap.get(companyId) || 0) + 1);
+        if (assessment.completed_at) {
+          candidatesMap.set(companyId, (candidatesMap.get(companyId) || 0) + 1);
+        }
+      });
+    }
+
+    const enrichedCompanies = companies.map((company) => {
+      const sub = company.company_subscriptions?.[0];
+      const pkg = sub?.packages?.[0];
+
+      return {
+        id: company.id,
+        full_name: company.name,
+        created_at: company.created_at,
+        subscription:
+          sub && pkg
+            ? {
+                package_name: pkg.name,
+                package_code: pkg.code,
+                // Vì không có end_date → ước lượng: created_at + 30 ngày
+                end_date: new Date(
+                  new Date(sub.created_at).getTime() + 30 * 24 * 60 * 60 * 1000,
+                ).toISOString(),
+                status: 'active',
+              }
+            : undefined,
+        stats: {
+          total_assignments: assignmentsMap.get(company.id) || 0,
+          total_candidates: candidatesMap.get(company.id) || 0,
+        },
+      };
+    });
+
+    const { count: total } = await this.client
+      .from('companies')
+      .select('id', { count: 'exact' });
+
+    return {
+      enrichedCompanies,
+      total: total || 0,
       page,
       limit,
-    );
+      total_pages: total ? Math.ceil(total / limit) : 0,
+    };
+  }
+  async getCompanyAnalytics(companyId: string) {
+    const { data: assignments, error } = await this.client
+      .from('assessments')
+      .select('created_at, tests(title)')
+      .eq('company_id', companyId);
+
+    if (error) throw error;
+    if (!assignments || assignments.length === 0) {
+      return { monthly_assignments: [], test_preferences: [] };
+    }
+
+    const monthlyMap = new Map<string, number>();
+    assignments.forEach((a) => {
+      const month = new Date(a.created_at).toISOString().slice(0, 7);
+      monthlyMap.set(month, (monthlyMap.get(month) || 0) + 1);
+    });
+
+    const monthly_assignments = Array.from(monthlyMap.entries())
+      .map(([month, count]) => ({ month, count }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    const testMap = new Map<string, number>();
+    assignments.forEach((a) => {
+      const test = Array.isArray(a.tests) ? a.tests[0] : a.tests;
+      const title = test?.title || 'Untitled Test';
+      testMap.set(title, (testMap.get(title) || 0) + 1);
+    });
+
+    const test_preferences = Array.from(testMap.entries())
+      .map(([test_title, count]) => ({ test_title, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return { monthly_assignments, test_preferences };
   }
 
   async getTests(page: number = 1, limit: number = 20) {

@@ -1,9 +1,8 @@
-// src/pages/admin/AdminCompaniesPage.tsx
 import { useState } from "react";
-
 import { useQuery } from "@tanstack/react-query";
 import api from "../../libs/api";
 import { Search, ChevronLeft, ChevronRight, Building2, Mail, Calendar, Package, Users, FileText } from "lucide-react";
+import CompanyAnalyticsDropdown from "../../components/CompanyAnalyticsDropdown";
 
 interface Company {
   id: string;
@@ -23,7 +22,7 @@ interface Company {
 }
 
 interface CompaniesResponse {
-  data: Company[];
+  enrichedCompanies: Company[];
   total: number;
   page: number;
   limit: number;
@@ -33,16 +32,25 @@ interface CompaniesResponse {
 export default function AdminCompaniesPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
+  const [openAnalyticsId, setOpenAnalyticsId] = useState<string | null>(null);
+
+  const toggleAnalytics = (id: string) => {
+    setOpenAnalyticsId(openAnalyticsId === id ? null : id);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "companies", page, limit],
     queryFn: async () => {
-      const { data } = await api.get<CompaniesResponse>("/admin/companies", {
+      const res = await api.get<CompaniesResponse>("/admin/companies", {
         params: { page, limit },
       });
-      return data;
+      return res.data;
     },
   });
+
+  const companies = data?.enrichedCompanies || [];
+  const total = data?.total || 0;
+  const totalPages = data?.total_pages || 1;
 
   if (isLoading) {
     return (
@@ -58,7 +66,7 @@ export default function AdminCompaniesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Quản lý Companies</h1>
-          <p className="text-gray-500 mt-1">Tổng số {data?.total || 0} companies</p>
+          <p className="text-gray-500 mt-1">Tổng số {total} companies</p>
         </div>
       </div>
 
@@ -70,7 +78,7 @@ export default function AdminCompaniesPage() {
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{data?.total || 0}</p>
+              <p className="text-2xl font-bold text-gray-900">{total}</p>
               <p className="text-sm text-gray-500">Tổng companies</p>
             </div>
           </div>
@@ -83,7 +91,7 @@ export default function AdminCompaniesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {data?.data.filter((c) => c.subscription?.status === "active").length || 0}
+                {companies.filter((c) => c.subscription?.status === "active").length || 0}
               </p>
               <p className="text-sm text-gray-500">Đang hoạt động</p>
             </div>
@@ -97,7 +105,7 @@ export default function AdminCompaniesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {data?.data.reduce((acc, c) => acc + (c.stats?.total_assignments || 0), 0)}
+                {companies.reduce((acc, c) => acc + (c.stats?.total_assignments || 0), 0)}
               </p>
               <p className="text-sm text-gray-500">Tổng assignments</p>
             </div>
@@ -111,7 +119,7 @@ export default function AdminCompaniesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {data?.data.reduce((acc, c) => acc + (c.stats?.total_candidates || 0), 0)}
+                {companies.reduce((acc, c) => acc + (c.stats?.total_candidates || 0), 0)}
               </p>
               <p className="text-sm text-gray-500">Tổng candidates</p>
             </div>
@@ -143,10 +151,11 @@ export default function AdminCompaniesPage() {
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Assignments</th>
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Candidates</th>
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Ngày tạo</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Phân tích</th>
               </tr>
             </thead>
             <tbody>
-              {data?.data.map((company) => {
+              {companies.map((company) => {
                 return (
                   <tr key={company.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-6">
@@ -198,6 +207,14 @@ export default function AdminCompaniesPage() {
                         {new Date(company.created_at).toLocaleDateString("vi-VN")}
                       </div>
                     </td>
+                    <td className="py-4 px-6">
+                      <button
+                        onClick={() => toggleAnalytics(company.id)}
+                        className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                      >
+                        {openAnalyticsId === company.id ? "Ẩn" : "Xem phân tích"}
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -205,11 +222,14 @@ export default function AdminCompaniesPage() {
           </table>
         </div>
 
+        {companies.map((company) => (
+          <CompanyAnalyticsDropdown key={company.id} companyId={company.id} isOpen={openAnalyticsId === company.id} />
+        ))}
+
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
           <div className="text-sm text-gray-600">
-            Hiển thị {(page - 1) * limit + 1} - {Math.min(page * limit, data?.total || 0)} của {data?.total || 0} kết
-            quả
+            Hiển thị {(page - 1) * limit + 1} - {Math.min(page * limit, total)} của {total} kết quả
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -220,11 +240,11 @@ export default function AdminCompaniesPage() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="px-4 py-2 text-sm text-gray-700">
-              Trang {page} / {data?.total_pages || 1}
+              Trang {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => p + 1)}
-              disabled={page >= (data?.total_pages || 1)}
+              disabled={page >= totalPages}
               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight className="w-5 h-5" />

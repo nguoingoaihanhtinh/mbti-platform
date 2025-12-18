@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from './user.service';
-
+import * as bcrypt from 'bcrypt';
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard)
 export class UserController {
@@ -23,7 +23,6 @@ export class UserController {
       throw new UnauthorizedException('Admin access required');
     }
   }
-
   @Post()
   async create(
     @Req() req: any,
@@ -38,9 +37,12 @@ export class UserController {
     this.checkAdmin(req);
 
     const role = body.role || 'candidate';
+
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+
     const user = await this.service.create({
       email: body.email,
-      password: body.password,
+      password: hashedPassword,
       full_name: body.full_name,
       role,
     });

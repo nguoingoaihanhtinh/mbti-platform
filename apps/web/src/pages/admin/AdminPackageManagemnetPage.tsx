@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import api from "../../libs/api";
 import { Plus, Edit, Trash2, Package, Users, DollarSign, CheckCircle, XCircle } from "lucide-react";
-import { useEffect } from "react";
 
 interface PackageItem {
   id: string;

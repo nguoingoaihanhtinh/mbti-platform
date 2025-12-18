@@ -103,6 +103,17 @@ export class AdminController {
     return this.adminService.getCompanies(+page, +limit);
   }
 
+  @Get('companies/:companyId/analytics')
+  async getCompanyAnalytics(
+    @Req() req: any,
+    @Param('companyId') companyId: string,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+    return this.adminService.getCompanyAnalytics(companyId);
+  }
+
   @Get('tests')
   async getTests(
     @Req() req: any,

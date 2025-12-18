@@ -35,10 +35,9 @@ export default function AdminDashboard() {
   const { data: timelineData, isLoading: timelineLoading } = useAdminTimeline();
 
   const completionChartData = useMemo(() => {
-    if (!stats) return [];
-    // return processCompletionData(stats);
-    return processCompletionData();
-  }, [stats]);
+    if (!timelineData) return [];
+    return processCompletionData(timelineData);
+  }, [timelineData]);
 
   const timelineChartData = useMemo(() => {
     if (!timelineData) return [];
@@ -276,18 +275,50 @@ export default function AdminDashboard() {
 }
 
 // ===== HELPER FUNCTIONS =====
-function processCompletionData() {
-  const days = 7;
-  const data = [];
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    data.push({
-      date: date.toLocaleDateString("vi-VN"),
-      completions: Math.floor(Math.random() * 5) + 1,
-    });
+function processCompletionData(timeline: AdminTimelineItem[]) {
+  if (!timeline || timeline.length === 0) {
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      data.push({
+        date: date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }),
+        completions: 0,
+      });
+    }
+    return data;
   }
-  return data;
+
+  const completionMap = new Map<string, number>();
+
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - 6);
+  startDate.setHours(0, 0, 0, 0);
+
+  // Initialize all days with 0
+  for (let i = 0; i <= 6; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+    const key = date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+    completionMap.set(key, 0);
+  }
+
+  // Count completions per day
+  timeline.forEach((item) => {
+    const itemDate = new Date(item.date);
+    if (itemDate >= startDate) {
+      const key = itemDate.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+      if (completionMap.has(key)) {
+        completionMap.set(key, (completionMap.get(key) || 0) + 1);
+      }
+    }
+  });
+
+  return Array.from(completionMap.entries()).map(([date, completions]) => ({
+    date,
+    completions,
+  }));
 }
 
 function processTimelineData(timeline: AdminTimelineItem[]) {

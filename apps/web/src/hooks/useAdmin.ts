@@ -173,7 +173,10 @@ export interface AdminPackage {
   is_active: boolean;
   created_at: string;
 }
-
+export interface CompanyAnalytics {
+  monthly_assignments: { month: string; count: number }[];
+  test_preferences: { test_title: string; count: number }[];
+}
 export function useAdminPackages() {
   return useQuery({
     queryKey: adminKeys.packages(),
@@ -192,5 +195,16 @@ export function useAdminPackage(packageId?: string) {
       return data;
     },
     enabled: !!packageId,
+  });
+}
+
+export function useCompanyAnalytics(companyId: string) {
+  return useQuery({
+    queryKey: ["admin", "companies", companyId, "analytics"],
+    queryFn: async () => {
+      const { data } = await api.get<CompanyAnalytics>(`/admin/companies/${companyId}/analytics`);
+      return data;
+    },
+    enabled: false,
   });
 }

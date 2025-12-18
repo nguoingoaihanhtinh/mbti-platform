@@ -12,9 +12,9 @@ export class UserService {
 
   constructor(private config: ConfigService) {
     const url = this.config.get<string>('SUPABASE_URL');
-    const key = this.config.get<string>('SUPABASE_ANON_KEY');
+    const key = this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY');
     if (!url || !key) {
-      throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY');
+      throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
     }
     this.client = createClient(url, key);
   }
@@ -67,11 +67,12 @@ export class UserService {
   async findAll(page?: number, limit?: number, email?: string) {
     let query = this.client
       .from('users')
-      .select('id, email, full_name, role, created_at', {
-        count: 'exact',
-      });
+      .select('id, email, full_name, role, created_at', { count: 'exact' })
+      .is('deleted_at', null);
 
-    if (email) query = query.eq('email', email);
+    if (email) {
+      query = query.ilike('email', `%${email}%`);
+    }
 
     if (page !== undefined && limit !== undefined) {
       const from = (page - 1) * limit;
@@ -88,7 +89,7 @@ export class UserService {
       }
       if (error) throw error;
       return {
-        data,
+        data: data || [],
         total: count || 0,
         page,
         limit,
@@ -98,7 +99,7 @@ export class UserService {
       const { data, error, count } = await query;
       if (error) throw error;
       return {
-        data,
+        data: data || [],
         total: count || 0,
         page: 1,
         limit: count || 0,

@@ -18,14 +18,14 @@ export class CompanyService {
 
   async subscribePackage(companyId: string, packageCode: string) {
     // 1. Lấy gói mới
-    const { data: newPkg, error: pkgErr } = await this.client
+    const { data: pkg, error: pkgErr } = await this.client
       .from('packages')
       .select('id, max_assignments')
       .eq('code', packageCode)
       .eq('is_active', true)
       .single();
 
-    if (pkgErr || !newPkg) {
+    if (pkgErr || !pkg) {
       throw new BadRequestException('Gói không tồn tại hoặc đã ngừng');
     }
 
@@ -39,7 +39,6 @@ export class CompanyService {
     let carryOver = 0;
 
     if (!subErr && currentSub) {
-      // Đã có subscription → tính remaining từ gói cũ
       const { data: oldPkg, error: oldErr } = await this.client
         .from('packages')
         .select('max_assignments')
@@ -55,13 +54,19 @@ export class CompanyService {
       }
     }
 
-    // 3. Cập nhật hoặc tạo mới subscription
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setMonth(endDate.getMonth() + 1);
+
     const newSubscriptionData = {
       company_id: companyId,
-      package_id: newPkg.id,
+      package_id: pkg.id,
       used_assignments: currentSub?.used_assignments || 0,
       carry_over_assignments: carryOver,
-      updated_at: new Date().toISOString(),
+      start_date: now.toISOString(),
+      end_date: endDate.toISOString(),
+      status: 'active',
+      updated_at: now.toISOString(),
     };
 
     const { error: upsertErr } = await this.client
@@ -70,7 +75,6 @@ export class CompanyService {
 
     if (upsertErr) throw upsertErr;
   }
-
   async getCurrentSubscription(companyId: string) {
     const { data: sub, error } = await this.client
       .from('company_subscriptions')

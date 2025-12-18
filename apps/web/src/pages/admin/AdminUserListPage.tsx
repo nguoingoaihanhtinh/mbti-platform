@@ -1,7 +1,7 @@
 // src/pages/admin/AdminUsersPage.tsx
 import { useState } from "react";
 
-import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../libs/api";
 import {
   Search,
