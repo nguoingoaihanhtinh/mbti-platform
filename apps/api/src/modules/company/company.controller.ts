@@ -12,6 +12,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CompanyService } from './company.service';
 import { SubscribePackageDto } from './dto/subcribe-package.dto';
+import { AssignmentDetail } from './types';
 
 class CreateAssignmentDto {
   candidate_email: string;
@@ -68,7 +69,16 @@ export class CompanyController {
 
     return this.companyService.getAssignment(id, req.user.company_id);
   }
-
+  @Get('assignments/:id/detail')
+  async getAssignmentDetail(
+    @Req() req: any,
+    @Param('id') id: string,
+  ): Promise<AssignmentDetail> {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Access denied');
+    }
+    return this.companyService.getAssignmentDetail(id, req.user.company_id);
+  }
   @Post('subscription')
   async subscribePackage(@Req() req: any, @Body() dto: SubscribePackageDto) {
     if (req.user.role !== 'company') {
@@ -95,5 +105,13 @@ export class CompanyController {
       throw new BadRequestException('Company access required');
     }
     return this.companyService.getDashboardStats(req.user.company_id);
+  }
+
+  @Get('users')
+  async getCompanyUsers(@Req() req: any) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Access denied');
+    }
+    return this.companyService.getCompanyUsers(req.user.company_id);
   }
 }

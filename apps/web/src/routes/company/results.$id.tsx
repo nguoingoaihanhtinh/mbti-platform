@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import CompanyResultPage from "../../pages/company/CompanyResultPage";
+import CompanyResultDetailPage from "../../pages/company/CompanyResultDetailPage";
 
 export const Route = createFileRoute("/company/results/$id")({
   validateSearch: (search) => ({
     email: typeof search.email === "string" ? search.email : undefined,
   }),
-  component: CompanyResultPage,
+  component: CompanyResultDetailPage,
 });

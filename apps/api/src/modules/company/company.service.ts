@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { sendAssignmentEmail } from '@/utils/email';
+import { AssignmentDetail } from './types';
 
 @Injectable()
 export class CompanyService {
@@ -262,5 +263,53 @@ export class CompanyService {
     await sendAssignmentEmail(candidateEmail, testLink);
 
     return { success: true };
+  }
+  async getCompanyUsers(companyId: string) {
+    const { data, error } = await this.client
+      .from('users')
+      .select('id, email, full_name, created_at')
+      .eq('company_id', companyId)
+      .is('deleted_at', null);
+
+    if (error) throw error;
+    return data;
+  }
+  async getAssignmentDetail(
+    assessmentId: string,
+    companyId: string,
+  ): Promise<AssignmentDetail> {
+    const assessmentRes = await this.getAssignment(assessmentId, companyId);
+
+    if (assessmentRes.error) {
+      throw new BadRequestException('Assignment not found');
+    }
+
+    const assessment = assessmentRes.data;
+
+    const responsesRes = await this.client
+      .from('responses')
+      .select('*')
+      .eq('assessment_id', assessment.id);
+
+    const testRes = await this.client
+      .from('tests')
+      .select(
+        `
+      id,
+      title,
+      questions!inner(
+        id, text, dimension,
+        answers!inner(id, text)
+      )
+    `,
+      )
+      .eq('id', assessment.test_id)
+      .single();
+
+    return {
+      assessment,
+      responses: responsesRes.data || [],
+      test: testRes.data,
+    };
   }
 }

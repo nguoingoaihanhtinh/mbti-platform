@@ -50,6 +50,49 @@ export interface AssignmentsListResponse {
   total_pages: number;
 }
 
+export interface AssignmentDetailResponse {
+  assessment: {
+    id: string;
+    status: string;
+    completed_at: string | null;
+    guest_email: string;
+    guest_fullname: string;
+    test_id: string;
+    tests: { title: string }[];
+    results: {
+      mbti_type_id: string;
+      mbti_types: {
+        suitable_roles: any;
+        type_code: string;
+        type_name: string;
+        strengths: string[];
+        weaknesses: string[];
+        career_recommendations: string[];
+        communication_style: string;
+        leadership_style: string;
+        overview: string;
+      }[];
+    }[];
+  };
+  responses: {
+    id: string;
+    question_id: string;
+    answer_id: string | null;
+    free_text: string | null;
+    created_at: string;
+  }[];
+  test: {
+    id: string;
+    title: string;
+    questions: {
+      id: string;
+      text: string;
+      dimension: string | null;
+      answers: { id: string; text: string }[];
+    }[];
+  } | null;
+}
+
 // Hooks
 export function useAssignments(page: number = 1, limit: number = 10, status?: string) {
   return useQuery({
@@ -68,14 +111,13 @@ export function useAssignmentDetail(assessmentId: string) {
   return useQuery({
     queryKey: assignmentKeys.detail(assessmentId),
     queryFn: async () => {
-      const { data } = await api.get<Assignment>(`/company/assignments/${assessmentId}`);
+      const { data } = await api.get<AssignmentDetailResponse>(`/company/assignments/${assessmentId}/detail`);
       return data;
     },
     enabled: !!assessmentId,
     staleTime: 5 * 60 * 1000,
   });
 }
-
 export function useCreateAssignment() {
   const queryClient = useQueryClient();
 
