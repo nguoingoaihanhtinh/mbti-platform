@@ -13,6 +13,7 @@ interface PackageFormData {
   max_assignments: number;
   description?: string;
   is_active: boolean;
+  benefits?: string[];
 }
 interface Props {
   packageId?: string;
@@ -30,6 +31,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
     price_per_month: 0,
     max_assignments: 0,
     description: "",
+    benefits: [],
     is_active: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -45,6 +47,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         price_per_month: packageData.price_per_month || 0,
         max_assignments: packageData.max_assignments || 0,
         description: packageData.description || "",
+        benefits: Array.isArray(packageData.benefits) ? packageData.benefits : [],
         is_active: packageData.is_active !== false,
       });
     }
@@ -57,6 +60,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         return response.data;
       } else {
         const response = await api.post("/admin/packages", data);
+        console.log("RAW RESPONSE:", response.data);
         return response.data;
       }
     },
@@ -189,7 +193,6 @@ export default function AdminPackageFormPage({ packageId }: Props) {
             </div>
           </div>
         </div>
-
         {/* Pricing */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -212,7 +215,6 @@ export default function AdminPackageFormPage({ packageId }: Props) {
             {errors.price_per_month && <p className="text-red-500 text-sm mt-2">{errors.price_per_month}</p>}
           </div>
         </div>
-
         {/* Limits */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -240,7 +242,6 @@ export default function AdminPackageFormPage({ packageId }: Props) {
             {errors.max_assignments && <p className="text-red-500 text-sm mt-2">{errors.max_assignments}</p>}
           </div>
         </div>
-
         {/* Description */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Mô tả (tùy chọn)</h2>
@@ -253,6 +254,50 @@ export default function AdminPackageFormPage({ packageId }: Props) {
           />
         </div>
 
+        {/* Benefits / Features */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Tính năng (benefits)</h2>
+          <div className="space-y-2">
+            {(formData.benefits || []).map((benefit, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={benefit}
+                  onChange={(e) => {
+                    const newBenefits = [...(formData.benefits || [])];
+                    newBenefits[index] = e.target.value;
+                    setFormData({ ...formData, benefits: newBenefits });
+                  }}
+                  placeholder="Ví dụ: Hỗ trợ ưu tiên"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newBenefits = [...(formData.benefits || [])];
+                    newBenefits.splice(index, 1);
+                    setFormData({ ...formData, benefits: newBenefits });
+                  }}
+                  className="px-3 text-red-600 hover:text-red-800"
+                >
+                  Xóa
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({
+                  ...formData,
+                  benefits: [...(formData.benefits || []), ""],
+                });
+              }}
+              className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+            >
+              + Thêm tính năng
+            </button>
+          </div>
+        </div>
         {/* Submit Buttons */}
         <div className="flex items-center justify-end gap-4">
           <button

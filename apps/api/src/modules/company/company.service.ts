@@ -1,5 +1,4 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { sendAssignmentEmail } from '@/utils/email';
@@ -18,31 +17,58 @@ export class CompanyService {
   }
 
   async subscribePackage(companyId: string, packageCode: string) {
-    const { data: pkg, error: pkgErr } = await this.client
+    // 1. Lấy gói mới
+    const { data: newPkg, error: pkgErr } = await this.client
       .from('packages')
       .select('id, max_assignments')
       .eq('code', packageCode)
       .eq('is_active', true)
       .single();
 
-    if (pkgErr || !pkg) {
-      throw new BadRequestException(
-        'Gói dịch vụ không tồn tại hoặc đã ngừng cung cấp',
-      );
+    if (pkgErr || !newPkg) {
+      throw new BadRequestException('Gói không tồn tại hoặc đã ngừng');
     }
 
-    const { error: subErr } = await this.client
+    // 2. Lấy subscription hiện tại
+    const { data: currentSub, error: subErr } = await this.client
       .from('company_subscriptions')
-      .upsert(
-        {
-          company_id: companyId,
-          package_id: pkg.id,
-          used_assignments: 0,
-        },
-        { onConflict: 'company_id' },
-      );
+      .select('used_assignments, package_id, carry_over_assignments')
+      .eq('company_id', companyId)
+      .single();
 
-    if (subErr) throw subErr;
+    let carryOver = 0;
+
+    if (!subErr && currentSub) {
+      // Đã có subscription → tính remaining từ gói cũ
+      const { data: oldPkg, error: oldErr } = await this.client
+        .from('packages')
+        .select('max_assignments')
+        .eq('id', currentSub.package_id)
+        .single();
+
+      if (!oldErr && oldPkg) {
+        const remaining = Math.max(
+          0,
+          oldPkg.max_assignments - currentSub.used_assignments,
+        );
+        carryOver = remaining;
+      }
+    }
+
+    // 3. Cập nhật hoặc tạo mới subscription
+    const newSubscriptionData = {
+      company_id: companyId,
+      package_id: newPkg.id,
+      used_assignments: currentSub?.used_assignments || 0,
+      carry_over_assignments: carryOver,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error: upsertErr } = await this.client
+      .from('company_subscriptions')
+      .upsert(newSubscriptionData, { onConflict: 'company_id' });
+
+    if (upsertErr) throw upsertErr;
   }
 
   async getCurrentSubscription(companyId: string) {
@@ -52,7 +78,7 @@ export class CompanyService {
         `
         *,
         packages!inner(
-          id, name, code, max_assignments, price_per_month, is_active
+          id, name, code, max_assignments, price_per_month, is_active, benefits
         )
       `,
       )
@@ -103,12 +129,16 @@ export class CompanyService {
 
     const subscription = await this.getCurrentSubscription(companyId);
 
+    const totalQuota =
+      (subscription?.packages.max_assignments || 0) +
+      (subscription?.carry_over_assignments || 0);
+
     return {
       total_completed: completedCount,
       mbti_distribution: mbtiDistribution,
       quota: {
         used: subscription?.used_assignments || 0,
-        max: subscription?.packages.max_assignments || 0,
+        max: totalQuota,
         package_name: subscription?.packages.name || 'Chưa đăng ký',
       },
     };
@@ -124,12 +154,12 @@ export class CompanyService {
     if (!subscription) {
       throw new BadRequestException('Vui lòng đăng ký gói trước khi gửi test');
     }
-    if (
-      subscription.used_assignments >= subscription.packages.max_assignments
-    ) {
-      throw new BadRequestException(
-        `Đã đạt giới hạn ${subscription.packages.max_assignments} lượt gửi`,
-      );
+
+    const totalQuota =
+      (subscription.packages.max_assignments || 0) +
+      (subscription.carry_over_assignments || 0);
+    if (subscription.used_assignments >= totalQuota) {
+      throw new BadRequestException(`Đã đạt giới hạn ${totalQuota} lượt gửi`);
     }
 
     const { data: test, error: testErr } = await this.client
@@ -154,18 +184,18 @@ export class CompanyService {
       .single();
     if (assessErr) throw assessErr;
 
-    // 4. Tăng quota
+    // Tăng used_assignments
     await this.client
       .from('company_subscriptions')
       .update({ used_assignments: subscription.used_assignments + 1 })
       .eq('company_id', companyId);
 
-    // 5. Gửi email
     const testLink = `https://mbti-platform-web.vercel.app/test?testId=${testId}&candidateEmail=${candidateEmail}`;
     await sendAssignmentEmail(candidateEmail, testLink, note);
 
     return { success: true };
   }
+
   async getAssignments(companyId: string, page: number, limit: number) {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
@@ -174,13 +204,13 @@ export class CompanyService {
       .from('assessments')
       .select(
         `
-      id,
-      status,
-      guest_email,
-      guest_fullname,
-      completed_at,
-      tests(title)
-    `,
+        id,
+        status,
+        guest_email,
+        guest_fullname,
+        completed_at,
+        tests(title)
+      `,
       )
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
@@ -192,18 +222,18 @@ export class CompanyService {
       .from('assessments')
       .select(
         `
-      id,
-      status,
-      completed_at,
-      guest_email,
-      guest_fullname,
-      tests(title), 
-      test_id,
-      results(
-        mbti_type_id,
-        mbti_types(type_code, type_name, strengths, weaknesses, career_recommendations)
-      )
-    `,
+        id,
+        status,
+        completed_at,
+        guest_email,
+        guest_fullname,
+        tests(title), 
+        test_id,
+        results(
+          mbti_type_id,
+          mbti_types(type_code, type_name, strengths, weaknesses, career_recommendations)
+        )
+      `,
       )
       .eq('id', assessmentId)
       .eq('company_id', companyId)

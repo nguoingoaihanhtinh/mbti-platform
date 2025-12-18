@@ -3,17 +3,16 @@
 import { AppShell } from "../../components/layout/AppShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../libs/api";
-import { Check, Star, Zap } from "lucide-react";
+import { Star, Zap } from "lucide-react";
 
 interface Package {
   id: string;
   name: string;
   code: string;
-  price: number;
-  duration_days: number;
-  max_tests: number;
-  max_candidates: number;
-  features: string[];
+  price_per_month: number;
+  max_assignments: number;
+  description?: string;
+  is_active: boolean;
   is_popular?: boolean;
 }
 
@@ -23,7 +22,7 @@ export default function CompanyPackagesPage() {
   const { data: packages, isLoading } = useQuery({
     queryKey: ["packages"],
     queryFn: async () => {
-      const { data } = await api.get<Package[]>("/admin/subscription");
+      const { data } = await api.get<Package[]>("/packages");
       return data;
     },
   });
@@ -122,10 +121,10 @@ export default function CompanyPackagesPage() {
               {/* Price */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-gray-900">{pkg.price.toLocaleString()}</span>
+                  <span className="text-4xl font-bold text-gray-900">{pkg.price_per_month.toLocaleString()}</span>
                   <span className="text-gray-500">VNĐ</span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">/{pkg.duration_days} ngày</p>
+                <p className="text-sm text-gray-500 mt-1">/tháng</p>
               </div>
 
               {/* Limits */}
@@ -133,26 +132,13 @@ export default function CompanyPackagesPage() {
                 <div className="flex items-center gap-2 text-sm">
                   <Zap className="w-4 h-4 text-purple-600" />
                   <span className="text-gray-700">
-                    <strong>{pkg.max_tests}</strong> bài test
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Zap className="w-4 h-4 text-purple-600" />
-                  <span className="text-gray-700">
-                    <strong>{pkg.max_candidates}</strong> ứng viên
+                    Tối đa <strong>{pkg.max_assignments}</strong> lượt
                   </span>
                 </div>
               </div>
 
-              {/* Features */}
-              <div className="space-y-2 mb-6">
-                {pkg.features?.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
+              {/* Description */}
+              {pkg.description && <p className="text-sm text-gray-600 mb-6">{pkg.description}</p>}
 
               {/* Subscribe Button */}
               <button

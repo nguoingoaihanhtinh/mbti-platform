@@ -169,6 +169,7 @@ export interface AdminPackage {
   max_assignments: number;
   price_per_month: number;
   description?: string;
+  benefits?: string[];
   is_active: boolean;
   created_at: string;
 }
@@ -185,7 +186,7 @@ export function useAdminPackages() {
 }
 export function useAdminPackage(packageId?: string) {
   return useQuery({
-    queryKey: adminKeys.packages(),
+    queryKey: packageId ? adminKeys.packageDetail(packageId) : ["admin", "packages", "detail", "empty"],
     queryFn: async () => {
       const { data } = await api.get<AdminPackage>(`/admin/packages/${packageId}`);
       return data;

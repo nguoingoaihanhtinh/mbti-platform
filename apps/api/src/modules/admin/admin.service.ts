@@ -31,6 +31,7 @@ export class AdminService {
         max_assignments: dto.max_assignments,
         price_per_month: dto.price_per_month,
         description: dto.description || null,
+        benefits: dto.benefits || [],
       })
       .select()
       .single();
@@ -60,16 +61,20 @@ export class AdminService {
   }
 
   async updatePackage(id: string, dto: UpdatePackageDto) {
+    const updateData: any = {};
+    if (dto.name !== undefined) updateData.name = dto.name;
+    if (dto.max_assignments !== undefined)
+      updateData.max_assignments = dto.max_assignments;
+    if (dto.price_per_month !== undefined)
+      updateData.price_per_month = dto.price_per_month;
+    if (dto.description !== undefined)
+      updateData.description = dto.description || null;
+    if (dto.is_active !== undefined) updateData.is_active = dto.is_active;
+    if (dto.benefits !== undefined) updateData.benefits = dto.benefits || [];
+
     const { data, error } = await this.client
       .from('packages')
-      .update({
-        name: dto.name,
-
-        max_assignments: dto.max_assignments,
-        price_per_month: dto.price_per_month,
-        description: dto.description || null,
-        is_active: dto.is_active,
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
