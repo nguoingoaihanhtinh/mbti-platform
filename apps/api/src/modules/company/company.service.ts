@@ -152,6 +152,7 @@ export class CompanyService {
   async createAssignment(
     companyId: string,
     candidateEmail: string,
+    candidateFullname: string,
     testId: string,
     note?: string,
   ) {
@@ -183,7 +184,7 @@ export class CompanyService {
         test_id: testId,
         status: 'notStarted',
         guest_email: candidateEmail,
-        guest_fullname: 'Guest',
+        guest_fullname: candidateFullname || 'Guest',
       })
       .select()
       .single();

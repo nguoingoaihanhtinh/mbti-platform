@@ -16,6 +16,7 @@ import { AssignmentDetail } from './types';
 
 class CreateAssignmentDto {
   candidate_email: string;
+  candidate_fullname?: string;
   test_id: string;
   note?: string;
 }
@@ -34,6 +35,7 @@ export class CompanyController {
     return this.companyService.createAssignment(
       req.user.company_id,
       dto.candidate_email,
+      dto.candidate_fullname || 'Guest',
       dto.test_id,
       dto.note,
     );
