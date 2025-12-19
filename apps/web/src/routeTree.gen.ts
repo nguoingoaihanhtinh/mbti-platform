@@ -19,8 +19,10 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestIndexRouteImport } from './routes/test/index'
 import { Route as ResultsIdRouteImport } from './routes/results.$id'
+import { Route as CompanyUsersRouteImport } from './routes/company/users'
 import { Route as CompanySubscriptionRouteImport } from './routes/company/subscription'
 import { Route as CompanyPackagesRouteImport } from './routes/company/packages'
+import { Route as CompanyDashboardRouteImport } from './routes/company/dashboard'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCompaniesRouteImport } from './routes/admin/companies'
@@ -87,6 +89,11 @@ const ResultsIdRoute = ResultsIdRouteImport.update({
   path: '/results/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompanyUsersRoute = CompanyUsersRouteImport.update({
+  id: '/company/users',
+  path: '/company/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompanySubscriptionRoute = CompanySubscriptionRouteImport.update({
   id: '/company/subscription',
   path: '/company/subscription',
@@ -95,6 +102,11 @@ const CompanySubscriptionRoute = CompanySubscriptionRouteImport.update({
 const CompanyPackagesRoute = CompanyPackagesRouteImport.update({
   id: '/company/packages',
   path: '/company/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyDashboardRoute = CompanyDashboardRouteImport.update({
+  id: '/company/dashboard',
+  path: '/company/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -189,8 +201,10 @@ export interface FileRoutesByFullPath {
   '/admin/companies': typeof AdminCompaniesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
+  '/company/dashboard': typeof CompanyDashboardRoute
   '/company/packages': typeof CompanyPackagesRoute
   '/company/subscription': typeof CompanySubscriptionRoute
+  '/company/users': typeof CompanyUsersRoute
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
   '/admin/candidates/$assessmentId': typeof AdminCandidatesAssessmentIdRoute
@@ -218,8 +232,10 @@ export interface FileRoutesByTo {
   '/admin/companies': typeof AdminCompaniesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
+  '/company/dashboard': typeof CompanyDashboardRoute
   '/company/packages': typeof CompanyPackagesRoute
   '/company/subscription': typeof CompanySubscriptionRoute
+  '/company/users': typeof CompanyUsersRoute
   '/results/$id': typeof ResultsIdRoute
   '/test': typeof TestIndexRoute
   '/admin/candidates/$assessmentId': typeof AdminCandidatesAssessmentIdRoute
@@ -248,8 +264,10 @@ export interface FileRoutesById {
   '/admin/companies': typeof AdminCompaniesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
+  '/company/dashboard': typeof CompanyDashboardRoute
   '/company/packages': typeof CompanyPackagesRoute
   '/company/subscription': typeof CompanySubscriptionRoute
+  '/company/users': typeof CompanyUsersRoute
   '/results/$id': typeof ResultsIdRoute
   '/test/': typeof TestIndexRoute
   '/admin/candidates/$assessmentId': typeof AdminCandidatesAssessmentIdRoute
@@ -279,8 +297,10 @@ export interface FileRouteTypes {
     | '/admin/companies'
     | '/admin/dashboard'
     | '/admin/users'
+    | '/company/dashboard'
     | '/company/packages'
     | '/company/subscription'
+    | '/company/users'
     | '/results/$id'
     | '/test'
     | '/admin/candidates/$assessmentId'
@@ -308,8 +328,10 @@ export interface FileRouteTypes {
     | '/admin/companies'
     | '/admin/dashboard'
     | '/admin/users'
+    | '/company/dashboard'
     | '/company/packages'
     | '/company/subscription'
+    | '/company/users'
     | '/results/$id'
     | '/test'
     | '/admin/candidates/$assessmentId'
@@ -337,8 +359,10 @@ export interface FileRouteTypes {
     | '/admin/companies'
     | '/admin/dashboard'
     | '/admin/users'
+    | '/company/dashboard'
     | '/company/packages'
     | '/company/subscription'
+    | '/company/users'
     | '/results/$id'
     | '/test/'
     | '/admin/candidates/$assessmentId'
@@ -364,8 +388,10 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  CompanyDashboardRoute: typeof CompanyDashboardRoute
   CompanyPackagesRoute: typeof CompanyPackagesRoute
   CompanySubscriptionRoute: typeof CompanySubscriptionRoute
+  CompanyUsersRoute: typeof CompanyUsersRoute
   ResultsIdRoute: typeof ResultsIdRoute
   TestIndexRoute: typeof TestIndexRoute
   CompanyAssignmentsCreateRoute: typeof CompanyAssignmentsCreateRoute
@@ -446,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/company/users': {
+      id: '/company/users'
+      path: '/company/users'
+      fullPath: '/company/users'
+      preLoaderRoute: typeof CompanyUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/company/subscription': {
       id: '/company/subscription'
       path: '/company/subscription'
@@ -458,6 +491,13 @@ declare module '@tanstack/react-router' {
       path: '/company/packages'
       fullPath: '/company/packages'
       preLoaderRoute: typeof CompanyPackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company/dashboard': {
+      id: '/company/dashboard'
+      path: '/company/dashboard'
+      fullPath: '/company/dashboard'
+      preLoaderRoute: typeof CompanyDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -609,8 +649,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  CompanyDashboardRoute: CompanyDashboardRoute,
   CompanyPackagesRoute: CompanyPackagesRoute,
   CompanySubscriptionRoute: CompanySubscriptionRoute,
+  CompanyUsersRoute: CompanyUsersRoute,
   ResultsIdRoute: ResultsIdRoute,
   TestIndexRoute: TestIndexRoute,
   CompanyAssignmentsCreateRoute: CompanyAssignmentsCreateRoute,

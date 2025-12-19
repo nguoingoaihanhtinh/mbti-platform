@@ -149,4 +149,15 @@ export class AdminController {
     }
     return this.adminService.getCandidateResult(assessmentId);
   }
+
+  @Get('candidates/:assessmentId/detail')
+  async getCandidateAssessmentDetail(
+    @Req() req: any,
+    @Param('assessmentId') assessmentId: string,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+    return this.adminService.getCandidateAssessmentDetail(assessmentId);
+  }
 }

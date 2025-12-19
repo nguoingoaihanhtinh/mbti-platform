@@ -69,7 +69,6 @@ type MbtiResult = {
   assessment_id?: string;
   mbti_type?: string;
   mbti_type_id?: string;
-  // backend may return `mbti_types` or `mbti_type_details`
   mbti_types?: MbtiTypeDetails;
   mbti_type_details?: MbtiTypeDetails;
   raw_scores?: Record<string, any>;
@@ -103,40 +102,66 @@ export default function AdminCandidateDetailPage() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const resultRes = await api.get(`/admin/candidates/${assessmentId}/result`);
-        console.log("resultRes", resultRes.data);
+        const detailRes = await api.get(`/admin/candidates/${assessmentId}/detail`);
+        const data = detailRes.data;
 
-        const apiResult = resultRes.data.results?.[0] ?? null;
-        const apiCandidate = resultRes.data.users ?? null;
+        // Process result
+        const apiResult = data.result ? { ...data.result, mbti_types: data.result.mbti_types } : null;
+        setResult(apiResult);
 
-        setResult(apiResult ?? null);
-        setCandidate(apiCandidate ?? null);
+        // Process candidate
+        const assessment = data.assessment;
+        let apiCandidate: CandidateInfo | null = null;
 
-        const assessmentRes = await api.get(`/assessments/${assessmentId}`);
-        console.log("assessmentRes", assessmentRes);
-        const testId = assessmentRes.data.test_id;
-
-        const testRes = await api.get(`/tests/${testId}`);
-        const qMap: Record<string, QuestionWithAnswers> = {};
-        for (const q of testRes.data.questions || []) {
-          qMap[q.id] = {
-            id: q.id,
-            text: q.text,
-            dimension: q.dimension,
-            answers: q.answers.map((a: any) => ({
-              id: a.id,
-              text: a.text,
-            })),
+        if (assessment.guest_email) {
+          // Guest candidate
+          apiCandidate = {
+            id: assessment.id,
+            email: assessment.guest_email,
+            full_name: assessment.guest_fullname || "Guest",
+            completed_at: assessment.completed_at || assessment.created_at,
           };
+        } else if (assessment.users) {
+          // Registered user (users is OBJECT)
+          const user = assessment.users;
+          apiCandidate = {
+            id: assessment.id,
+            email: user.email,
+            full_name: user.full_name,
+            completed_at: assessment.completed_at || assessment.created_at,
+          };
+        }
+
+        setCandidate(apiCandidate);
+
+        // Process questions
+        const qMap: Record<string, QuestionWithAnswers> = {};
+        if (data.test?.questions) {
+          for (const q of data.test.questions as Array<{
+            id: string;
+            text: string;
+            dimension: string | null;
+            answers: Array<{ id: string; text: string }>;
+          }>) {
+            qMap[q.id] = {
+              id: q.id,
+              text: q.text,
+              dimension: q.dimension || undefined,
+              answers: q.answers.map((a) => ({
+                id: a.id,
+                text: a.text,
+              })),
+            };
+          }
         }
         setQuestionsMap(qMap);
 
-        const allResp = await api.get(`/assessments/${assessmentId}/responses`, {
-          params: { page: 1, limit: 1000 },
-        });
+        // Process responses
+        const allResponses = data.responses || [];
+        setResponses(allResponses);
+        setTotalPages(Math.ceil(allResponses.length / limit));
 
-        const allResponses = allResp.data.data || [];
-
+        // Calculate stats
         const dimCount: Record<string, number> = {};
         const ansCount: Record<string, number> = {};
 
@@ -157,37 +182,17 @@ export default function AdminCandidateDetailPage() {
 
         setDimensionCounts(dimCount);
         setAnswerCounts(ansCount);
-
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching candidate detail:", err);
+        console.error("Error:", err);
         setLoading(false);
       }
     };
 
     fetchInitialData();
-  }, [assessmentId]);
-
-  useEffect(() => {
-    const fetchPageResponses = async () => {
-      try {
-        const resp = await api.get(`/assessments/${assessmentId}/responses`, {
-          params: { page: currentPage, limit },
-        });
-        setResponses(resp.data.data || []);
-        setTotalPages(resp.data.total_pages);
-      } catch (err) {
-        console.error("Error fetching responses:", err);
-      }
-    };
-
-    if (!loading) {
-      fetchPageResponses();
-    }
-  }, [assessmentId, currentPage, loading]);
+  }, [assessmentId, limit]);
 
   const handleExportPDF = () => {
-    // TODO: Implement PDF export
     alert("Tính năng xuất PDF đang được phát triển");
   };
 
@@ -198,7 +203,8 @@ export default function AdminCandidateDetailPage() {
       </div>
     );
   }
-
+  console.log("Result:", result);
+  console.log("Candidate:", candidate);
   if (!result || !candidate) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -223,17 +229,14 @@ export default function AdminCandidateDetailPage() {
   };
 
   const maxDim = Math.max(...Object.values(dimensionCounts), 1);
-
   const answerChartData = Object.entries(answerCounts).map(([key, value]) => ({
     answer: key,
     count: value,
   }));
-
   const radarData = Object.entries(dimensionCounts).map(([dimension, count]) => ({
     dimension,
     score: (count / maxDim) * 100,
   }));
-
   const COLORS = ["#9333ea", "#ec4899", "#3b82f6", "#f59e0b"];
 
   return (
@@ -464,7 +467,7 @@ export default function AdminCandidateDetailPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold mb-6">Chi tiết câu trả lời</h2>
         <div className="space-y-4">
-          {responses.map((resp, index) => {
+          {responses.slice((currentPage - 1) * limit, currentPage * limit).map((resp, index) => {
             const q = questionsMap[resp.question_id];
             const answerText = resp.free_text ? resp.free_text : q?.answers.find((a) => a.id === resp.answer_id)?.text;
             return (
@@ -489,7 +492,7 @@ export default function AdminCandidateDetailPage() {
           <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ← Trang trước
@@ -498,8 +501,8 @@ export default function AdminCandidateDetailPage() {
               Trang {currentPage} / {totalPages}
             </span>
             <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Trang sau →

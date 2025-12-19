@@ -442,4 +442,78 @@ export class AdminService {
       .sort((a, b) => b.taken_count - a.taken_count)
       .slice(0, 5);
   }
+
+  async getCandidateAssessmentDetail(assessmentId: string) {
+    const { data: assessment, error: assessErr } = await this.client
+      .from('assessments')
+      .select(
+        `
+      id,
+      status,
+      completed_at,
+      created_at,
+      guest_email,
+      guest_fullname,
+      test_id,
+      company_id,
+      tests!inner(title),
+      companies!left(name),
+      users!left(full_name, email)
+    `,
+      )
+      .eq('id', assessmentId)
+      .single();
+
+    if (assessErr) throw assessErr;
+
+    const { data: responses } = await this.client
+      .from('responses')
+      .select('*')
+      .eq('assessment_id', assessmentId);
+
+    const { data: test } = await this.client
+      .from('tests')
+      .select(
+        `
+      id,
+      title,
+      questions!inner(
+        id,
+        text,
+        dimension,
+        answers!inner(id, text)
+      )
+    `,
+      )
+      .eq('id', assessment.test_id)
+      .single();
+
+    const { data: resultData } = await this.client
+      .from('results')
+      .select(
+        `
+      id,
+      mbti_type,
+      created_at,
+      mbti_types!inner(
+        type_code,
+        type_name,
+        overview,
+        strengths,
+        weaknesses,
+        career_recommendations,
+        communication_style,
+        leadership_style
+      )
+    `,
+      )
+      .eq('assessment_id', assessmentId);
+    const result = resultData?.[0] || null;
+    return {
+      assessment,
+      responses: responses || [],
+      test,
+      result,
+    };
+  }
 }

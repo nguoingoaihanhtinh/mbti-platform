@@ -92,6 +92,25 @@ export interface AssignmentDetailResponse {
     }[];
   } | null;
 }
+export interface DashboardStats {
+  total_completed: number;
+  mbti_distribution: Array<{
+    mbti_type: string;
+    percentage: number;
+  }>;
+  quota: {
+    used: number;
+    max: number;
+    package_name: string;
+  };
+}
+
+export interface CompanyUser {
+  id: string;
+  email: string;
+  full_name: string;
+  created_at: string;
+}
 
 // Hooks
 export function useAssignments(page: number = 1, limit: number = 10, status?: string) {
@@ -141,5 +160,27 @@ export function useAvailableTests() {
       return data;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ["company", "dashboard", "stats"],
+    queryFn: async () => {
+      const { data } = await api.get<DashboardStats>("/company/dashboard/stats");
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useCompanyUsers() {
+  return useQuery({
+    queryKey: ["company", "users"],
+    queryFn: async () => {
+      const { data } = await api.get<CompanyUser[]>("/company/users");
+      return data;
+    },
+    staleTime: 10 * 60 * 1000,
   });
 }

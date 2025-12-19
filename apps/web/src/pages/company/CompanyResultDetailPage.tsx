@@ -1,28 +1,8 @@
 // src/pages/company/CompanyResultDetailPage.tsx
-import { useParams, useSearch, useNavigate } from "@tanstack/react-router";
-import {
-  useEffect,
-  type JSXElementConstructor,
-  type Key,
-  type ReactElement,
-  type ReactNode,
-  type ReactPortal,
-} from "react";
+import { useParams, useNavigate } from "@tanstack/react-router";
+import { type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from "react";
 import { useAssignmentDetail } from "../../hooks/useAssignments";
-import {
-  ArrowLeft,
-  Mail,
-  User,
-  Calendar,
-  Clock,
-  Award,
-  Users,
-  MessageSquare,
-  BookOpen,
-  Target,
-  Briefcase,
-  BarChart3,
-} from "lucide-react";
+import { ArrowLeft, Mail, User, Calendar, Award, Users, Target, Briefcase, BarChart3 } from "lucide-react";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -41,7 +21,7 @@ import { AppShell } from "../../components/layout/AppShell";
 
 export default function CompanyResultDetailPage() {
   const { id: assessmentId } = useParams({ from: "/company/results/$id" });
-  const search = useSearch({ from: "/company/results/$id" });
+  // const search = useSearch({ from: "/company/results/$id" });
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useAssignmentDetail(assessmentId);

@@ -197,14 +197,28 @@ export class AssessmentService {
   private async calculateAndSaveResult(assessmentId: string) {
     const { data: responses, error: resErr } = await this.supabase.client
       .from('responses')
-      .select('answer_id')
+      .select('answer_id, questions(dimension)')
       .eq('assessment_id', assessmentId);
 
     if (resErr) throw resErr;
+    if (!responses || responses.length === 0) {
+      throw new BadRequestException('No responses found for assessment');
+    }
 
-    const validResponses = (responses ?? []).filter(
-      (r): r is { answer_id: string } => r.answer_id !== null,
-    );
+    const validResponses = responses
+      .filter(
+        (
+          r,
+        ): r is {
+          answer_id: string;
+          questions: { dimension: string | null };
+        } => r.answer_id !== null,
+      )
+      .map((r) => ({ answer_id: r.answer_id }));
+
+    if (validResponses.length === 0) {
+      throw new BadRequestException('No valid responses to calculate MBTI');
+    }
 
     const mbtiType = this.calculateMBTI(validResponses);
 
@@ -213,12 +227,16 @@ export class AssessmentService {
       .insert({
         assessment_id: assessmentId,
         mbti_type: mbtiType,
-        raw_scores: {}, // TODO: store actual scores
+        raw_scores: {},
       })
       .select()
       .single();
 
-    if (resultErr) throw resultErr;
+    if (resultErr) {
+      console.error('Failed to save result:', resultErr);
+      throw resultErr;
+    }
+
     return result;
   }
 

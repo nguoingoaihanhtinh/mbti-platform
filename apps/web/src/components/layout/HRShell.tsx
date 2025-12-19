@@ -25,8 +25,6 @@ const navItems: { id: HRNav; label: string; icon: LucideIcon }[] = [
   { id: "tests", label: "Bài test", icon: BarChart3 },
   { id: "users", label: "Người dùng", icon: Users },
   { id: "candidates", label: "Danh sách khách hàng", icon: Users },
-  { id: "analytics", label: "Phân tích", icon: BarChart3 },
-  { id: "settings", label: "Cài đặt", icon: Settings },
 ];
 
 export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {

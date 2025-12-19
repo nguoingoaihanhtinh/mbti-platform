@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
 import api from "../libs/api";
+import { useAuthStore } from "../stores/useAuthStore";
 
 export type RegisterData = {
   email: string;
@@ -28,6 +29,7 @@ export const useAuth = () => {
     try {
       const res = await api.get("/auth/profile");
       const user = res.data.user;
+      useAuthStore.getState().setUser(user);
 
       if (user.role === "admin") {
         navigate({ to: "/admin/dashboard" });
@@ -37,7 +39,8 @@ export const useAuth = () => {
         navigate({ to: "/assessments" });
       }
     } catch (err) {
-      navigate({ to: "/assessments" });
+      useAuthStore.getState().setUser(null);
+      navigate({ to: "/login" });
     }
   };
 

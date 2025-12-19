@@ -67,11 +67,11 @@ export class AssessmentController {
     // Todo: verify assessment belongs to user
     return this.assessmentService.submitResponse(id, dto);
   }
-
+  @UseGuards(JwtAuthGuard)
   @Post(':id/complete')
   completeAssessment(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: CompleteAssessmentDto,
+
     @Req() req,
   ) {
     return this.assessmentService.completeAssessment(id, req.user.sub);
