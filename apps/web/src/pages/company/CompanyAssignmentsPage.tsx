@@ -234,12 +234,18 @@ export default function CompanyAssignmentsPage() {
                       </td>
                       <td className="py-4 px-6">
                         <div className="text-sm">
-                          <p className="text-gray-900">{new Date(assignment.created_at).toLocaleDateString("vi-VN")}</p>
+                          <p className="text-gray-900">
+                            {assignment.created_at
+                              ? new Date(assignment.created_at).toLocaleDateString("vi-VN")
+                              : "N/A"}
+                          </p>
                           <p className="text-gray-400 text-xs">
-                            {new Date(assignment.created_at).toLocaleTimeString("vi-VN", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {assignment.created_at
+                              ? new Date(assignment.created_at).toLocaleTimeString("vi-VN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "N/A"}
                           </p>
                         </div>
                       </td>

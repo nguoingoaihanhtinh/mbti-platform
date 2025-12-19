@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import { useNavigate } from "@tanstack/react-router";
 import { useAvailableTests, useCreateAssignment } from "../../hooks/useAssignments";
 import { Send, ArrowLeft, FileText, Mail, User, CheckCircle, AlertCircle } from "lucide-react";
@@ -7,8 +6,8 @@ import { AppShell } from "../../components/layout/AppShell";
 
 export default function CompanyCreateAssignmentPage() {
   const navigate = useNavigate();
-  const { data: testsResponse, isLoading: testsLoading } = useAvailableTests();
-  const tests = testsResponse?.data || [];
+  const { data: testsData, isLoading: testsLoading } = useAvailableTests();
+  const tests = testsData?.data || [];
   const createAssignment = useCreateAssignment();
 
   const [formData, setFormData] = useState({
@@ -25,7 +24,6 @@ export default function CompanyCreateAssignmentPage() {
     setErrors({});
     setSuccess(false);
 
-    // Validation
     const newErrors: Record<string, string> = {};
     if (!formData.test_id) {
       newErrors.test_id = "Vui lòng chọn bài test";
@@ -42,6 +40,7 @@ export default function CompanyCreateAssignmentPage() {
     }
 
     try {
+      // ✅ Gọi API, backend sẽ tự gửi email với assessmentId
       await createAssignment.mutateAsync(formData);
       setSuccess(true);
       setTimeout(() => {

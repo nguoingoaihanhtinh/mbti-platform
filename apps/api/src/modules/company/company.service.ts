@@ -190,16 +190,15 @@ export class CompanyService {
       .single();
     if (assessErr) throw assessErr;
 
-    // Tăng used_assignments
     await this.client
       .from('company_subscriptions')
       .update({ used_assignments: subscription.used_assignments + 1 })
       .eq('company_id', companyId);
 
-    const testLink = `https://mbti-platform-web.vercel.app/test?testId=${testId}&candidateEmail=${candidateEmail}`;
+    const testLink = `https://mbti-platform-web.vercel.app/test?assessmentId=${assessment.id}&candidateEmail=${candidateEmail}`;
     await sendAssignmentEmail(candidateEmail, testLink, note);
 
-    return { success: true };
+    return { success: true, assessmentId: assessment.id };
   }
 
   async getAssignments(companyId: string, page: number, limit: number) {
@@ -217,8 +216,7 @@ export class CompanyService {
       guest_email,
       guest_fullname,
       user:users(id, email, full_name),
-      tests(title),
-      results(mbti_type)
+      tests(title)
     `,
       )
       .eq('company_id', companyId)
@@ -227,11 +225,25 @@ export class CompanyService {
 
     if (error) throw error;
 
+    const assessmentIds = assessments.map((a) => a.id);
+    let resultMap = new Map<string, { mbti_type: string }>();
+
+    if (assessmentIds.length > 0) {
+      const { data: results, error: resultsErr } = await this.client
+        .from('results')
+        .select('assessment_id, mbti_type')
+        .in('assessment_id', assessmentIds);
+
+      if (!resultsErr && results) {
+        results.forEach((r) => resultMap.set(r.assessment_id, r));
+      }
+    }
+
     const normalized = assessments.map((a) => {
       let frontendStatus = 'assigned';
       if (a.status === 'completed') {
         frontendStatus = 'completed';
-      } else if (a.status === 'in_progress' || a.completed_at) {
+      } else if (a.completed_at) {
         frontendStatus = 'in_progress';
       }
 
@@ -244,7 +256,7 @@ export class CompanyService {
         guest_fullname: a.guest_fullname,
         user: a.user?.[0] || null,
         test: a.tests?.[0] || null,
-        result: a.results?.[0] || null,
+        result: resultMap.get(a.id) || null,
       };
     });
 

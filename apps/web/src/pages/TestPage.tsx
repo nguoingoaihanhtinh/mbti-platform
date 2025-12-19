@@ -1,10 +1,8 @@
-// src/pages/TestPage.tsx
 import { useState, useEffect } from "react";
 import { Route as TestRoute } from "../routes/test";
 import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "../components/layout/AppShell";
 import { Button } from "../components/ui/button";
-import { useTest } from "../hooks/useTests";
 import api from "../libs/api";
 import type { Answer, Question } from "../types/test";
 import { useAuthStore } from "../stores/useAuthStore";
@@ -13,26 +11,81 @@ import { GuestShell } from "../components/layout/GuestShell";
 const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
-  const { testId, candidateEmail } = TestRoute.useSearch();
+  // ✅ HỖ TRỢ CẢ 2 LOẠI LINK
+  const { testId, assessmentId, candidateEmail } = TestRoute.useSearch();
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
-  const {
-    data: testResponse,
-    isLoading,
-    error,
-  } = useTest(testId ?? "", undefined, {
-    enabled: !!testId,
-  });
-
+  const [testResponse, setTestResponse] = useState<{
+    test: any;
+    version: any;
+    questions: Question[];
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [selectedAnswer, setSelectedAnswer] = useState<Record<string, string>>({});
   const [timeLeft, setTimeLeft] = useState<number>(INITIAL_SECONDS);
   const [mounted, setMounted] = useState(false);
+  const [localAssessmentId, setLocalAssessmentId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // ✅ XỬ LÝ CẢ 2 TRƯỜNG HỢP
+  useEffect(() => {
+    const loadTest = async () => {
+      if (!mounted) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+
+        if (assessmentId) {
+          // ✅ TRƯỜNG HỢP CÓ assessmentId (do công ty gửi)
+          const assessmentRes = await api.get(`/assessments/${assessmentId}`);
+          const testId = assessmentRes.data.test_id;
+          const testRes = await api.get(`/tests/${testId}`);
+          setTestResponse({
+            test: testRes.data,
+            version: testRes.data.versions?.[0],
+            questions: testRes.data.questions || [],
+          });
+          setLocalAssessmentId(assessmentId);
+        } else if (testId && candidateEmail) {
+          // ✅ TRƯỜNG HỢP CÓ testId (link cũ, tự tạo)
+          const createRes = await api.post("/assessments/guest", {
+            test_id: testId,
+            test_version_id: "14605646-6380-4a24-9f3b-f1a2d6ee76f3", // ← version mặc định
+            status: "started",
+            email: candidateEmail,
+            fullname: "Guest",
+          });
+          const newAssessmentId = createRes.data.id;
+
+          const testRes = await api.get(`/tests/${testId}`);
+          setTestResponse({
+            test: testRes.data,
+            version: testRes.data.versions?.[0],
+            questions: testRes.data.questions || [],
+          });
+          setLocalAssessmentId(newAssessmentId);
+        } else {
+          setError(true);
+        }
+      } catch (err) {
+        console.error("Failed to load test", err);
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTest();
+  }, [testId, assessmentId, candidateEmail, mounted]);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -47,82 +100,62 @@ export default function TestPage() {
   };
 
   if (!mounted) return null;
-  if (!testId) return <div className="p-8">Invalid test ID</div>;
   if (isLoading) return <div className="p-8">Loading test...</div>;
-  if (error || !testResponse) return <div className="p-8">Failed to load test.</div>;
+  if (error || !testResponse || !localAssessmentId) return <div className="p-8">Failed to load test.</div>;
 
   const test = testResponse.test;
   const version = testResponse.version;
-  const questions: Question[] = testResponse.questions || [];
+  const questions: Question[] = testResponse.questions;
+  const testVersionId = version?.id;
+
+  if (!testVersionId) {
+    return <div className="p-8 text-red-600">Test version not available</div>;
+  }
 
   const totalQuestions = questions.length;
   const question = questions[page - 1];
   const answers: Answer[] = question?.answers || [];
   const progressPct = totalQuestions ? Math.round(((page - 1) / totalQuestions) * 100) : 0;
 
-  const testVersionId = version?.id;
-  console.log("testVersionId =", testVersionId);
-  if (!testVersionId) {
-    return <div className="p-8 text-red-600">Test version not available</div>;
-  }
-
   const handleSubmitTest = async () => {
-    if (!testId || !testResponse) {
+    if (!localAssessmentId || !testResponse) {
       alert("Test not ready");
       return;
     }
 
     try {
-      let assessmentId: string;
-
       if (candidateEmail) {
-        const createRes = await api.post("/assessments/guest", {
-          test_id: testId,
-          test_version_id: testVersionId,
-          status: "started",
-          email: candidateEmail,
-          fullname: "Guest",
-        });
-        assessmentId = createRes.data.id;
-
         const responseEntries = Object.entries(selectedAnswer);
         for (const [question_id, answer_id] of responseEntries) {
-          await api.post(`/assessments/${assessmentId}/responses`, {
+          await api.post(`/assessments/${localAssessmentId}/responses`, {
             question_id,
             answer_id,
           });
         }
 
-        await api.post(`/assessments/${assessmentId}/guest-complete`, {
+        await api.post(`/assessments/${localAssessmentId}/guest-complete`, {
           email: candidateEmail,
         });
 
         navigate({
           to: "/guest/results/$assessmentId",
-          params: { assessmentId },
+          params: { assessmentId: localAssessmentId },
           search: { email: candidateEmail },
         });
       } else {
-        const createRes = await api.post("/assessments", {
-          test_id: testId,
-          test_version_id: testVersionId,
-          status: "started",
-        });
-        assessmentId = createRes.data.id;
-
         const responseEntries = Object.entries(selectedAnswer);
         for (const [question_id, answer_id] of responseEntries) {
-          await api.post(`/assessments/${assessmentId}/responses`, {
+          await api.post(`/assessments/${localAssessmentId}/responses`, {
             question_id,
             answer_id,
           });
         }
 
-        await api.post(`/assessments/${assessmentId}/complete`);
+        await api.post(`/assessments/${localAssessmentId}/complete`);
 
         navigate({
           to: "/results/$id",
-          params: { id: assessmentId },
+          params: { id: localAssessmentId },
         });
       }
     } catch (err) {
@@ -149,6 +182,7 @@ export default function TestPage() {
       </div>
     </div>
   );
+
   const Layout = isAuthenticated ? AppShell : GuestShell;
   return (
     <Layout activeNav="assessments" rightSidebar={isAuthenticated ? rightSidebar : undefined}>

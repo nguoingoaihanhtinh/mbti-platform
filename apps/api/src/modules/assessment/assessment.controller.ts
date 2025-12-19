@@ -25,7 +25,7 @@ export class AssessmentController {
 
   @Post('guest')
   createAssessmentGuest(@Body() dto: CreateAssessmentGuestDto) {
-    return this.assessmentService.createAssessmentGuest(dto);
+    throw new BadRequestException('Guest cannot create assessment directly');
   }
 
   @Post(':id/guest-complete')

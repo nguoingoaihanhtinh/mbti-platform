@@ -58,6 +58,7 @@ export default function AssessmentsPage() {
                     to: "/test",
                     search: {
                       testId: test.id,
+                      assessmentId: undefined,
                       candidateEmail: undefined,
                     },
                   });
@@ -93,6 +94,7 @@ export default function AssessmentsPage() {
                         to: "/test",
                         search: {
                           testId: assessment.test_id,
+                          assessmentId: assessment.id,
                           candidateEmail: undefined,
                         },
                       });
