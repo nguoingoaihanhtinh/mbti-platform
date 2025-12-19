@@ -94,6 +94,12 @@ export default function TestPage() {
         await api.post(`/assessments/${assessmentId}/guest-complete`, {
           email: candidateEmail,
         });
+
+        navigate({
+          to: "/guest/results/$assessmentId",
+          params: { assessmentId },
+          search: { email: candidateEmail },
+        });
       } else {
         const createRes = await api.post("/assessments", {
           test_id: testId,
@@ -110,13 +116,13 @@ export default function TestPage() {
           });
         }
 
-        await api.post(`/assessments/${assessmentId}/complete`, {});
-      }
+        await api.post(`/assessments/${assessmentId}/complete`);
 
-      navigate({
-        to: `/results/${assessmentId}`,
-        search: candidateEmail ? { email: candidateEmail } : {},
-      });
+        navigate({
+          to: "/results/$id",
+          params: { id: assessmentId },
+        });
+      }
     } catch (err) {
       console.error("Submission failed:", err);
       alert("Failed to submit test. Please try again.");
