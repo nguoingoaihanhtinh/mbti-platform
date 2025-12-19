@@ -58,6 +58,7 @@ type MbtiTypeDetails = {
 type GuestResultData = {
   id: string;
   mbti_type: string;
+  test_id: string;
   mbti_type_details: MbtiTypeDetails;
   assessment_id: string;
 };
@@ -91,16 +92,15 @@ function GuestResultPage() {
     enabled: !!assessmentId,
   });
 
-  const { data: test, isLoading: isLoadingTest } = useQuery({
-    queryKey: ["guest-test", assessmentId],
-    queryFn: async () => {
-      const assessmentRes = await api.get(`/assessments/${assessmentId}`);
-      const testId = assessmentRes.data.test_id;
+  const testId = result?.test_id;
 
+  const { data: test, isLoading: isLoadingTest } = useQuery({
+    queryKey: ["guest-test", testId],
+    queryFn: async () => {
       const testRes = await api.get(`/tests/${testId}`);
       return testRes.data;
     },
-    enabled: !!assessmentId,
+    enabled: !!testId,
   });
 
   const isLoading = isLoadingResult || isLoadingResponses || isLoadingTest;

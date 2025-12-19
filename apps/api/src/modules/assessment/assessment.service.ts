@@ -310,7 +310,7 @@ export class AssessmentService {
     const { data: assessment, error: assessmentErr } =
       await this.supabase.client
         .from('assessments')
-        .select('id')
+        .select('test_id')
         .eq('id', assessmentId)
         .eq('guest_email', email)
         .single();
@@ -337,6 +337,7 @@ export class AssessmentService {
 
     return {
       ...result,
+      test_id: assessment.test_id,
       mbti_type_details: mbtiType || undefined,
     };
   }
