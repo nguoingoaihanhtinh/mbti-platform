@@ -59,11 +59,14 @@ export class AssessmentService {
     if (error || !assessment)
       throw new BadRequestException('Assessment not found for guest');
 
+    const testId = assessment.test_id;
+
     const { data: updated, error: updateErr } = await this.supabase.client
       .from('assessments')
       .update({
         status: 'completed',
         completed_at: new Date().toISOString(),
+        test_id: testId,
       })
       .eq('id', assessmentId)
       .eq('guest_email', email)
@@ -190,10 +193,8 @@ export class AssessmentService {
     }
 
     const result = await this.calculateAndSaveResult(assessmentId);
-
     return { assessment: updated, result };
   }
-
   private async calculateAndSaveResult(assessmentId: string) {
     const { data: responses, error: resErr } = await this.supabase.client
       .from('responses')
