@@ -14,7 +14,7 @@ export default function CompanyCreateAssignmentPage() {
   const [formData, setFormData] = useState({
     test_id: "",
     candidate_email: "",
-    full_name: "",
+    candidate_fullname: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -171,8 +171,8 @@ export default function CompanyCreateAssignmentPage() {
               </label>
               <input
                 type="text"
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                value={formData.candidate_fullname}
+                onChange={(e) => setFormData({ ...formData, candidate_fullname: e.target.value })}
                 placeholder="Nguyễn Văn A"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
