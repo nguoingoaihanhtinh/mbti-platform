@@ -222,6 +222,9 @@ export class AssessmentService {
 
     const mbtiType = this.calculateMBTI(validResponses);
 
+    console.log('Saving result for assessment:', assessmentId);
+    console.log('MBTI Type:', mbtiType);
+
     const { data: result, error: resultErr } = await this.supabase.client
       .from('results')
       .insert({
@@ -234,7 +237,9 @@ export class AssessmentService {
 
     if (resultErr) {
       console.error('Failed to save result:', resultErr);
-      throw resultErr;
+      throw new BadRequestException(
+        `Failed to save result: ${resultErr.message}`,
+      );
     }
 
     return result;

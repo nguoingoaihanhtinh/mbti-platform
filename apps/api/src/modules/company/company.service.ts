@@ -206,21 +206,60 @@ export class CompanyService {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    return this.client
+    const { data: assessments, error } = await this.client
       .from('assessments')
       .select(
         `
-        id,
-        status,
-        guest_email,
-        guest_fullname,
-        completed_at,
-        tests(title)
-      `,
+      id,
+      status,
+      created_at,
+      completed_at,
+      guest_email,
+      guest_fullname,
+      user:users(id, email, full_name),
+      tests(title),
+      results(mbti_type)
+    `,
       )
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .range(from, to);
+
+    if (error) throw error;
+
+    const normalized = assessments.map((a) => {
+      let frontendStatus = 'assigned';
+      if (a.status === 'completed') {
+        frontendStatus = 'completed';
+      } else if (a.status === 'in_progress' || a.completed_at) {
+        frontendStatus = 'in_progress';
+      }
+
+      return {
+        id: a.id,
+        status: frontendStatus,
+        created_at: a.created_at,
+        completed_at: a.completed_at,
+        guest_email: a.guest_email,
+        guest_fullname: a.guest_fullname,
+        user: a.user?.[0] || null,
+        test: a.tests?.[0] || null,
+        result: a.results?.[0] || null,
+      };
+    });
+
+    const { count } = await this.client
+      .from('assessments')
+      .select('id', { count: 'exact' })
+      .eq('company_id', companyId);
+
+    return {
+      data: normalized,
+      total: count || 0,
+      page,
+      limit,
+      total_pages: count ? Math.ceil(count / limit) : 0,
+    };
   }
 
   async getAssignment(assessmentId: string, companyId: string) {
