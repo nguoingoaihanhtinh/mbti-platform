@@ -7,12 +7,14 @@ import { Button } from "../components/ui/button";
 import { useTest } from "../hooks/useTests";
 import api from "../libs/api";
 import type { Answer, Question } from "../types/test";
+import { useAuthStore } from "../stores/useAuthStore";
+import { GuestShell } from "../components/layout/GuestShell";
 
 const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
   const { testId, candidateEmail } = TestRoute.useSearch();
-
+  const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
   const {
@@ -147,9 +149,9 @@ export default function TestPage() {
       </div>
     </div>
   );
-
+  const Layout = isAuthenticated ? AppShell : GuestShell;
   return (
-    <AppShell activeNav="assessments" rightSidebar={rightSidebar}>
+    <Layout activeNav="assessments" rightSidebar={isAuthenticated ? rightSidebar : undefined}>
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
         {/* Header */}
         <div className="flex justify-between flex-wrap gap-4 items-center mb-6">
@@ -259,6 +261,6 @@ export default function TestPage() {
           })}
         </div>
       </div>
-    </AppShell>
+    </Layout>
   );
 }
