@@ -102,15 +102,12 @@ export default function TestPage() {
   if (!mounted) return null;
   if (isLoading) return <div className="p-8">Loading test...</div>;
   if (error || !testResponse || !localAssessmentId) return <div className="p-8">Failed to load test.</div>;
-
+  console.log("Test Response:", testResponse);
   const test = testResponse.test;
-  const version = testResponse.version;
+  // const version = testResponse.version;
   const questions: Question[] = testResponse.questions;
-  const testVersionId = version?.id;
 
-  if (!testVersionId) {
-    return <div className="p-8 text-red-600">Test version not available</div>;
-  }
+  // const testVersionId = version?.id || test.id;
 
   const totalQuestions = questions.length;
   const question = questions[page - 1];
