@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import {
-  BarChart3,
+  // BarChart3,
   CheckCircle,
   AlertCircle,
   MessageSquare,
@@ -17,30 +17,30 @@ import {
   Target,
   Briefcase,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Cell,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  Legend,
-} from "recharts";
+// import {
+//   ResponsiveContainer,
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Cell,
+//   RadarChart,
+//   PolarGrid,
+//   PolarAngleAxis,
+//   PolarRadiusAxis,
+//   Radar,
+//   Legend,
+// } from "recharts";
 import api from "../../libs/api";
 
-type ResponseItem = {
-  id: string;
-  question_id: string;
-  answer_id: string | null;
-  free_text: string | null;
-};
+// type ResponseItem = {
+//   id: string;
+//   question_id: string;
+//   answer_id: string | null;
+//   free_text: string | null;
+// };
 
 type QuestionWithAnswers = {
   id: string;
@@ -89,12 +89,12 @@ export default function AdminCandidateDetailPage() {
 
   const [result, setResult] = useState<MbtiResult | null>(null);
   const [candidate, setCandidate] = useState<CandidateInfo | null>(null);
-  const [responses, setResponses] = useState<ResponseItem[]>([]);
-  const [questionsMap, setQuestionsMap] = useState<Record<string, QuestionWithAnswers>>({});
-  const [dimensionCounts, setDimensionCounts] = useState<Record<string, number>>({});
-  const [answerCounts, setAnswerCounts] = useState<Record<string, number>>({});
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [responses, setResponses] = useState<ResponseItem[]>([]);
+  // const [questionsMap, setQuestionsMap] = useState<Record<string, QuestionWithAnswers>>({});
+  // const [dimensionCounts, setDimensionCounts] = useState<Record<string, number>>({});
+  // const [answerCounts, setAnswerCounts] = useState<Record<string, number>>({});
+  // const [totalPages, setTotalPages] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   const limit = 10;
@@ -154,34 +154,34 @@ export default function AdminCandidateDetailPage() {
             };
           }
         }
-        setQuestionsMap(qMap);
+        // setQuestionsMap(qMap);
 
-        // Process responses
-        const allResponses = data.responses || [];
-        setResponses(allResponses);
-        setTotalPages(Math.ceil(allResponses.length / limit));
+        // // Process responses
+        // const allResponses = data.responses || [];
+        // setResponses(allResponses);
+        // setTotalPages(Math.ceil(allResponses.length / limit));
 
         // Calculate stats
-        const dimCount: Record<string, number> = {};
-        const ansCount: Record<string, number> = {};
+        // const dimCount: Record<string, number> = {};
+        // const ansCount: Record<string, number> = {};
 
-        allResponses.forEach((resp: ResponseItem) => {
-          const question = qMap[resp.question_id];
-          if (question?.dimension) {
-            dimCount[question.dimension] = (dimCount[question.dimension] || 0) + 1;
-          }
-          if (resp.answer_id) {
-            const answer = question?.answers.find((a) => a.id === resp.answer_id);
-            if (answer) {
-              const match = answer.text.match(/^([A-Z])\./);
-              const letter = match ? match[1] : answer.text[0];
-              ansCount[letter] = (ansCount[letter] || 0) + 1;
-            }
-          }
-        });
+        // allResponses.forEach((resp: ResponseItem) => {
+        //   const question = qMap[resp.question_id];
+        //   if (question?.dimension) {
+        //     dimCount[question.dimension] = (dimCount[question.dimension] || 0) + 1;
+        //   }
+        //   if (resp.answer_id) {
+        //     const answer = question?.answers.find((a) => a.id === resp.answer_id);
+        //     if (answer) {
+        //       const match = answer.text.match(/^([A-Z])\./);
+        //       const letter = match ? match[1] : answer.text[0];
+        //       ansCount[letter] = (ansCount[letter] || 0) + 1;
+        //     }
+        //   }
+        // });
 
-        setDimensionCounts(dimCount);
-        setAnswerCounts(ansCount);
+        // setDimensionCounts(dimCount);
+        // setAnswerCounts(ansCount);
         setLoading(false);
       } catch (err) {
         console.error("Error:", err);
@@ -228,16 +228,16 @@ export default function AdminCandidateDetailPage() {
     leadership_style: mbtiRaw.leadership_style ?? "—",
   };
 
-  const maxDim = Math.max(...Object.values(dimensionCounts), 1);
-  const answerChartData = Object.entries(answerCounts).map(([key, value]) => ({
-    answer: key,
-    count: value,
-  }));
-  const radarData = Object.entries(dimensionCounts).map(([dimension, count]) => ({
-    dimension,
-    score: (count / maxDim) * 100,
-  }));
-  const COLORS = ["#9333ea", "#ec4899", "#3b82f6", "#f59e0b"];
+  // const maxDim = Math.max(...Object.values(dimensionCounts), 1);
+  // const answerChartData = Object.entries(answerCounts).map(([key, value]) => ({
+  //   answer: key,
+  //   count: value,
+  // }));
+  // const radarData = Object.entries(dimensionCounts).map(([dimension, count]) => ({
+  //   dimension,
+  //   score: (count / maxDim) * 100,
+  // }));
+  // const COLORS = ["#9333ea", "#ec4899", "#3b82f6", "#f59e0b"];
 
   return (
     <div className="space-y-6">
@@ -320,7 +320,7 @@ export default function AdminCandidateDetailPage() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      {/* <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <Target className="w-5 h-5 text-purple-600 mr-2" />
@@ -356,7 +356,7 @@ export default function AdminCandidateDetailPage() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div> */}
 
       {/* Strengths & Weaknesses */}
       <div className="grid lg:grid-cols-2 gap-6">
@@ -464,7 +464,7 @@ export default function AdminCandidateDetailPage() {
       </div>
 
       {/* Responses Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold mb-6">Chi tiết câu trả lời</h2>
         <div className="space-y-4">
           {responses.slice((currentPage - 1) * limit, currentPage * limit).map((resp, index) => {
@@ -509,7 +509,7 @@ export default function AdminCandidateDetailPage() {
             </button>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

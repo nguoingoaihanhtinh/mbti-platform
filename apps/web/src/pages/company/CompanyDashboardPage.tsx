@@ -30,9 +30,9 @@ export default function CompanyDashboardPage() {
 
   // Calculate status counts (mock from stats for now)
   const totalAssignments = stats?.total_completed || 0;
-  const completed = totalAssignments;
+  const completed = 1;
   const inProgress = 0;
-  const assigned = 0;
+  const assigned = 7;
 
   if (loading) {
     return (
