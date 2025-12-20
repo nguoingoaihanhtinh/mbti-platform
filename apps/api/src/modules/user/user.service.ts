@@ -18,17 +18,35 @@ export class UserService {
     }
     this.client = createClient(url, key);
   }
+  async createCompany(companyName: string) {
+    const { data, error } = await this.client
+      .from('companies')
+      .insert({ name: companyName })
+      .select('id')
+      .single();
 
+    if (error) throw error;
+    return data.id;
+  }
   async create(userData: {
     email: string;
     password: string;
     full_name: string;
     role: string;
+    company_id?: string; // ← THÊM
   }) {
+    const insertData = {
+      email: userData.email,
+      password: userData.password,
+      full_name: userData.full_name,
+      role: userData.role,
+      company_id: userData.company_id, // ← THÊM
+    };
+
     const { data, error } = await this.client
       .from('users')
-      .insert([userData])
-      .select('id, email, full_name, role, created_at, password')
+      .insert([insertData])
+      .select('id, email, full_name, role, company_id, created_at')
       .single();
 
     if (error?.message.includes('duplicate')) {
@@ -107,6 +125,7 @@ export class UserService {
       };
     }
   }
+
   async updatePassword(email: string, hashedPassword: string) {
     const { error } = await this.client
       .from('users')

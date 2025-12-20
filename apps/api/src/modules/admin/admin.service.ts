@@ -195,12 +195,12 @@ export class AdminService {
       id,
       name,
       created_at,
-      company_subscriptions!inner(
+      company_subscriptions(
         id,
         used_assignments,
         created_at,       
         updated_at,      
-        packages!inner(
+        packages(
           name,
           code,
           is_active,
@@ -242,20 +242,19 @@ export class AdminService {
 
       return {
         id: company.id,
-        full_name: company.name,
+        name: company.name,
         created_at: company.created_at,
         subscription:
           sub && pkg
             ? {
                 package_name: pkg.name,
                 package_code: pkg.code,
-                // Vì không có end_date → ước lượng: created_at + 30 ngày
                 end_date: new Date(
                   new Date(sub.created_at).getTime() + 30 * 24 * 60 * 60 * 1000,
                 ).toISOString(),
                 status: 'active',
               }
-            : undefined,
+            : null,
         stats: {
           total_assignments: assignmentsMap.get(company.id) || 0,
           total_candidates: candidatesMap.get(company.id) || 0,

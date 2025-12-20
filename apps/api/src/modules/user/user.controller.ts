@@ -32,20 +32,33 @@ export class UserController {
       password: string;
       full_name: string;
       role?: string;
+      company_name?: string; // ← THÊM FIELD NÀY CHO COMPANY
     },
   ) {
     this.checkAdmin(req);
 
     const role = body.role || 'candidate';
-
     const hashedPassword = await bcrypt.hash(body.password, 10);
+
+    let company_id: string | undefined;
+
+    if (role === 'company') {
+      if (!body.company_name) {
+        throw new BadRequestException(
+          'Company name is required for company user',
+        );
+      }
+      company_id = await this.service.createCompany(body.company_name);
+    }
 
     const user = await this.service.create({
       email: body.email,
       password: hashedPassword,
       full_name: body.full_name,
       role,
+      company_id, // ← LIÊN KẾT VỚI CÔNG TY
     });
+
     return { success: true, data: user };
   }
 

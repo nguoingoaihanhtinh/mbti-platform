@@ -35,7 +35,7 @@ export class AuthService {
       role: 'candidate',
     });
 
-    const { password: _, ...safeUser } = user;
+    const safeUser = user;
     return safeUser;
   }
 
@@ -56,7 +56,7 @@ export class AuthService {
     const accessToken = this.jwtUtil.signAccess(payload);
     const refreshToken = this.jwtUtil.signRefresh(payload);
 
-    const { password: _, ...safeUser } = user;
+    const safeUser = user;
     return {
       user: safeUser,
       accessToken,
@@ -179,7 +179,7 @@ export class AuthService {
       role: 'candidate',
     });
 
-    const { password: _, ...safeUser } = user;
+    const safeUser = user;
     return safeUser;
   }
 }
