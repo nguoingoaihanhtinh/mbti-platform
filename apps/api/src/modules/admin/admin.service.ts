@@ -188,37 +188,50 @@ export class AdminService {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    const { data: companies, error } = await this.client
+    const { data: companies, error: compErr } = await this.client
       .from('companies')
-      .select(
-        `
-      id,
-      name,
-      created_at,
-      company_subscriptions!inner(
+      .select('id, name, created_at')
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (compErr) throw compErr;
+
+    const companyIds = companies.map((c) => c.id);
+
+    let subMap = new Map();
+    if (companyIds.length > 0) {
+      const { data: subs, error: subErr } = await this.client
+        .from('company_subscriptions')
+        .select(
+          `
+        company_id,
         id,
+        package_id,   
         used_assignments,
-        created_at,       
-        updated_at,      
-        packages!inner(
+        created_at,
+        updated_at,
+        carry_over_assignments,
+        packages(
+          id,
           name,
           code,
           is_active,
           max_assignments,
           price_per_month
         )
-      )
-    `,
-      )
-      .order('created_at', { ascending: false })
-      .range(from, to);
+      `,
+        )
+        .in('company_id', companyIds);
 
-    if (error) throw error;
+      if (subErr) throw subErr;
+      console.log('Raw subs:', subs);
+      subs.forEach((sub) => {
+        subMap.set(sub.company_id, sub);
+      });
+    }
 
-    const companyIds = companies.map((c) => c.id);
     let assignmentsMap = new Map<string, number>();
     let candidatesMap = new Map<string, number>();
-
     if (companyIds.length > 0) {
       const { data: allAssessments, error: assessErr } = await this.client
         .from('assessments')
@@ -237,25 +250,30 @@ export class AdminService {
     }
 
     const enrichedCompanies = companies.map((company) => {
-      const sub = company.company_subscriptions?.[0];
-      const pkg = sub?.packages?.[0];
+      const sub = subMap.get(company.id);
+      const pkg = sub?.packages;
 
       return {
         id: company.id,
-        full_name: company.name,
+        name: company.name,
         created_at: company.created_at,
         subscription:
           sub && pkg
             ? {
                 package_name: pkg.name,
                 package_code: pkg.code,
-                // Vì không có end_date → ước lượng: created_at + 30 ngày
-                end_date: new Date(
-                  new Date(sub.created_at).getTime() + 30 * 24 * 60 * 60 * 1000,
-                ).toISOString(),
-                status: 'active',
+                end_date:
+                  sub.end_date ||
+                  new Date(
+                    new Date(sub.start_date || sub.created_at).getTime() +
+                      30 * 24 * 60 * 60 * 1000,
+                  ).toISOString(),
+                status: sub.status || 'active',
+                used_assignments: sub.used_assignments,
+                max_assignments: pkg.max_assignments,
+                carry_over: sub.carry_over_assignments || 0,
               }
-            : undefined,
+            : null,
         stats: {
           total_assignments: assignmentsMap.get(company.id) || 0,
           total_candidates: candidatesMap.get(company.id) || 0,
@@ -312,15 +330,58 @@ export class AdminService {
   }
 
   async getTests(page: number = 1, limit: number = 20) {
-    return this.pagination.paginate(
-      () =>
-        this.client
-          .from('tests')
-          .select('*')
-          .order('created_at', { ascending: false }),
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { data: tests, error: testErr } = await this.client
+      .from('tests')
+      .select('id, title, description, is_active, created_at')
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (testErr) throw testErr;
+
+    const testIds = tests.map((t) => t.id);
+
+    let questionCountMap = new Map<string, number>();
+    if (testIds.length > 0) {
+      for (const testId of testIds) {
+        const { count } = await this.client
+          .from('questions')
+          .select('id', { count: 'exact' })
+          .eq('test_id', testId);
+        questionCountMap.set(testId, count || 0);
+      }
+    }
+
+    let takenCountMap = new Map<string, number>();
+    if (testIds.length > 0) {
+      for (const testId of testIds) {
+        const { count } = await this.client
+          .from('assessments')
+          .select('id', { count: 'exact' })
+          .eq('test_id', testId);
+        takenCountMap.set(testId, count || 0);
+      }
+    }
+
+    const enrichedTests = tests.map((test) => ({
+      ...test,
+      total_questions: questionCountMap.get(test.id) || 0,
+      total_assessments: takenCountMap.get(test.id) || 0,
+    }));
+
+    const { count: total } = await this.client
+      .from('tests')
+      .select('id', { count: 'exact' });
+
+    return {
+      data: enrichedTests,
+      total: total || 0,
       page,
       limit,
-    );
+      total_pages: total ? Math.ceil(total / limit) : 0,
+    };
   }
 
   async getCandidatesByTest(

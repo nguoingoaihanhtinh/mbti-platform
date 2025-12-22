@@ -51,8 +51,20 @@ export interface AdminUser {
 export interface AdminCompany {
   id: string;
   name: string;
-  domain: string;
   created_at: string;
+  subscription: {
+    package_name: string;
+    package_code: string;
+    end_date: string;
+    status: string;
+    used_assignments: number;
+    max_assignments: number;
+    carry_over: number;
+  } | null;
+  stats: {
+    total_assignments: number;
+    total_candidates: number;
+  };
 }
 
 export interface AdminTest {
@@ -61,6 +73,8 @@ export interface AdminTest {
   description: string | null;
   is_active: boolean;
   created_at: string;
+  question_count: number;
+  taken_count: number;
 }
 
 export interface PaginatedResponse<T> {

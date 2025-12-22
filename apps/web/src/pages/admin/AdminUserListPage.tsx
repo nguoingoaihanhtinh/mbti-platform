@@ -1,6 +1,4 @@
-// src/pages/admin/AdminUsersPage.tsx
 import { useState } from "react";
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../libs/api";
 import {
@@ -28,9 +26,8 @@ interface UserItem {
     experience?: string;
   };
 }
-
 interface UsersResponse {
-  data: UserItem[];
+  users: UserItem[];
   total: number;
   page: number;
   limit: number;
@@ -41,14 +38,23 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [roleFilter, setRoleFilter] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+
+  const { data, isLoading } = useQuery<UsersResponse>({
     queryKey: ["admin", "users", page, limit],
     queryFn: async () => {
-      const { data } = await api.get<UsersResponse>("/admin/users", {
+      const res = await api.get("/admin/users", {
         params: { page, limit },
       });
-      return data;
+
+      return {
+        users: res.data.data,
+        total: res.data.pagination.total,
+        page: res.data.pagination.page,
+        limit: res.data.pagination.limit,
+        total_pages: res.data.pagination.total_pages,
+      };
     },
   });
 
@@ -61,6 +67,7 @@ export default function AdminUsersPage() {
   });
   const [createError, setCreateError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+
   const handleCreateUser = async () => {
     setCreateError(null);
     if (!newUser.email || !newUser.full_name || !newUser.password) {
@@ -73,7 +80,6 @@ export default function AdminUsersPage() {
       await api.post("/admin/users", newUser);
       setIsModalOpen(false);
       setNewUser({ email: "", full_name: "", password: "", role: "candidate" });
-
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
     } catch (err: any) {
       setCreateError(err.response?.data?.message || "Có lỗi xảy ra khi tạo user");
@@ -81,6 +87,7 @@ export default function AdminUsersPage() {
       setIsCreating(false);
     }
   };
+
   const handleDeleteUser = async (userId: string) => {
     if (!confirm("Bạn có chắc chắn muốn xoá user này? Hành động này không thể hoàn tác.")) {
       return;
@@ -93,6 +100,7 @@ export default function AdminUsersPage() {
       alert(err.response?.data?.message || "Có lỗi xảy ra khi xoá user");
     }
   };
+
   const getRoleBadge = (role: string) => {
     const styles = {
       admin: { bg: "bg-red-100", text: "text-red-700", icon: Shield },
@@ -102,9 +110,13 @@ export default function AdminUsersPage() {
     return styles[role as keyof typeof styles] || styles.candidate;
   };
 
-  const filteredUsers = data?.data.filter((user) => {
-    if (!roleFilter) return true;
-    return user.role === roleFilter;
+  const filteredUsers = data?.users.filter((user) => {
+    const matchesRole = !roleFilter || user.role === roleFilter;
+    const matchesSearch =
+      !searchTerm ||
+      user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesRole && matchesSearch;
   });
 
   if (isLoading) {
@@ -153,7 +165,7 @@ export default function AdminUsersPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {data?.data.filter((u) => u.role === "admin").length || 0}
+                {data?.users.filter((u) => u.role === "admin").length || 0}
               </p>
               <p className="text-sm text-gray-500">Admins</p>
             </div>
@@ -167,7 +179,7 @@ export default function AdminUsersPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {data?.data.filter((u) => u.role === "company").length || 0}
+                {data?.users.filter((u) => u.role === "company").length || 0}
               </p>
               <p className="text-sm text-gray-500">Companies</p>
             </div>
@@ -181,7 +193,7 @@ export default function AdminUsersPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {data?.data.filter((u) => u.role === "candidate").length || 0}
+                {data?.users.filter((u) => u.role === "candidate").length || 0}
               </p>
               <p className="text-sm text-gray-500">Candidates</p>
             </div>
@@ -196,6 +208,8 @@ export default function AdminUsersPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Tìm kiếm theo tên hoặc email..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
             />
@@ -313,6 +327,8 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+
+      {/* Create Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
