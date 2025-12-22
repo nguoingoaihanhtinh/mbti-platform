@@ -87,7 +87,7 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
               <button className="p-2 hover:bg-secondary-100 rounded-lg">
                 <User className="w-5 h-5 text-neutral-600" />
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-secondary-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-secondary-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-500 delay-200">
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-secondary-100 rounded-lg"

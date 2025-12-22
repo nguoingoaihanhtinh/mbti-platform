@@ -64,8 +64,8 @@ export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
+              <div className="flex items-center gap-3">
+                <img src="/Group 50.png" alt="H&HIS Assessment" className="h-8 w-auto" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">H&HIS</h1>
@@ -94,7 +94,7 @@ export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {
               <button className="p-2 hover:bg-gray-100 rounded-lg">
                 <Settings className="w-5 h-5 text-gray-600" />
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-500 delay-200">
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"

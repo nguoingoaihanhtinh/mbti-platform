@@ -64,6 +64,7 @@ export default function AdminUsersPage() {
     full_name: "",
     password: "",
     role: "candidate" as "admin" | "company" | "candidate",
+    company_name: "",
   });
   const [createError, setCreateError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -74,12 +75,22 @@ export default function AdminUsersPage() {
       setCreateError("Vui lòng điền đầy đủ thông tin");
       return;
     }
-
+    if (newUser.role === "company" && !newUser.company_name.trim()) {
+      setCreateError("Vui lòng nhập tên công ty");
+      return;
+    }
     setIsCreating(true);
     try {
-      await api.post("/admin/users", newUser);
+      await api.post("/admin/users", {
+        email: newUser.email,
+        full_name: newUser.full_name,
+        password: newUser.password,
+        role: newUser.role,
+        company_name: newUser.role === "company" ? newUser.company_name : undefined,
+      });
+
       setIsModalOpen(false);
-      setNewUser({ email: "", full_name: "", password: "", role: "candidate" });
+      setNewUser({ email: "", full_name: "", password: "", role: "candidate", company_name: "" });
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
     } catch (err: any) {
       setCreateError(err.response?.data?.message || "Có lỗi xảy ra khi tạo user");
@@ -383,6 +394,18 @@ export default function AdminUsersPage() {
                     <option value="admin">Admin</option>
                   </select>
                 </div>
+                {newUser.role === "company" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tên công ty *</label>
+                    <input
+                      type="text"
+                      value={newUser.company_name}
+                      onChange={(e) => setNewUser({ ...newUser, company_name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      placeholder="Công ty TNHH ABC"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 flex gap-3">
