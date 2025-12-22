@@ -77,7 +77,6 @@ export class AssessmentController {
     return this.assessmentService.completeAssessment(id, req.user.sub);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   getAssessment(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
     const userId = req.user.sub;
