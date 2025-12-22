@@ -8,11 +8,13 @@ import {
   Param,
   Get,
   Query,
+  Put,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CompanyService } from './company.service';
 import { SubscribePackageDto } from './dto/subcribe-package.dto';
 import { AssignmentDetail } from './types';
+import { UpdateCompanyProfileDto } from './dto/update-company-profile.dto';
 
 class CreateAssignmentDto {
   candidate_email: string;
@@ -115,5 +117,32 @@ export class CompanyController {
       throw new BadRequestException('Access denied');
     }
     return this.companyService.getCompanyUsers(req.user.company_id);
+  }
+  @Get('dashboard/timeline')
+  async getAssignmentTimeline(@Req() req: any) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Company access required');
+    }
+    return this.companyService.getAssignmentTimeline(req.user.company_id);
+  }
+  @Get('profile')
+  async getCompanyProfile(@Req() req: any) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Company access required');
+    }
+
+    return this.companyService.getCompanyProfile(req.user.company_id);
+  }
+
+  @Put('profile')
+  async updateCompanyProfile(
+    @Req() req: any,
+    @Body() dto: UpdateCompanyProfileDto,
+  ) {
+    if (req.user.role !== 'company') {
+      throw new BadRequestException('Company access required');
+    }
+
+    return this.companyService.updateCompanyProfile(req.user.company_id, dto);
   }
 }

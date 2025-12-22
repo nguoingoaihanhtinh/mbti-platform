@@ -4,7 +4,6 @@ import {
   Bell,
   User,
   Home,
-  Users,
   BarChart3,
   Settings,
   LogOut,
@@ -28,11 +27,9 @@ interface AppShellProps {
 const companyNavItems: { id: string; label: string; icon: LucideIcon; path: string }[] = [
   { id: "dashboard", label: "Dashboard", icon: Home, path: "/company/dashboard" },
   { id: "assignments", label: "Assignments", icon: FileText, path: "/company/assignments" },
-  { id: "candidates", label: "Ứng viên", icon: Users, path: "/company/candidates" },
   { id: "packages", label: "Gói dịch vụ", icon: Package, path: "/company/packages" },
   { id: "subscription", label: "Gói hiện tại", icon: CreditCard, path: "/company/subscription" },
-  { id: "analytics", label: "Phân tích", icon: BarChart3, path: "/company/analytics" },
-  { id: "settings", label: "Cài đặt", icon: Settings, path: "/company/settings" },
+  { id: "profile", label: "Thông tin công ty", icon: Settings, path: "/company/profile" },
 ];
 
 // Navigation for Candidate

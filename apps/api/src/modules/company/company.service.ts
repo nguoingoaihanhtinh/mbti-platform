@@ -215,14 +215,15 @@ export class CompanyService {
       completed_at,
       guest_email,
       guest_fullname,
+      test_id,      
       user:users(id, email, full_name),
-      tests(title)
+      tests!assessments_test_id_fkey(title)
     `,
       )
       .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .range(from, to);
-
+    console.log(assessments, error);
     if (error) throw error;
 
     const assessmentIds = assessments.map((a) => a.id);
@@ -255,7 +256,7 @@ export class CompanyService {
         guest_email: a.guest_email,
         guest_fullname: a.guest_fullname,
         user: a.user?.[0] || null,
-        test: a.tests?.[0] || null,
+        test: a.tests || null,
         result: resultMap.get(a.id) || null,
       };
     });
@@ -363,5 +364,84 @@ export class CompanyService {
       responses: responsesRes.data || [],
       test: testRes.data,
     };
+  }
+  async getAssignmentTimeline(companyId: string, days: number = 30) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data: assignments, error } = await this.client
+      .from('assessments')
+      .select('created_at')
+      .eq('company_id', companyId)
+      .gte('created_at', since.toISOString())
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    const timelineMap = new Map<string, number>();
+    assignments.forEach((a) => {
+      const date = new Date(a.created_at).toISOString().split('T')[0];
+      timelineMap.set(date, (timelineMap.get(date) || 0) + 1);
+    });
+
+    return Array.from(timelineMap.entries())
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+  async getCompanyProfile(companyId: string) {
+    const { data, error } = await this.client
+      .from('companies')
+      .select(
+        `
+      id,
+      name,
+      domain,
+      website,
+      logo_url,
+      description,
+      address,
+      phone,
+      created_at,
+      updated_at
+    `,
+      )
+      .eq('id', companyId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+  async updateCompanyProfile(companyId: string, dto: any) {
+    // Chỉ cập nhật các field được cung cấp và tồn tại
+    const allowedFields = [
+      'name',
+      'domain',
+      'website',
+      'logo_url',
+      'description',
+      'address',
+      'phone',
+    ];
+    const updateData: any = {};
+
+    for (const key of allowedFields) {
+      if (dto[key] !== undefined) {
+        updateData[key] = dto[key];
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException('No valid fields to update');
+    }
+
+    updateData.updated_at = new Date().toISOString();
+
+    const { error } = await this.client
+      .from('companies')
+      .update(updateData)
+      .eq('id', companyId);
+
+    if (error) throw error;
+    return { success: true };
   }
 }

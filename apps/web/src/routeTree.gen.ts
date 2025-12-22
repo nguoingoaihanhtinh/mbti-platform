@@ -26,6 +26,7 @@ import { Route as CompanyDashboardRouteImport } from './routes/company/dashboard
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCompaniesRouteImport } from './routes/admin/companies'
+import { Route as CompanyProfileIndexRouteImport } from './routes/company/profile/index'
 import { Route as CompanyAssignmentsIndexRouteImport } from './routes/company/assignments/index'
 import { Route as AdminTestsIndexRouteImport } from './routes/admin/tests/index'
 import { Route as AdminPackagesIndexRouteImport } from './routes/admin/packages/index'
@@ -124,6 +125,11 @@ const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
   path: '/companies',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const CompanyProfileIndexRoute = CompanyProfileIndexRouteImport.update({
+  id: '/company/profile/',
+  path: '/company/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompanyAssignmentsIndexRoute = CompanyAssignmentsIndexRouteImport.update({
   id: '/company/assignments/',
   path: '/company/assignments/',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/admin/packages': typeof AdminPackagesIndexRoute
   '/admin/tests': typeof AdminTestsIndexRoute
   '/company/assignments': typeof CompanyAssignmentsIndexRoute
+  '/company/profile': typeof CompanyProfileIndexRoute
   '/admin/packages/$packageId/edit': typeof AdminPackagesPackageIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/admin/packages': typeof AdminPackagesIndexRoute
   '/admin/tests': typeof AdminTestsIndexRoute
   '/company/assignments': typeof CompanyAssignmentsIndexRoute
+  '/company/profile': typeof CompanyProfileIndexRoute
   '/admin/packages/$packageId/edit': typeof AdminPackagesPackageIdEditRoute
 }
 export interface FileRoutesById {
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/admin/packages/': typeof AdminPackagesIndexRoute
   '/admin/tests/': typeof AdminTestsIndexRoute
   '/company/assignments/': typeof CompanyAssignmentsIndexRoute
+  '/company/profile/': typeof CompanyProfileIndexRoute
   '/admin/packages/$packageId/edit': typeof AdminPackagesPackageIdEditRoute
 }
 export interface FileRouteTypes {
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin/packages'
     | '/admin/tests'
     | '/company/assignments'
+    | '/company/profile'
     | '/admin/packages/$packageId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/packages'
     | '/admin/tests'
     | '/company/assignments'
+    | '/company/profile'
     | '/admin/packages/$packageId/edit'
   id:
     | '__root__'
@@ -376,6 +387,7 @@ export interface FileRouteTypes {
     | '/admin/packages/'
     | '/admin/tests/'
     | '/company/assignments/'
+    | '/company/profile/'
     | '/admin/packages/$packageId/edit'
   fileRoutesById: FileRoutesById
 }
@@ -398,6 +410,7 @@ export interface RootRouteChildren {
   CompanyResultsIdRoute: typeof CompanyResultsIdRoute
   GuestResultsAssessmentIdRoute: typeof GuestResultsAssessmentIdRoute
   CompanyAssignmentsIndexRoute: typeof CompanyAssignmentsIndexRoute
+  CompanyProfileIndexRoute: typeof CompanyProfileIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -520,6 +533,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/companies'
       preLoaderRoute: typeof AdminCompaniesRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/company/profile/': {
+      id: '/company/profile/'
+      path: '/company/profile'
+      fullPath: '/company/profile'
+      preLoaderRoute: typeof CompanyProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/company/assignments/': {
       id: '/company/assignments/'
@@ -659,6 +679,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompanyResultsIdRoute: CompanyResultsIdRoute,
   GuestResultsAssessmentIdRoute: GuestResultsAssessmentIdRoute,
   CompanyAssignmentsIndexRoute: CompanyAssignmentsIndexRoute,
+  CompanyProfileIndexRoute: CompanyProfileIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

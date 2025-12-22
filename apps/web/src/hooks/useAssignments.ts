@@ -19,6 +19,8 @@ export interface Assignment {
   status: "assigned" | "in_progress" | "completed";
   created_at: string;
   completed_at?: string;
+  guest_email?: string;
+  guest_fullname?: string;
   test?: {
     id: string;
     title: string;
@@ -92,6 +94,7 @@ export interface AssignmentDetailResponse {
     }[];
   } | null;
 }
+
 export interface DashboardStats {
   total_completed: number;
   mbti_distribution: Array<{
@@ -122,7 +125,7 @@ export function useAssignments(page: number = 1, limit: number = 10, status?: st
       });
       return data;
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 }
 
@@ -137,6 +140,7 @@ export function useAssignmentDetail(assessmentId: string) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
 export function useCreateAssignment() {
   const queryClient = useQueryClient();
 
@@ -146,7 +150,6 @@ export function useCreateAssignment() {
       return response.data;
     },
     onSuccess: () => {
-      // Invalidate assignments list to refetch
       queryClient.invalidateQueries({ queryKey: assignmentKeys.all });
     },
   });
@@ -159,7 +162,7 @@ export function useAvailableTests() {
       const { data } = await api.get("/tests");
       return data;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000,
   });
 }
 

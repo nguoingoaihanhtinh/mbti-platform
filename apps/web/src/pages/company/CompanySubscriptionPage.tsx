@@ -1,12 +1,11 @@
+// src/pages/company/CompanySubscriptionPage.tsx
 import { AppShell } from "../../components/layout/AppShell";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import api from "../../libs/api";
 import { CreditCard, Users, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
-
-/* =======================
-   Types (match backend)
-======================= */
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { useState } from "react";
 
 interface Package {
   id: string;
@@ -21,20 +20,19 @@ interface Subscription {
   id: string;
   company_id: string;
   used_assignments: number;
+  carry_over_assignments: number;
   created_at: string;
   updated_at: string;
   package_id: string;
   packages: Package;
+  total_assignments?: number;
 }
-
-/* =======================
-   Component
-======================= */
 
 export default function CompanySubscriptionPage() {
   const navigate = useNavigate();
+  const [showTimeline, setShowTimeline] = useState(false);
 
-  const { data: subscription, isLoading } = useQuery({
+  const { data: subscription, isLoading: subLoading } = useQuery({
     queryKey: ["company", "subscription"],
     queryFn: async () => {
       const { data } = await api.get<Subscription | null>("/company/subscription");
@@ -42,9 +40,16 @@ export default function CompanySubscriptionPage() {
     },
   });
 
-  /* =======================
-     Loading
-  ======================= */
+  const { data: timelineData = [], isLoading: timelineLoading } = useQuery({
+    queryKey: ["company", "dashboard", "timeline"],
+    queryFn: async () => {
+      const { data } = await api.get<{ date: string; count: number }[]>("/company/dashboard/timeline");
+      return data;
+    },
+    enabled: showTimeline,
+  });
+
+  const isLoading = subLoading || (showTimeline && timelineLoading);
 
   if (isLoading) {
     return (
@@ -55,10 +60,6 @@ export default function CompanySubscriptionPage() {
       </AppShell>
     );
   }
-
-  /* =======================
-     No subscription
-  ======================= */
 
   if (!subscription) {
     return (
@@ -80,22 +81,19 @@ export default function CompanySubscriptionPage() {
     );
   }
 
-  /* =======================
-     Derived values
-  ======================= */
-
   const { packages } = subscription;
-
   const maxAssignments = packages.max_assignments;
+  const carryOver = subscription.carry_over_assignments || 0;
+  const totalAssignments = maxAssignments + carryOver;
   const usedAssignments = subscription.used_assignments;
-
-  const assignmentsPercent = maxAssignments > 0 ? (usedAssignments / maxAssignments) * 100 : 0;
-
+  const remaining = Math.max(0, totalAssignments - usedAssignments);
+  const assignmentsPercent = totalAssignments > 0 ? (usedAssignments / totalAssignments) * 100 : 0;
   const status = packages.is_active ? "active" : "inactive";
 
-  /* =======================
-     Render
-  ======================= */
+  const timelineFormatted = timelineData.map((item) => ({
+    date: new Date(item.date).toLocaleDateString("vi-VN"),
+    count: item.count,
+  }));
 
   return (
     <AppShell activeNav="subscription">
@@ -139,17 +137,16 @@ export default function CompanySubscriptionPage() {
           </div>
 
           {/* Assignment Usage */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-purple-600" />
-                <span className="text-sm font-medium text-gray-900">Số lượt phân công</span>
+                <span className="text-sm font-medium text-gray-900">Đã sử dụng</span>
               </div>
               <span className="text-sm text-gray-600">
-                {usedAssignments} / {maxAssignments}
+                {usedAssignments} / {totalAssignments}
               </span>
             </div>
-
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div
                 className={`h-3 rounded-full transition-all ${
@@ -159,11 +156,14 @@ export default function CompanySubscriptionPage() {
                       ? "bg-orange-500"
                       : "bg-gradient-to-r from-purple-600 to-pink-600"
                 }`}
-                style={{
-                  width: `${Math.min(assignmentsPercent, 100)}%`,
-                }}
+                style={{ width: `${Math.min(assignmentsPercent, 100)}%` }}
               />
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Còn lại</span>
+              <span className="font-medium text-green-600">{remaining} lượt</span>
+            </div>
+            {carryOver > 0 && <div className="text-xs text-gray-500 mt-2">+ {carryOver} lượt từ gói trước</div>}
           </div>
         </div>
 
@@ -184,16 +184,42 @@ export default function CompanySubscriptionPage() {
               </div>
             </button>
 
-            <button className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+            <button
+              onClick={() => setShowTimeline(!showTimeline)}
+              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">Xem thống kê</p>
+                <p className="font-medium text-gray-900">{showTimeline ? "Ẩn thống kê" : "Xem thống kê"}</p>
                 <p className="text-sm text-gray-500">Theo dõi mức sử dụng</p>
               </div>
             </button>
           </div>
+
+          {/* Biểu đồ chỉ hiển thị khi bật */}
+          {showTimeline && (
+            <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Mức tiêu dùng assignment</h3>
+              {timelineFormatted.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={timelineFormatted}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="date" stroke="#6b7280" />
+                    <YAxis stroke="#6b7280" />
+                    <Tooltip
+                      formatter={(value) => [`${value} lượt`, "Số lượng"]}
+                      labelFormatter={(label) => `Ngày ${label}`}
+                    />
+                    <Bar dataKey="count" name="Số assignment đã gửi" fill="#9333ea" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-gray-500 text-center py-8">Chưa có dữ liệu sử dụng trong 30 ngày gần đây</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </AppShell>

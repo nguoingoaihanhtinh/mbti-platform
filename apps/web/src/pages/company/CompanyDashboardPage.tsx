@@ -1,5 +1,4 @@
 // src/pages/company/CompanyDashboardPage.tsx
-
 import { useNavigate } from "@tanstack/react-router";
 import { Users, FileText, Calendar, Package, Plus } from "lucide-react";
 import {
@@ -16,7 +15,9 @@ import {
   BarChart,
 } from "recharts";
 import { AppShell } from "../../components/layout/AppShell";
-import { useCompanyUsers, useDashboardStats } from "../../hooks/useAssignments";
+import { useCompanyUsers, useDashboardStats, useAssignments } from "../../hooks/useAssignments";
+import { useQuery } from "@tanstack/react-query";
+import api from "../../libs/api";
 
 const COLORS = ["#9333ea", "#ec4899", "#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
@@ -25,14 +26,38 @@ export default function CompanyDashboardPage() {
 
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: users, isLoading: usersLoading } = useCompanyUsers();
+  const { data: assignmentsData, isLoading: assignmentsLoading } = useAssignments(1, 1000);
 
-  const loading = statsLoading || usersLoading;
+  const { data: timeline, isLoading: timelineLoading } = useQuery({
+    queryKey: ["company", "dashboard", "timeline"],
+    queryFn: async () => {
+      const { data } = await api.get<{ date: string; count: number }[]>("/company/dashboard/timeline");
+      return data.map((item) => ({
+        date: new Date(item.date).toLocaleDateString("vi-VN"),
+        count: item.count,
+      }));
+    },
+  });
 
-  // Calculate status counts (mock from stats for now)
-  const totalAssignments = stats?.total_completed || 0;
-  const completed = 1;
-  const inProgress = 0;
-  const assigned = 7;
+  const loading = statsLoading || usersLoading || assignmentsLoading || timelineLoading;
+
+  let completed = 0;
+  let inProgress = 0;
+  let assigned = 0;
+  let totalAssignments = 0;
+
+  if (assignmentsData?.data) {
+    assignmentsData.data.forEach((a) => {
+      if (a.status === "completed") {
+        completed++;
+      } else if (a.status === "in_progress") {
+        inProgress++;
+      } else if (a.status === "assigned") {
+        assigned++;
+      }
+    });
+    totalAssignments = completed + inProgress + assigned;
+  }
 
   if (loading) {
     return (
@@ -45,7 +70,7 @@ export default function CompanyDashboardPage() {
   }
 
   return (
-    <AppShell>
+    <AppShell activeNav="dashboard">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -186,6 +211,30 @@ export default function CompanyDashboardPage() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Tần suất sử dụng assignments trong 30 ngày gần đây
+            </h3>
+            {timeline && timeline.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={timeline}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="date" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
+                  <Tooltip
+                    formatter={(value) => [`${value} lượt`, "Số lượng"]}
+                    labelFormatter={(label) => `Ngày ${label}`}
+                  />
+                  <Bar dataKey="count" name="Số assignment" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-500 text-center py-8">Chưa có dữ liệu sử dụng trong 30 ngày gần đây</p>
+            )}
           </div>
         </div>
 

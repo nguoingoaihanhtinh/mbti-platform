@@ -1,5 +1,5 @@
+// src/pages/company/CompanyAssignmentsPage.tsx
 import { useState } from "react";
-
 import { useNavigate } from "@tanstack/react-router";
 import { useAssignments } from "../../hooks/useAssignments";
 import {
@@ -21,19 +21,25 @@ export default function CompanyAssignmentsPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { data: rawData, isLoading } = useAssignments(page, limit, statusFilter);
 
-  const data = rawData
-    ? {
-        ...rawData,
-        data: rawData.data.map((a: any) => ({
-          ...a,
-          user: a.user || a.users,
-          test: a.test || a.tests,
-        })),
-      }
-    : undefined;
+  const data = rawData;
+
+  const filteredData = data?.data.filter((assignment) => {
+    const matchesStatus = !statusFilter || assignment.status === statusFilter;
+    const searchText = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      !searchTerm ||
+      assignment.guest_fullname?.toLowerCase().includes(searchText) ||
+      assignment.guest_email?.toLowerCase().includes(searchText) ||
+      assignment.user?.full_name?.toLowerCase().includes(searchText) ||
+      assignment.user?.email?.toLowerCase().includes(searchText);
+
+    return matchesStatus && matchesSearch;
+  });
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -77,7 +83,7 @@ export default function CompanyAssignmentsPage() {
   }
 
   return (
-    <AppShell>
+    <AppShell activeNav="assignments">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -158,6 +164,8 @@ export default function CompanyAssignmentsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Tìm kiếm theo tên hoặc email..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
@@ -193,7 +201,7 @@ export default function CompanyAssignmentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {data?.data.map((assignment) => {
+                {filteredData?.map((assignment) => {
                   const statusInfo = getStatusBadge(assignment.status);
                   const StatusIcon = statusInfo.icon;
 
@@ -212,8 +220,8 @@ export default function CompanyAssignmentsPage() {
                               </>
                             ) : assignment.guest_email ? (
                               <>
-                                <p className="font-medium text-gray-900">Guest Candidate</p>
-                                <p className="text-sm text-gray-500">{assignment.guest_email}</p>
+                                <p className="font-medium text-gray-900">{assignment.guest_fullname || "Guest"}</p>
+                                <p className="text-sm text-gray-500">{assignment.guest_email || "N/A"}</p>
                               </>
                             ) : (
                               <p className="font-medium text-gray-900">N/A</p>
@@ -263,23 +271,15 @@ export default function CompanyAssignmentsPage() {
                           {assignment.status === "completed" ? (
                             <button
                               onClick={() => {
-                                if (assignment.guest_email) {
-                                  navigate({
-                                    to: "/company/results/$id",
-                                    params: { id: assignment.id },
-                                    search: { email: assignment.guest_email },
-                                  });
-                                } else {
-                                  navigate({
-                                    to: "/company/results/$id",
-                                    params: { id: assignment.id },
-
-                                    search: { email: undefined },
-                                  });
-                                }
+                                const email = assignment.guest_email || assignment.user?.email;
+                                navigate({
+                                  to: "/company/results/$id",
+                                  params: { id: assignment.id },
+                                  search: { email: email || undefined },
+                                });
                               }}
                               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="View result"
+                              title="Xem kết quả"
                             >
                               <Eye className="w-4 h-4 text-gray-600" />
                             </button>

@@ -1,8 +1,19 @@
 // src/pages/company/CompanyResultDetailPage.tsx
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from "react";
 import { useAssignmentDetail } from "../../hooks/useAssignments";
-import { ArrowLeft, Mail, User, Calendar, Award, Users, Target, Briefcase, BarChart3 } from "lucide-react";
+import {
+  ArrowLeft,
+  Mail,
+  User,
+  Calendar,
+  Award,
+  Users,
+  Target,
+  Briefcase,
+  BarChart3,
+  MessageSquare,
+  Users2,
+} from "lucide-react";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -18,17 +29,20 @@ import {
   Cell,
 } from "recharts";
 import { AppShell } from "../../components/layout/AppShell";
+import { useState } from "react";
+
+const ITEMS_PER_PAGE = 5;
 
 export default function CompanyResultDetailPage() {
   const { id: assessmentId } = useParams({ from: "/company/results/$id" });
-  // const search = useSearch({ from: "/company/results/$id" });
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, error } = useAssignmentDetail(assessmentId);
 
   if (isLoading) {
     return (
-      <AppShell>
+      <AppShell activeNav="assignments">
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">Đang tải kết quả...</div>
         </div>
@@ -38,7 +52,7 @@ export default function CompanyResultDetailPage() {
 
   if (error || !data) {
     return (
-      <AppShell>
+      <AppShell activeNav="assignments">
         <div className="flex items-center justify-center h-64">
           <div className="text-red-500">Không tìm thấy kết quả</div>
         </div>
@@ -51,7 +65,7 @@ export default function CompanyResultDetailPage() {
   const candidateName = assessment.guest_fullname || "Guest";
   const candidateEmail = assessment.guest_email;
 
-  // Calculate dimension scores for radar chart
+  // Tính điểm cho radar chart
   const dimensionScores: Record<string, number> = {};
   responses.forEach((resp) => {
     const question = test?.questions?.find((q) => q.id === resp.question_id);
@@ -64,7 +78,7 @@ export default function CompanyResultDetailPage() {
     score: count,
   }));
 
-  // Calculate answer letter counts for bar chart
+  // Tính phân bố câu trả lời
   const answerCounts: Record<string, number> = {};
   responses.forEach((resp) => {
     const question = test?.questions?.find((q) => q.id === resp.question_id);
@@ -81,8 +95,12 @@ export default function CompanyResultDetailPage() {
 
   const COLORS = ["#9333ea", "#ec4899", "#3b82f6", "#10b981"];
 
+  // Phân trang responses
+  const totalPages = Math.ceil(responses.length / ITEMS_PER_PAGE);
+  const paginatedResponses = responses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return (
-    <AppShell>
+    <AppShell activeNav="assignments">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -137,6 +155,31 @@ export default function CompanyResultDetailPage() {
             <p className="text-gray-700">{mbtiType.overview}</p>
           </div>
         )}
+
+        {/* MBTI Core Traits */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Communication Style */}
+          {mbtiType?.communication_style && (
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
+                Phong cách giao tiếp
+              </h2>
+              <p className="text-gray-700">{mbtiType.communication_style}</p>
+            </div>
+          )}
+
+          {/* Leadership Style */}
+          {mbtiType?.leadership_style && (
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Users2 className="w-5 h-5 text-green-600 mr-2" />
+                Phong cách lãnh đạo
+              </h2>
+              <p className="text-gray-700">{mbtiType.leadership_style}</p>
+            </div>
+          )}
+        </div>
 
         {/* Charts */}
         <div className="grid lg:grid-cols-2 gap-6">
@@ -236,47 +279,22 @@ export default function CompanyResultDetailPage() {
                   Vai trò phù hợp
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {mbtiType.suitable_roles.map(
-                    (
-                      r:
-                        | string
-                        | number
-                        | bigint
-                        | boolean
-                        | ReactElement<unknown, string | JSXElementConstructor<any>>
-                        | Iterable<ReactNode>
-                        | ReactPortal
-                        | Promise<
-                            | string
-                            | number
-                            | bigint
-                            | boolean
-                            | ReactPortal
-                            | ReactElement<unknown, string | JSXElementConstructor<any>>
-                            | Iterable<ReactNode>
-                            | null
-                            | undefined
-                          >
-                        | null
-                        | undefined,
-                      i: Key | null | undefined
-                    ) => (
-                      <span key={i} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                        {r}
-                      </span>
-                    )
-                  )}
+                  {mbtiType.suitable_roles?.map((r: string, i: number) => (
+                    <span key={i} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                      {r}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Detailed Responses */}
+        {/* Detailed Responses with Pagination */}
         <div className="bg-white rounded-xl shadow-sm border p-6">
           <h2 className="text-xl font-semibold mb-4">Chi tiết câu trả lời</h2>
           <div className="space-y-4">
-            {responses.map((resp, idx) => {
+            {paginatedResponses.map((resp, idx) => {
               const question = test?.questions?.find((q) => q.id === resp.question_id);
               const answerText = resp.free_text
                 ? resp.free_text
@@ -285,13 +303,36 @@ export default function CompanyResultDetailPage() {
               return (
                 <div key={resp.id} className="p-4 bg-gray-50 rounded-lg">
                   <p className="font-medium text-gray-900 mb-1">
-                    {idx + 1}. {question?.text || "—"}
+                    {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}. {question?.text || "—"}
                   </p>
                   <p className="text-gray-700 text-sm">{answerText}</p>
                 </div>
               );
             })}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+              >
+                Trước
+              </button>
+              <span className="text-gray-700">
+                Trang {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+              >
+                Tiếp
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </AppShell>

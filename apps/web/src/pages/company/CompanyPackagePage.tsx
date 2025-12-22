@@ -3,7 +3,7 @@
 import { AppShell } from "../../components/layout/AppShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../libs/api";
-import { Star, Zap } from "lucide-react";
+import { CheckCircle, Star, Zap } from "lucide-react";
 
 interface Package {
   id: string;
@@ -12,6 +12,7 @@ interface Package {
   price_per_month: number;
   max_assignments: number;
   description?: string;
+  benefits?: string[];
   is_active: boolean;
   is_popular?: boolean;
 }
@@ -81,11 +82,11 @@ export default function CompanyPackagesPage() {
         </div>
 
         {/* Packages Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 items-stretch">
           {packages?.map((pkg) => (
             <div
               key={pkg.id}
-              className={`relative bg-white rounded-xl shadow-sm border-2 p-6 ${
+              className={`relative bg-white rounded-xl shadow-sm border-2 p-6 flex flex-col ${
                 pkg.is_popular
                   ? "border-purple-600"
                   : isCurrentPackage(pkg.code)
@@ -95,7 +96,7 @@ export default function CompanyPackagesPage() {
             >
               {/* Popular Badge */}
               {pkg.is_popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                     <Star className="w-3 h-3" />
                     PHỔ BIẾN
@@ -112,39 +113,57 @@ export default function CompanyPackagesPage() {
                 </div>
               )}
 
-              {/* Package Name */}
-              <div className="mb-4">
-                <h3 className="text-xl font-bold text-gray-900">{pkg.name}</h3>
-                <p className="text-gray-500 text-sm mt-1">{pkg.code.toUpperCase()}</p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-gray-900">{pkg.price_per_month.toLocaleString()}</span>
-                  <span className="text-gray-500">VNĐ</span>
+              {/* ===== CONTENT ===== */}
+              <div className="flex-1">
+                {/* Package Name */}
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">{pkg.name}</h3>
+                  <p className="text-gray-500 text-sm mt-1">{pkg.code.toUpperCase()}</p>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">/tháng</p>
-              </div>
 
-              {/* Limits */}
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-2 text-sm">
-                  <Zap className="w-4 h-4 text-purple-600" />
-                  <span className="text-gray-700">
-                    Tối đa <strong>{pkg.max_assignments}</strong> lượt
-                  </span>
+                {/* Price */}
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-gray-900">{pkg.price_per_month.toLocaleString()}</span>
+                    <span className="text-gray-500">VNĐ</span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">/tháng</p>
                 </div>
+
+                {/* Limits */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Zap className="w-4 h-4 text-purple-600" />
+                    <span className="text-gray-700">
+                      Tối đa <strong>{pkg.max_assignments}</strong> lượt
+                    </span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {pkg.description && <p className="text-sm text-gray-600 mb-6">{pkg.description}</p>}
+
+                {/* Benefits */}
+                {pkg.benefits && pkg.benefits.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-sm font-medium text-gray-900 mb-2">Lợi ích:</p>
+                    <ul className="space-y-1">
+                      {pkg.benefits.map((benefit, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span>{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              {/* Description */}
-              {pkg.description && <p className="text-sm text-gray-600 mb-6">{pkg.description}</p>}
-
-              {/* Subscribe Button */}
+              {/* ===== SUBSCRIBE BUTTON ===== */}
               <button
                 onClick={() => handleSubscribe(pkg.code)}
                 disabled={isCurrentPackage(pkg.code) || subscribeMutation.isPending}
-                className={`w-full py-3 rounded-lg font-medium transition-all ${
+                className={`mt-auto w-full py-3 rounded-lg font-medium transition-all ${
                   isCurrentPackage(pkg.code)
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                     : pkg.is_popular
