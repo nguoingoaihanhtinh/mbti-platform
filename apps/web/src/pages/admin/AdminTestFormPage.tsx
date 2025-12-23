@@ -70,10 +70,10 @@ export default function AdminTestFormPage() {
         is_active: testData.test?.is_active ?? true,
         questions: (testData.questions || []).map((q: any, idx: number) => ({
           ...q,
-          order_index: q.order_index ?? idx,
+          order_index: q.order_index ?? idx + 1,
           answers: (q.answers || []).map((a: any, aIdx: number) => ({
             ...a,
-            order_index: a.order_index ?? aIdx,
+            order_index: a.order_index ?? aIdx + 1,
             score: a.score ?? 0,
           })),
         })),
@@ -106,7 +106,7 @@ export default function AdminTestFormPage() {
   });
 
   const handleAddQuestion = () => {
-    const newOrderIndex = formData.questions.length;
+    const newOrderIndex = formData.questions.length + 1;
     setFormData({
       ...formData,
       questions: [
@@ -117,8 +117,8 @@ export default function AdminTestFormPage() {
           dimension: null,
           order_index: newOrderIndex,
           answers: [
-            { text: "", score: 0, dimension: null, order_index: 0 },
             { text: "", score: 0, dimension: null, order_index: 1 },
+            { text: "", score: 0, dimension: null, order_index: 2 },
           ],
         },
       ],
@@ -130,7 +130,7 @@ export default function AdminTestFormPage() {
 
     const reorderedQuestions = newQuestions.map((q, idx) => ({
       ...q,
-      order_index: idx,
+      order_index: idx + 1,
     }));
     setFormData({ ...formData, questions: reorderedQuestions });
   };
@@ -143,7 +143,7 @@ export default function AdminTestFormPage() {
 
   const handleAddAnswer = (questionIndex: number) => {
     const newQuestions = [...formData.questions];
-    const newOrderIndex = newQuestions[questionIndex].answers.length;
+    const newOrderIndex = newQuestions[questionIndex].answers.length + 1;
     newQuestions[questionIndex].answers.push({
       text: "",
       score: 0,
@@ -157,7 +157,7 @@ export default function AdminTestFormPage() {
     const newQuestions = [...formData.questions];
     newQuestions[questionIndex].answers = newQuestions[questionIndex].answers
       .filter((_, i) => i !== answerIndex)
-      .map((a, idx) => ({ ...a, order_index: idx }));
+      .map((a, idx) => ({ ...a, order_index: idx + 1 }));
     setFormData({ ...formData, questions: newQuestions });
   };
 
@@ -366,12 +366,12 @@ export default function AdminTestFormPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-600 mb-1">Dimension (E-I, S-N, T-F, J-P)</label>
+                      <label className="block text-sm text-gray-600 mb-1">Dimension (E/I, S/N, T/F, J/P)</label>
                       <input
                         type="text"
                         value={question.dimension || ""}
                         onChange={(e) => handleQuestionChange(qIndex, "dimension", e.target.value || null)}
-                        placeholder="Ví dụ: E-I"
+                        placeholder="Ví dụ: E/I"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                       />
                     </div>
