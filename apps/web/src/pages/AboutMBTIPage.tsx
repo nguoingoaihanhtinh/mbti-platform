@@ -4,7 +4,7 @@ import { Brain, Target, Users, TrendingUp, BookOpen, Lightbulb, Shield, Zap } fr
 
 export default function AboutMBTIPage() {
   return (
-    <AppShell>
+    <AppShell activeNav="about">
       <div className="max-w-4xl mx-auto space-y-12 px-4 py-8">
         {/* Hero Section */}
         <section className="text-center space-y-6">

@@ -1,7 +1,19 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../../libs/api";
-import { Search, ChevronLeft, ChevronRight, Building2, Mail, Calendar, Package, Users, FileText } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+  Mail,
+  Calendar,
+  Package,
+  Users,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import CompanyAnalyticsDropdown from "../../components/CompanyAnalyticsDropdown";
 
 interface Company {
@@ -156,75 +168,99 @@ export default function AdminCompaniesPage() {
             </thead>
             <tbody>
               {companies.map((company) => {
+                const isOpen = openAnalyticsId === company.id;
                 return (
-                  <tr key={company.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                          <Building2 className="w-5 h-5 text-purple-600" />
+                  <>
+                    <tr
+                      key={company.id}
+                      className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${isOpen ? "bg-purple-50" : ""}`}
+                    >
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                            <Building2 className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{company.full_name}</p>
+                            <p className="text-xs text-gray-400">{company.id.substring(0, 8)}...</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{company.full_name}</p>
-                          <p className="text-xs text-gray-400">{company.id.substring(0, 8)}...</p>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm text-gray-700">{company.email}</span>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-700">{company.email}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      {company.subscription ? (
-                        <div>
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              company.subscription.status === "active"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
-                          >
-                            {company.subscription.package_name}
-                          </span>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Đến {new Date(company.subscription.end_date).toLocaleDateString("vi-VN")}
-                          </p>
+                      </td>
+                      <td className="py-4 px-6">
+                        {company.subscription ? (
+                          <div>
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                company.subscription.status === "active"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {company.subscription.package_name}
+                            </span>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Đến {new Date(company.subscription.end_date).toLocaleDateString("vi-VN")}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">Chưa có</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="text-sm font-medium text-gray-900">
+                          {company.stats?.total_assignments || 0}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="text-sm font-medium text-gray-900">
+                          {company.stats?.total_candidates || 0}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          {new Date(company.created_at).toLocaleDateString("vi-VN")}
                         </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">Chưa có</span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-sm font-medium text-gray-900">{company.stats?.total_assignments || 0}</span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-sm font-medium text-gray-900">{company.stats?.total_candidates || 0}</span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        {new Date(company.created_at).toLocaleDateString("vi-VN")}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <button
-                        onClick={() => toggleAnalytics(company.id)}
-                        className="text-sm text-purple-600 hover:text-purple-800 font-medium"
-                      >
-                        {openAnalyticsId === company.id ? "Ẩn" : "Xem phân tích"}
-                      </button>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="py-4 px-6">
+                        <button
+                          onClick={() => toggleAnalytics(company.id)}
+                          className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 font-medium transition-colors"
+                        >
+                          {isOpen ? (
+                            <>
+                              <ChevronUp className="w-4 h-4" />
+                              Ẩn phân tích
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-4 h-4" />
+                              Xem phân tích
+                            </>
+                          )}
+                        </button>
+                      </td>
+                    </tr>
+                    {/* Analytics Row - Hiển thị ngay dưới company được chọn */}
+                    {isOpen && (
+                      <tr key={`${company.id}-analytics`}>
+                        <td colSpan={7} className="p-0">
+                          <CompanyAnalyticsDropdown companyId={company.id} isOpen={true} />
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 );
               })}
             </tbody>
           </table>
         </div>
-
-        {companies.map((company) => (
-          <CompanyAnalyticsDropdown key={company.id} companyId={company.id} isOpen={openAnalyticsId === company.id} />
-        ))}
 
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">

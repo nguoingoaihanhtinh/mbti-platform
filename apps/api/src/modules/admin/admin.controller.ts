@@ -9,17 +9,24 @@ import {
   Body,
   Put,
   Delete,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { PdfExportService } from '../../common/services/pdf-export.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private pdfExportService: PdfExportService,
+  ) {}
 
   @Post('packages')
   async createPackage(@Req() req: any, @Body() dto: CreatePackageDto) {
@@ -36,6 +43,7 @@ export class AdminController {
     }
     return this.adminService.getPackages();
   }
+
   @Get('packages/:id')
   async getPackageById(@Req() req: any, @Param('id') id: string) {
     if (req.user.role !== 'admin') {
@@ -43,6 +51,7 @@ export class AdminController {
     }
     return this.adminService.getPackageById(id);
   }
+
   @Put('packages/:id')
   async updatePackage(
     @Req() req: any,
@@ -114,6 +123,33 @@ export class AdminController {
     return this.adminService.getCompanyAnalytics(companyId);
   }
 
+  // === NEW: Export Company Dashboard PDF ===
+  @Get('companies/:companyId/export-pdf')
+  async exportCompanyPDF(
+    @Req() req: any,
+    @Param('companyId') companyId: string,
+    @Res() res: Response,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+
+    try {
+      const pdfBuffer =
+        await this.pdfExportService.generateCompanyDashboardPDF(companyId);
+
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="company-dashboard-${companyId}.pdf"`,
+        'Content-Length': pdfBuffer.length,
+      });
+
+      res.end(pdfBuffer);
+    } catch (error) {
+      throw new BadRequestException('Failed to generate PDF: ' + error.message);
+    }
+  }
+
   @Get('tests')
   async getTests(
     @Req() req: any,
@@ -159,5 +195,32 @@ export class AdminController {
       throw new UnauthorizedException('Admin access required');
     }
     return this.adminService.getCandidateAssessmentDetail(assessmentId);
+  }
+
+  // === NEW: Export Assessment Result PDF ===
+  @Get('candidates/:assessmentId/export-pdf')
+  async exportAssessmentPDF(
+    @Req() req: any,
+    @Param('assessmentId') assessmentId: string,
+    @Res() res: Response,
+  ) {
+    if (req.user.role !== 'admin') {
+      throw new UnauthorizedException('Admin access required');
+    }
+
+    try {
+      const pdfBuffer =
+        await this.pdfExportService.generateAssessmentResultPDF(assessmentId);
+
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="assessment-result-${assessmentId}.pdf"`,
+        'Content-Length': pdfBuffer.length,
+      });
+
+      res.end(pdfBuffer);
+    } catch (error) {
+      throw new BadRequestException('Failed to generate PDF: ' + error.message);
+    }
   }
 }
