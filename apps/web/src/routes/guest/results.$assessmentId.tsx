@@ -39,7 +39,7 @@ type Question = {
   id: string;
   text: string;
   dimension: string | null;
-  answers: { id: string; text: string }[];
+  answers: { id: string; text: string; order_index: number }[];
 };
 
 type MbtiTypeDetails = {
@@ -130,9 +130,8 @@ function GuestResultPage() {
     }
     if (resp.answer_id) {
       const answer = question?.answers.find((a) => a.id === resp.answer_id);
-      if (answer) {
-        const match = answer.text.match(/^([A-Z])\./);
-        const letter = match ? match[1] : answer.text[0];
+      if (answer && typeof answer.order_index === "number") {
+        const letter = String.fromCharCode(65 + answer.order_index);
         answerCounts[letter] = (answerCounts[letter] || 0) + 1;
       }
     }
