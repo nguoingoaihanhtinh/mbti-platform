@@ -79,9 +79,10 @@ export class AssessmentController {
 
   @Get(':id')
   getAssessment(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
-    const userId = req.user.sub;
+    const userId = req.user?.sub || null;
     const companyId =
-      req.user.role === 'company' ? req.user.company_id : undefined;
+      req.user?.role === 'company' ? req.user.company_id : undefined;
+
     return this.assessmentService.getAssessmentById(id, userId, companyId);
   }
 

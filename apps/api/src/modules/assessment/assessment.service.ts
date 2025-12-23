@@ -115,34 +115,30 @@ export class AssessmentService {
         .eq('company_id', companyId)
         .single();
 
-      if (viaCompany) {
-        return viaCompany;
-      }
+      if (viaCompany) return viaCompany;
     }
 
-    const { data: viaUser } = await this.supabase.client
+    if (userId) {
+      const { data: viaUser } = await this.supabase.client
+        .from('assessments')
+        .select('*')
+        .eq('id', assessmentId)
+        .eq('user_id', userId)
+        .single();
+
+      if (viaUser) return viaUser;
+    }
+
+    const { data: assessment, error } = await this.supabase.client
       .from('assessments')
       .select('*')
       .eq('id', assessmentId)
-      .eq('user_id', userId)
       .single();
 
-    if (viaUser) {
-      return viaUser;
+    if (error || !assessment) {
+      throw new BadRequestException('Assessment not found');
     }
-
-    const { data: viaGuest } = await this.supabase.client
-      .from('assessments')
-      .select('*')
-      .eq('id', assessmentId)
-      .eq('guest_email', userId)
-      .single();
-
-    if (viaGuest) {
-      return viaGuest;
-    }
-
-    throw new BadRequestException('Assessment not found');
+    return assessment;
   }
 
   async submitResponse(
