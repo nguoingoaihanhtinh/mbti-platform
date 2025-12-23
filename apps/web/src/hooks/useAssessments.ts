@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { assessmentKeys } from "../libs/queryKeys";
 import api from "../libs/api";
 import type { PaginatedAssessments } from "../types/assessment";
@@ -12,7 +12,19 @@ export const useAssessments = (page: number = 1, limit: number = 10) => {
       });
       return response.data as PaginatedAssessments;
     },
-    // Optional: only fetch if user is authenticated
-    // enabled: useAuthStore.getState().isAuthenticated,
   });
 };
+
+export function useDeleteAssessment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (assessmentId: string) => {
+      const response = await api.delete(`/assessments/${assessmentId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["assessments"] });
+    },
+  });
+}

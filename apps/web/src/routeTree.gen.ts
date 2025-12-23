@@ -27,6 +27,7 @@ import { Route as CompanyDashboardRouteImport } from './routes/company/dashboard
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCompaniesRouteImport } from './routes/admin/companies'
+import { Route as AboutMbtiRouteImport } from './routes/about.mbti'
 import { Route as CompanyProfileIndexRouteImport } from './routes/company/profile/index'
 import { Route as CompanyAssignmentsIndexRouteImport } from './routes/company/assignments/index'
 import { Route as AdminTestsIndexRouteImport } from './routes/admin/tests/index'
@@ -131,6 +132,11 @@ const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
   path: '/companies',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AboutMbtiRoute = AboutMbtiRouteImport.update({
+  id: '/about/mbti',
+  path: '/about/mbti',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompanyProfileIndexRoute = CompanyProfileIndexRouteImport.update({
   id: '/company/profile/',
   path: '/company/profile/',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/about/mbti': typeof AboutMbtiRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/about/mbti': typeof AboutMbtiRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/about/mbti': typeof AboutMbtiRoute
   '/admin/companies': typeof AdminCompaniesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
@@ -313,6 +322,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/about/mbti'
     | '/admin/companies'
     | '/admin/dashboard'
     | '/admin/users'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/about/mbti'
     | '/admin/companies'
     | '/admin/dashboard'
     | '/admin/users'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/about/mbti'
     | '/admin/companies'
     | '/admin/dashboard'
     | '/admin/users'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  AboutMbtiRoute: typeof AboutMbtiRoute
   CompanyDashboardRoute: typeof CompanyDashboardRoute
   CompanyPackagesRoute: typeof CompanyPackagesRoute
   CompanySubscriptionRoute: typeof CompanySubscriptionRoute
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCompaniesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/about/mbti': {
+      id: '/about/mbti'
+      path: '/about/mbti'
+      fullPath: '/about/mbti'
+      preLoaderRoute: typeof AboutMbtiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/company/profile/': {
       id: '/company/profile/'
       path: '/company/profile'
@@ -690,6 +710,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  AboutMbtiRoute: AboutMbtiRoute,
   CompanyDashboardRoute: CompanyDashboardRoute,
   CompanyPackagesRoute: CompanyPackagesRoute,
   CompanySubscriptionRoute: CompanySubscriptionRoute,

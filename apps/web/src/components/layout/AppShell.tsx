@@ -1,5 +1,5 @@
 // src/components/layout/AppShell.tsx (for Company + Candidate)
-import React from "react";
+import React, { useState } from "react";
 import {
   Bell,
   User,
@@ -35,14 +35,14 @@ const companyNavItems: { id: string; label: string; icon: LucideIcon; path: stri
 // Navigation for Candidate
 const candidateNavItems: { id: string; label: string; icon: LucideIcon; path: string }[] = [
   { id: "assessments", label: "All Tests", icon: Home, path: "/assessments" },
-  { id: "analytics", label: "Analytics", icon: BarChart3, path: "/analytics" },
+  { id: "about", label: "About MBTI", icon: BarChart3, path: "/about/mbti" },
   { id: "profile", label: "Profile Settings", icon: Settings, path: "/profile" },
 ];
 
 export function AppShell({ children, rightSidebar, activeNav = "assessments" }: AppShellProps) {
   const { user, logout: logoutStore } = useAuthStore();
   const navigate = useNavigate();
-
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const handleLogout = async () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -80,19 +80,27 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
             <button className="p-2 hover:bg-secondary-100 rounded-lg">
               <Bell className="w-5 h-5 text-neutral-600" />
             </button>
-            <div className="relative group">
-              <button className="p-2 hover:bg-secondary-100 rounded-lg">
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="p-2 hover:bg-secondary-100 rounded-lg"
+              >
                 <User className="w-5 h-5 text-neutral-600" />
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-secondary-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-500 delay-200">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-secondary-100 rounded-lg"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
-              </div>
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-secondary-200 rounded-lg shadow-lg z-10">
+                  <button
+                    onClick={() => {
+                      setIsProfileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-secondary-100 rounded-lg"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

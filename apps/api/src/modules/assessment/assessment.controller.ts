@@ -9,13 +9,13 @@ import {
   Req,
   BadRequestException,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AssessmentService } from './assessment.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { SubmitResponseDto } from './dto/submit-response.dto';
 import { CompleteAssessmentDto } from './dto/complete-assessment.dto';
-
 import { CreateAssessmentGuestDto } from './dto/create-assessment-guest.dto';
 import { CompleteAssessmentGuestDto } from './dto/complete-assessment-guest.dto';
 
@@ -45,13 +45,12 @@ export class AssessmentController {
   ) {
     const page = pageStr ? parseInt(pageStr, 10) : 1;
     const limit = limitStr ? parseInt(limitStr, 10) : 10;
-
     if (page < 1 || limit < 1 || limit > 100) {
       throw new BadRequestException('Invalid page or limit');
     }
-
     return this.assessmentService.getUserAssessments(req.user.sub, page, limit);
   }
+
   @UseGuards(JwtAuthGuard)
   @Post()
   createAssessment(@Body() dto: CreateAssessmentDto, @Req() req) {
@@ -64,17 +63,19 @@ export class AssessmentController {
     @Body() dto: SubmitResponseDto,
     @Req() req,
   ) {
-    // Todo: verify assessment belongs to user
     return this.assessmentService.submitResponse(id, dto);
   }
+
   @UseGuards(JwtAuthGuard)
   @Post(':id/complete')
-  completeAssessment(
-    @Param('id', ParseUUIDPipe) id: string,
-
-    @Req() req,
-  ) {
+  completeAssessment(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
     return this.assessmentService.completeAssessment(id, req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  deleteAssessment(@Param('id', ParseUUIDPipe) id: string, @Req() req) {
+    return this.assessmentService.deleteAssessment(id, req.user.sub);
   }
 
   @Get(':id')
@@ -82,7 +83,6 @@ export class AssessmentController {
     const userId = req.user?.sub || null;
     const companyId =
       req.user?.role === 'company' ? req.user.company_id : undefined;
-
     return this.assessmentService.getAssessmentById(id, userId, companyId);
   }
 
@@ -94,7 +94,6 @@ export class AssessmentController {
   ) {
     const page = pageStr ? parseInt(pageStr, 10) : 1;
     const limit = limitStr ? parseInt(limitStr, 10) : 20;
-
     return this.assessmentService.getResponses(id, page, limit);
   }
 
@@ -104,7 +103,6 @@ export class AssessmentController {
     const userId = req.user?.sub;
     const companyId =
       req.user?.role === 'company' ? req.user.company_id : undefined;
-
     return this.assessmentService.getResultByAssessment(id, userId, companyId);
   }
 
@@ -116,7 +114,6 @@ export class AssessmentController {
     if (!email) {
       throw new BadRequestException('Email required');
     }
-
     return this.assessmentService.getGuestResult(id, email);
   }
 }
