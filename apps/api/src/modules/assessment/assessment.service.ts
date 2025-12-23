@@ -104,7 +104,7 @@ export class AssessmentService {
 
   async getAssessmentById(
     assessmentId: string,
-    userId: string,
+    userId: string | null,
     companyId?: string,
   ) {
     if (companyId) {
@@ -128,7 +128,7 @@ export class AssessmentService {
 
       if (viaUser) return viaUser;
     }
-
+    // Guest
     const { data: assessment, error } = await this.supabase.client
       .from('assessments')
       .select('*')
@@ -145,6 +145,27 @@ export class AssessmentService {
     assessmentId: string,
     responseData: Omit<ResponseInsert, 'assessment_id'>,
   ) {
+    const { question_id, answer_id } = responseData;
+
+    const { data: existing } = await this.supabase.client
+      .from('responses')
+      .select('id')
+      .eq('assessment_id', assessmentId)
+      .eq('question_id', question_id)
+      .single();
+
+    if (existing) {
+      const { data: updated, error: updateErr } = await this.supabase.client
+        .from('responses')
+        .update({ answer_id })
+        .eq('id', existing.id)
+        .select()
+        .single();
+
+      if (updateErr) throw updateErr;
+      return updated;
+    }
+
     const { data: response, error } = await this.supabase.client
       .from('responses')
       .insert({ ...responseData, assessment_id: assessmentId })
@@ -154,7 +175,6 @@ export class AssessmentService {
     if (error) throw error;
     return response;
   }
-
   async getResponses(
     assessmentId: string,
     page: number = 1,

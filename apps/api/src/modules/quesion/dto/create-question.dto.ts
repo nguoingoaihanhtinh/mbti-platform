@@ -23,6 +23,7 @@ export class CreateQuestionDto {
   @IsNumber()
   order_index: number;
 
+  @IsOptional()
   @IsString()
   test_id: string;
 

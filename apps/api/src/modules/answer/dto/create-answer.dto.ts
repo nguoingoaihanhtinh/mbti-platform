@@ -14,6 +14,7 @@ export class CreateAnswerDto {
   @IsNumber()
   order_index: number;
 
+  @IsOptional()
   @IsString()
   question_id: string;
 }
