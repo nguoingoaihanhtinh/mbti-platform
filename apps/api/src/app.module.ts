@@ -10,6 +10,7 @@ import { AssessmentModule } from './modules/assessment/assessment.module';
 import { HRModule } from './modules/hr/hr.module';
 import { CompanyModule } from './modules/company/company.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { PdfExportModule } from './common/module/pdf-export.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AdminModule } from './modules/admin/admin.module';
     HRModule,
     CompanyModule,
     AdminModule,
+    PdfExportModule,
   ],
   providers: [PaginationService],
 })
