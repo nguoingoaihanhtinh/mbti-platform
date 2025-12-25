@@ -9,15 +9,30 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { AnswerService } from './answer.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
 import { UpdateAnswerDto } from './dto/update-answer.dto';
-
 @Controller('answers')
 export class AnswerController {
   constructor(private answerService: AnswerService) {}
 
   @Post()
+  @ApiBody({
+    type: CreateAnswerDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          text: 'Answer text',
+          score: 1,
+          dimension: 'EI',
+          order_index: 0,
+          question_id: 'question-uuid',
+        },
+      },
+    },
+  })
   createAnswer(@Body() dto: CreateAnswerDto) {
     return this.answerService.createAnswer(dto);
   }
@@ -37,6 +52,20 @@ export class AnswerController {
   }
 
   @Put(':id')
+  @ApiBody({
+    type: UpdateAnswerDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          text: 'Updated answer',
+          score: 2,
+          dimension: 'SN',
+          order_index: 1,
+        },
+      },
+    },
+  })
   updateAnswer(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAnswerDto,

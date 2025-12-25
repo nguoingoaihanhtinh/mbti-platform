@@ -43,7 +43,7 @@ type QuestionWithAnswers = {
   id: string;
   text: string;
   dimension?: string;
-  answers: { id: string; text: string }[];
+  answers: { id: string; text: string; order_index: number }[];
 };
 
 type MbtiTypeDetails = {
@@ -139,6 +139,7 @@ export default function ResultsPage() {
             answers: q.answers.map((a: any) => ({
               id: a.id,
               text: a.text,
+              order_index: a.order_index,
             })),
           };
         }
@@ -151,14 +152,12 @@ export default function ResultsPage() {
         allResponses.forEach((resp: ResponseItem) => {
           const question = qMap[resp.question_id];
           if (question?.dimension) {
-            const normalizedDim = normalizeDimension(question.dimension);
-            dimCount[normalizedDim] = (dimCount[normalizedDim] || 0) + 1;
+            dimCount[question.dimension] = (dimCount[question.dimension] || 0) + 1;
           }
           if (resp.answer_id) {
             const answer = question?.answers.find((a) => a.id === resp.answer_id);
-            if (answer) {
-              const match = answer.text.match(/^([A-Z])\./);
-              const letter = match ? match[1] : answer.text[0];
+            if (answer && typeof answer.order_index === "number") {
+              const letter = String.fromCharCode(65 + (answer.order_index - 1));
               ansCount[letter] = (ansCount[letter] || 0) + 1;
             }
           }

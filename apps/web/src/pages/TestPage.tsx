@@ -264,7 +264,8 @@ export default function TestPage() {
                           {active && <div className="w-2 h-2 bg-white rounded-full" />}
                         </div>
                         <div>
-                          <span className="font-medium">{String.fromCharCode(65 + ans.order_index)}.</span> {ans.text}
+                          <span className="font-medium">{String.fromCharCode(65 + ans.order_index - 1)}.</span>{" "}
+                          {ans.text}
                         </div>
                       </div>
                     </button>

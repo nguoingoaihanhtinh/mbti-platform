@@ -16,6 +16,7 @@ import { SubscribePackageDto } from './dto/subcribe-package.dto';
 import { AssignmentDetail } from './types';
 import { UpdateCompanyProfileDto } from './dto/update-company-profile.dto';
 
+import { ApiBody } from '@nestjs/swagger';
 class CreateAssignmentDto {
   candidate_email: string;
   candidate_fullname?: string;
@@ -29,6 +30,20 @@ export class CompanyController {
   constructor(private companyService: CompanyService) {}
 
   @Post('assignments')
+  @ApiBody({
+    type: CreateAssignmentDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          candidate_email: 'candidate@example.com',
+          candidate_fullname: 'Candidate Name',
+          test_id: 'test-uuid',
+          note: 'Test for candidate',
+        },
+      },
+    },
+  })
   async createAssignment(@Req() req: any, @Body() dto: CreateAssignmentDto) {
     if (req.user.role !== 'company') {
       throw new BadRequestException('Only company admins can assign tests');
@@ -84,6 +99,15 @@ export class CompanyController {
     return this.companyService.getAssignmentDetail(id, req.user.company_id);
   }
   @Post('subscription')
+  @ApiBody({
+    type: SubscribePackageDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: { package_code: 'PKG_BASIC' },
+      },
+    },
+  })
   async subscribePackage(@Req() req: any, @Body() dto: SubscribePackageDto) {
     if (req.user.role !== 'company') {
       throw new BadRequestException('Company access required');
@@ -135,6 +159,22 @@ export class CompanyController {
   }
 
   @Put('profile')
+  @ApiBody({
+    type: UpdateCompanyProfileDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          name: 'Company ABC',
+          website: 'https://company.com',
+          logo_url: 'https://company.com/logo.png',
+          description: 'Company description',
+          address: '123 Main St',
+          phone: '0123456789',
+        },
+      },
+    },
+  })
   async updateCompanyProfile(
     @Req() req: any,
     @Body() dto: UpdateCompanyProfileDto,

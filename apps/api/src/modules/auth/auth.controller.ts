@@ -10,6 +10,7 @@ import {
   Patch,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import {
@@ -33,11 +34,37 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @ApiBody({
+    type: RegisterDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          email: 'user@example.com',
+          password: 'password123',
+          confirm_password: 'password123',
+          full_name: 'User Name',
+        },
+      },
+    },
+  })
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
   @Post('login')
+  @ApiBody({
+    type: LoginDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          email: 'user@example.com',
+          password: 'password123',
+        },
+      },
+    },
+  })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -61,12 +88,43 @@ export class AuthController {
   }
 
   @Post('login/otp')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email' },
+      },
+      required: ['email'],
+    },
+    examples: {
+      default: {
+        summary: 'Example',
+        value: { email: 'user@example.com' },
+      },
+    },
+  })
   async sendLoginOtp(@Body('email') email: string) {
     await this.authService.sendLoginOtp(email);
     return { message: 'OTP sent to your email' };
   }
 
   @Post('login/verify')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email' },
+        otp: { type: 'string' },
+      },
+      required: ['email', 'otp'],
+    },
+    examples: {
+      default: {
+        summary: 'Example',
+        value: { email: 'user@example.com', otp: '123456' },
+      },
+    },
+  })
   async verifyLoginOtp(
     @Body() { email, otp }: { email: string; otp: string },
     @Res({ passthrough: true }) res: Response,
@@ -165,18 +223,52 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @ApiBody({
+    type: ForgotPasswordDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: { email: 'user@example.com' },
+      },
+    },
+  })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     await this.authService.forgotPassword(dto.email);
     return { message: 'If your email is registered, you’ll receive an OTP.' };
   }
 
   @Post('reset-password')
+  @ApiBody({
+    type: ResetPasswordDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: { otp: '123456', newPassword: 'newpassword123' },
+      },
+    },
+  })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.authService.resetPassword(dto.otp, dto.newPassword);
     return { message: 'Password updated.' };
   }
   @Patch('profile')
   @UseGuards(JwtAuthGuard)
+  @ApiBody({
+    type: UpdateProfileDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          full_name: 'User Name',
+          email: 'user@example.com',
+          education: "Bachelor's Degree",
+          experience: '5 years',
+          social_links: { linkedin: 'https://linkedin.com/in/user' },
+          about: 'About me',
+        },
+      },
+    },
+  })
   async updateProfile(
     @Req() req: Request,
     @Body() updateDto: UpdateProfileDto,

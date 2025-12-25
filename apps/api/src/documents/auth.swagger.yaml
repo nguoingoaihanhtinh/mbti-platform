@@ -1,0 +1,251 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  version: 1.0.0
+  description: OpenAPI documentation for Auth endpoints
+servers:
+  - url: http://localhost:3000
+paths:
+  /auth/register:
+    post:
+      summary: Đăng ký tài khoản
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+            example:
+              email: 'user@example.com'
+              password: 'password123'
+              confirm_password: 'password123'
+              full_name: 'User Name'
+      responses:
+        '200':
+          description: Đăng ký thành công
+  /auth/login:
+    post:
+      summary: Đăng nhập
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+            example:
+              email: 'user@example.com'
+              password: 'password123'
+      responses:
+        '200':
+          description: Đăng nhập thành công
+  /auth/login/otp:
+    post:
+      summary: Gửi OTP đăng nhập
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+            example:
+              email: 'user@example.com'
+      responses:
+        '200':
+          description: OTP sent
+  /auth/login/verify:
+    post:
+      summary: Xác thực OTP đăng nhập
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                otp:
+                  type: string
+            example:
+              email: 'user@example.com'
+              otp: '123456'
+      responses:
+        '200':
+          description: Đăng nhập bằng OTP thành công
+  /auth/refresh:
+    get:
+      summary: Làm mới access token
+      responses:
+        '200':
+          description: Token refreshed
+  /auth/logout:
+    post:
+      summary: Đăng xuất
+      responses:
+        '200':
+          description: Đăng xuất thành công
+  /auth/profile:
+    get:
+      summary: Lấy thông tin profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thông tin profile
+    patch:
+      summary: Cập nhật profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileDto'
+            example:
+              full_name: 'User Name'
+              email: 'user@example.com'
+              education: "Bachelor's Degree"
+              experience: '5 years'
+              social_links: { 'linkedin': 'https://linkedin.com/in/user' }
+              about: 'About me'
+      responses:
+        '200':
+          description: Profile updated
+  /auth/forgot-password:
+    post:
+      summary: Quên mật khẩu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordDto'
+            example:
+              email: 'user@example.com'
+      responses:
+        '200':
+          description: OTP sent if email exists
+  /auth/reset-password:
+    post:
+      summary: Đặt lại mật khẩu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordDto'
+            example:
+              otp: '123456'
+              newPassword: 'newpassword123'
+      responses:
+        '200':
+          description: Password updated
+  /auth/register/otp:
+    post:
+      summary: Gửi OTP đăng ký
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+            example:
+              email: 'user@example.com'
+      responses:
+        '200':
+          description: OTP sent
+  /auth/register/verify:
+    post:
+      summary: Xác thực OTP đăng ký
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRegisterOtpDto'
+            example:
+              email: 'user@example.com'
+              otp: '123456'
+              password: 'password123'
+              full_name: 'User Name'
+      responses:
+        '200':
+          description: Đăng ký bằng OTP thành công
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        confirm_password:
+          type: string
+        full_name:
+          type: string
+    LoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    ForgotPasswordDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+    ResetPasswordDto:
+      type: object
+      properties:
+        otp:
+          type: string
+        newPassword:
+          type: string
+    VerifyRegisterOtpDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+        password:
+          type: string
+        full_name:
+          type: string
+    UpdateProfileDto:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        education:
+          type: string
+        experience:
+          type: string
+        social_links:
+          type: object
+        about:
+          type: string

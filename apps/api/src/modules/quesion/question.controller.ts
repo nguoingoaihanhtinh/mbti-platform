@@ -9,15 +9,40 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { QuestionService } from './question.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
-
 @Controller('questions')
 export class QuestionController {
   constructor(private questionService: QuestionService) {}
 
   @Post()
+  @ApiBody({
+    type: CreateQuestionDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          text: 'Question text',
+          type: 'single',
+          dimension: 'EI',
+          order_index: 1,
+          test_id: 'test-uuid',
+          test_version_id: 'version-uuid',
+          answers: [
+            {
+              text: 'Answer 1',
+              score: 1,
+              dimension: 'EI',
+              order_index: 0,
+              question_id: 'question-uuid',
+            },
+          ],
+        },
+      },
+    },
+  })
   createQuestion(@Body() dto: CreateQuestionDto) {
     return this.questionService.createQuestion(dto);
   }
@@ -43,6 +68,21 @@ export class QuestionController {
   }
 
   @Put(':id')
+  @ApiBody({
+    type: UpdateQuestionDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          text: 'Updated question',
+          type: 'multi',
+          dimension: 'SN',
+          order_index: 2,
+          test_version_id: 'version-uuid',
+        },
+      },
+    },
+  })
   updateQuestion(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateQuestionDto,

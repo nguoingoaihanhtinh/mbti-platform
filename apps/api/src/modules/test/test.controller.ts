@@ -18,6 +18,7 @@ import { CreateTestDto } from './dto/create-test.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
 import { UpdateTestVersionDto } from './dto/update-test-version.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('tests')
 export class TestController {
@@ -33,6 +34,42 @@ export class TestController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
+  @ApiBody({
+    type: CreateTestDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          title: 'MBTI Test',
+          description: 'Test description',
+          is_active: true,
+          version: {
+            version_number: 1,
+            description: 'Initial version',
+          },
+          questions: [
+            {
+              text: 'Question 1',
+              type: 'single',
+              dimension: 'EI',
+              order_index: 1,
+              test_id: 'test-uuid',
+              test_version_id: 'version-uuid',
+              answers: [
+                {
+                  text: 'Answer 1',
+                  score: 1,
+                  dimension: 'EI',
+                  order_index: 0,
+                  question_id: 'question-uuid',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
+  })
   createTest(@Req() req: any, @Body() dto: CreateTestDto) {
     if (req.user.role !== 'admin') {
       throw new UnauthorizedException('Chỉ admin mới có thể tạo test');
@@ -73,6 +110,22 @@ export class TestController {
 
   @UseGuards(JwtAuthGuard)
   @Post(':testId/versions')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        version_number: { type: 'number' },
+        description: { type: 'string' },
+      },
+      required: ['version_number'],
+    },
+    examples: {
+      default: {
+        summary: 'Example',
+        value: { version_number: 2, description: 'New version' },
+      },
+    },
+  })
   createVersion(
     @Req() req: any,
     @Param('testId', ParseUUIDPipe) testId: string,

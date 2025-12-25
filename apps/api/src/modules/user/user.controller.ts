@@ -13,6 +13,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 import * as bcrypt from 'bcrypt';
+import { ApiBody } from '@nestjs/swagger';
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard)
 export class UserController {
@@ -24,6 +25,31 @@ export class UserController {
     }
   }
   @Post()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email' },
+        password: { type: 'string' },
+        full_name: { type: 'string' },
+        role: { type: 'string' },
+        company_name: { type: 'string' },
+      },
+      required: ['email', 'password', 'full_name'],
+    },
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          email: 'user@example.com',
+          password: 'password123',
+          full_name: 'User Name',
+          role: 'candidate',
+          company_name: 'Company ABC',
+        },
+      },
+    },
+  })
   async create(
     @Req() req: any,
     @Body()

@@ -20,6 +20,7 @@ import { PdfExportService } from '../../common/services/pdf-export.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 
+import { ApiBody } from '@nestjs/swagger';
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
 export class AdminController {
@@ -29,6 +30,22 @@ export class AdminController {
   ) {}
 
   @Post('packages')
+  @ApiBody({
+    type: CreatePackageDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          name: 'Gói cơ bản',
+          code: 'PKG_BASIC',
+          max_assignments: 100,
+          price_per_month: 500000,
+          description: 'Gói cho doanh nghiệp nhỏ',
+          benefits: ['Tạo 100 assignment', 'Hỗ trợ email'],
+        },
+      },
+    },
+  })
   async createPackage(@Req() req: any, @Body() dto: CreatePackageDto) {
     if (req.user.role !== 'admin') {
       throw new UnauthorizedException('Admin access required');
@@ -53,6 +70,22 @@ export class AdminController {
   }
 
   @Put('packages/:id')
+  @ApiBody({
+    type: UpdatePackageDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          name: 'Gói nâng cao',
+          max_assignments: 200,
+          price_per_month: 1000000,
+          description: 'Gói cho doanh nghiệp lớn',
+          benefits: ['Tạo 200 assignment', 'Hỗ trợ 24/7'],
+          is_active: true,
+        },
+      },
+    },
+  })
   async updatePackage(
     @Req() req: any,
     @Param('id') id: string,

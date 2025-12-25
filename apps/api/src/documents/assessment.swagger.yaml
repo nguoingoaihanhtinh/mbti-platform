@@ -1,0 +1,251 @@
+openapi: 3.0.0
+info:
+  title: Assessment API
+  version: 1.0.0
+  description: OpenAPI documentation for Assessment endpoints
+servers:
+  - url: http://localhost:3000
+paths:
+  /assessments/guest:
+    post:
+      summary: Guest tạo assessment (bị chặn)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAssessmentGuestDto'
+            example:
+              test_id: 'test-uuid'
+              test_version_id: 'version-uuid'
+              status: 'notStarted'
+              email: 'guest@example.com'
+              fullname: 'Guest User'
+      responses:
+        '400':
+          description: Guest cannot create assessment directly
+  /assessments/{id}/guest-complete:
+    post:
+      summary: Guest hoàn thành assessment
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteAssessmentGuestDto'
+            example:
+              email: 'guest@example.com'
+      responses:
+        '200':
+          description: Assessment completed
+  /assessments/me:
+    get:
+      summary: Lấy danh sách assessment của user
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Danh sách assessment
+  /assessments:
+    post:
+      summary: Tạo assessment cho user đã đăng nhập
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAssessmentDto'
+            example:
+              test_id: 'test-uuid'
+              test_version_id: 'version-uuid'
+              status: 'notStarted'
+      responses:
+        '201':
+          description: Assessment created
+  /assessments/{id}/responses:
+    post:
+      summary: Nộp câu trả lời cho assessment
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitResponseDto'
+            example:
+              question_id: 'question-uuid'
+              answer_id: 'answer-uuid'
+              selected_option_index: 1
+              free_text: 'Some answer'
+      responses:
+        '201':
+          description: Response submitted
+    get:
+      summary: Lấy danh sách responses của assessment
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Danh sách responses
+  /assessments/{id}/complete:
+    post:
+      summary: Hoàn thành assessment cho user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+      responses:
+        '200':
+          description: Assessment completed
+  /assessments/{id}:
+    get:
+      summary: Lấy thông tin assessment theo ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+      responses:
+        '200':
+          description: Assessment detail
+    delete:
+      summary: Xóa assessment của user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+      responses:
+        '200':
+          description: Assessment deleted
+  /assessments/{id}/result:
+    get:
+      summary: Lấy kết quả assessment cho user hoặc company
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+      responses:
+        '200':
+          description: Assessment result
+  /assessments/{id}/guest-result:
+    get:
+      summary: Lấy kết quả assessment cho guest
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Assessment ID
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: true
+          description: Guest email
+      responses:
+        '200':
+          description: Assessment result for guest
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CreateAssessmentDto:
+      type: object
+      properties:
+        test_id:
+          type: string
+        test_version_id:
+          type: string
+        status:
+          type: string
+          enum: [notStarted, started, completed]
+    CreateAssessmentGuestDto:
+      type: object
+      properties:
+        test_id:
+          type: string
+        test_version_id:
+          type: string
+        status:
+          type: string
+          enum: [notStarted, started, completed]
+        email:
+          type: string
+          format: email
+        fullname:
+          type: string
+    CompleteAssessmentGuestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+    SubmitResponseDto:
+      type: object
+      properties:
+        question_id:
+          type: string
+        answer_id:
+          type: string
+        selected_option_index:
+          type: integer
+        free_text:
+          type: string

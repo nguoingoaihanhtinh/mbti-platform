@@ -11,6 +11,7 @@ import {
   Query,
   Delete,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AssessmentService } from './assessment.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
@@ -18,17 +19,40 @@ import { SubmitResponseDto } from './dto/submit-response.dto';
 import { CompleteAssessmentDto } from './dto/complete-assessment.dto';
 import { CreateAssessmentGuestDto } from './dto/create-assessment-guest.dto';
 import { CompleteAssessmentGuestDto } from './dto/complete-assessment-guest.dto';
-
 @Controller('assessments')
 export class AssessmentController {
   constructor(private assessmentService: AssessmentService) {}
 
   @Post('guest')
+  @ApiBody({
+    type: CreateAssessmentGuestDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          test_id: 'test-uuid',
+          test_version_id: 'version-uuid',
+          status: 'notStarted',
+          email: 'guest@example.com',
+          fullname: 'Guest User',
+        },
+      },
+    },
+  })
   createAssessmentGuest(@Body() dto: CreateAssessmentGuestDto) {
     throw new BadRequestException('Guest cannot create assessment directly');
   }
 
   @Post(':id/guest-complete')
+  @ApiBody({
+    type: CompleteAssessmentGuestDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: { email: 'guest@example.com' },
+      },
+    },
+  })
   completeAssessmentGuest(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CompleteAssessmentGuestDto,
@@ -53,11 +77,38 @@ export class AssessmentController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
+  @ApiBody({
+    type: CreateAssessmentDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          test_id: 'test-uuid',
+          test_version_id: 'version-uuid',
+          status: 'notStarted',
+        },
+      },
+    },
+  })
   createAssessment(@Body() dto: CreateAssessmentDto, @Req() req) {
     return this.assessmentService.createAssessment(req.user.sub, dto);
   }
 
   @Post(':id/responses')
+  @ApiBody({
+    type: SubmitResponseDto,
+    examples: {
+      default: {
+        summary: 'Example',
+        value: {
+          question_id: 'question-uuid',
+          answer_id: 'answer-uuid',
+          selected_option_index: 1,
+          free_text: 'Some answer',
+        },
+      },
+    },
+  })
   submitResponse(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SubmitResponseDto,

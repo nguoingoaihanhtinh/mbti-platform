@@ -29,6 +29,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.2.3",
     "@supabase/supabase-js": "^2.86.0",
     "@types/bcrypt": "^6.0.0",
     "ajv": "^8.17.1",
@@ -41,6 +42,7 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.5.2",
     "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.1",
     "tsconfig-paths": "^4.2.0"
   },
   "resolutions": {
