@@ -7,7 +7,6 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  type LucideIcon,
   FileText,
   Package,
   CreditCard,
@@ -16,7 +15,8 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useNavigate } from "@tanstack/react-router";
-
+import LanguageSwitcher from "../LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 interface AppShellProps {
   children: React.ReactNode;
   rightSidebar?: React.ReactNode;
@@ -24,25 +24,12 @@ interface AppShellProps {
 }
 
 // Navigation for Company
-const companyNavItems: { id: string; label: string; icon: LucideIcon; path: string }[] = [
-  { id: "dashboard", label: "Dashboard", icon: Home, path: "/company/dashboard" },
-  { id: "assignments", label: "Assignments", icon: FileText, path: "/company/assignments" },
-  { id: "packages", label: "Gói dịch vụ", icon: Package, path: "/company/packages" },
-  { id: "subscription", label: "Gói hiện tại", icon: CreditCard, path: "/company/subscription" },
-  { id: "profile", label: "Thông tin công ty", icon: Settings, path: "/company/profile" },
-];
-
-// Navigation for Candidate
-const candidateNavItems: { id: string; label: string; icon: LucideIcon; path: string }[] = [
-  { id: "assessments", label: "All Tests", icon: Home, path: "/assessments" },
-  { id: "about", label: "About MBTI", icon: BarChart3, path: "/about/mbti" },
-  { id: "profile", label: "Profile Settings", icon: Settings, path: "/profile" },
-];
 
 export function AppShell({ children, rightSidebar, activeNav = "assessments" }: AppShellProps) {
   const { user, logout: logoutStore } = useAuthStore();
   const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { t } = useTranslation();
   const handleLogout = async () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -58,6 +45,19 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
       navigate({ to: "/login" });
     }
   };
+  const companyNavItems = [
+    { id: "dashboard", label: t("dashboard"), icon: Home, path: "/company/dashboard" },
+    { id: "assignments", label: t("assignments"), icon: FileText, path: "/company/assignments" },
+    { id: "packages", label: t("packages"), icon: Package, path: "/company/packages" },
+    { id: "subscription", label: t("current_subscription"), icon: CreditCard, path: "/company/subscription" },
+    { id: "profile", label: t("company_info"), icon: Settings, path: "/company/profile" },
+  ];
+
+  const candidateNavItems = [
+    { id: "assessments", label: t("all_tests"), icon: Home, path: "/assessments" },
+    { id: "about", label: t("about_mbti"), icon: BarChart3, path: "/about/mbti" },
+    { id: "profile", label: t("profile_settings"), icon: Settings, path: "/profile" },
+  ];
 
   if (!user) {
     return <div className="min-h-screen bg-secondary-50 flex items-center justify-center">Loading...</div>;
@@ -77,6 +77,7 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
           </div>
 
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <button className="p-2 hover:bg-secondary-100 rounded-lg">
               <Bell className="w-5 h-5 text-neutral-600" />
             </button>
@@ -97,7 +98,7 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-secondary-100 rounded-lg"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
+                    <span>{t("logout")}</span>
                   </button>
                 </div>
               )}
@@ -123,14 +124,14 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
             <div className="space-y-4 mb-6">
               {/* Role */}
               <div>
-                <h4 className="text-xs font-semibold text-neutral-500 mb-1">ROLE</h4>
-                <p className="text-sm font-medium text-primary-900 capitalize">{user.role}</p>
+                <h4 className="text-xs font-semibold text-neutral-500 mb-1">{t("role")}</h4>
+                <p className="text-sm font-medium text-primary-900 capitalize">{t(user.role)}</p>
               </div>
 
               {/* Education (only if exists) */}
               {user.profile?.education && (
                 <div>
-                  <h4 className="text-xs font-semibold text-neutral-500 mb-1">EDUCATION</h4>
+                  <h4 className="text-xs font-semibold text-neutral-500 mb-1">{t("education")}</h4>
                   <p className="text-sm text-neutral-700">{user.profile.education}</p>
                 </div>
               )}
@@ -138,7 +139,7 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
               {/* Social Links (only if any exist) */}
               {(user.profile?.social_links?.linkedin || user.profile?.social_links?.github) && (
                 <div>
-                  <h4 className="text-xs font-semibold text-neutral-500 mb-1">SOCIAL</h4>
+                  <h4 className="text-xs font-semibold text-neutral-500 mb-1">{t("social")}</h4>
                   <div className="flex flex-col gap-1">
                     {user.profile.social_links.linkedin && (
                       <a
@@ -146,10 +147,9 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                        title="LinkedIn"
                       >
                         <Linkedin className="w-4 h-4" />
-                        <span>LinkedIn</span>
+                        <span>{t("linkedin")}</span>
                       </a>
                     )}
                     {user.profile.social_links.github && (
@@ -158,10 +158,9 @@ export function AppShell({ children, rightSidebar, activeNav = "assessments" }: 
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 text-gray-800 hover:text-black"
-                        title="GitHub"
                       >
                         <Github className="w-4 h-4" />
-                        <span>GitHub</span>
+                        <span>{t("github")}</span>
                       </a>
                     )}
                   </div>

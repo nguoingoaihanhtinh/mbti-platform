@@ -7,11 +7,11 @@ import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/text-area";
 import { Button } from "../components/ui/button";
-
+import { useDynamicTranslation } from "../libs/translations";
 export function ProfilePage() {
   const { user, refreshProfile } = useAuthStore();
   const navigate = useNavigate();
-
+  const { tContent } = useDynamicTranslation();
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -75,14 +75,14 @@ export function ProfilePage() {
     <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Profile</CardTitle>
+          <CardTitle>{tContent("Edit Profile")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="full_name">Full Name</Label>
+                <Label htmlFor="full_name">{tContent("Full Name")}</Label>
                 <Input
                   id="full_name"
                   value={formData.full_name}
@@ -91,7 +91,7 @@ export function ProfilePage() {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{tContent("Email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -105,33 +105,33 @@ export function ProfilePage() {
             {/* Education & Experience */}
             <div className="space-y-6">
               <div>
-                <Label htmlFor="education">Education</Label>
+                <Label htmlFor="education">{tContent("Education")}</Label>
                 <Textarea
                   id="education"
                   value={formData.education}
                   onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-                  placeholder="e.g., B.Sc. Computer Science, University of XYZ"
+                  placeholder={tContent("e.g., B.Sc. Computer Science, University of XYZ")}
                 />
               </div>
               <div>
-                <Label htmlFor="experience">Experience</Label>
+                <Label htmlFor="experience">{tContent("Experience")}</Label>
                 <Textarea
                   id="experience"
                   value={formData.experience}
                   onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                  placeholder="e.g., 3 years as Software Engineer at ABC Corp"
+                  placeholder={tContent("e.g., 3 years as Software Engineer at ABC Corp")}
                 />
               </div>
             </div>
 
             {/* About */}
             <div>
-              <Label htmlFor="about">About Me</Label>
+              <Label htmlFor="about">{tContent("About Me")}</Label>
               <Textarea
                 id="about"
                 value={formData.about}
                 onChange={(e) => setFormData({ ...formData, about: e.target.value })}
-                placeholder="Tell us about yourself..."
+                placeholder={tContent("Tell us about yourself...")}
                 rows={5}
               />
             </div>
@@ -139,7 +139,7 @@ export function ProfilePage() {
             {/* Social Links */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="linkedin">LinkedIn</Label>
+                <Label htmlFor="linkedin">{tContent("LinkedIn")}</Label>
                 <Input
                   id="linkedin"
                   value={formData.social_links.linkedin}
@@ -153,7 +153,7 @@ export function ProfilePage() {
                 />
               </div>
               <div>
-                <Label htmlFor="github">GitHub</Label>
+                <Label htmlFor="github">{tContent("GitHub")}</Label>
                 <Input
                   id="github"
                   value={formData.social_links.github}
@@ -171,10 +171,10 @@ export function ProfilePage() {
             {/* Submit */}
             <div className="flex justify-end space-x-4">
               <Button type="button" variant="outline" onClick={() => navigate({ to: "/assessments" })}>
-                Cancel
+                {tContent("Cancel")}
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? tContent("Saving...") : tContent("Save Changes")}
               </Button>
             </div>
           </form>

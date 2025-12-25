@@ -7,13 +7,14 @@ import api from "../libs/api";
 import type { Answer, Question } from "../types/test";
 import { useAuthStore } from "../stores/useAuthStore";
 import { GuestShell } from "../components/layout/GuestShell";
-
+import { useDynamicTranslation } from "../libs/translations";
 const INITIAL_SECONDS = 42 * 60 + 15;
 
 export default function TestPage() {
   const { testId, assessmentId, candidateEmail } = TestRoute.useSearch();
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+  const { tContent } = useDynamicTranslation();
 
   const [testResponse, setTestResponse] = useState<{
     test: any;
@@ -121,11 +122,11 @@ export default function TestPage() {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">Access Denied</h2>
+          <h2 className="text-lg font-semibold text-red-800 mb-2">{tContent("Access Denied")}</h2>
           <p className="text-red-600">
             {!isAuthenticated && !candidateEmail
-              ? "Please login or use the link from your email to access this test."
-              : "Failed to load test. Please check your link or contact support."}
+              ? tContent("Please login or use the link from your email to access this test.")
+              : tContent("Failed to load test. Please check your link or contact support.")}
           </p>
         </div>
       </div>
@@ -181,16 +182,16 @@ export default function TestPage() {
   const rightSidebar = (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold mb-3">Quick Actions</h3>
+        <h3 className="font-semibold mb-3">{tContent("Quick Actions")}</h3>
         <div className="space-y-2 text-sm">
           <Button variant="ghost" className="w-full justify-start px-4 py-2 bg-gray-50 hover:bg-gray-100">
-            📊 View Progress Report
+            📊 {tContent("View Progress Report")}
           </Button>
           <Button variant="ghost" className="w-full justify-start px-4 py-2 bg-gray-50 hover:bg-gray-100">
-            📝 Schedule Study Time
+            📝 {tContent("Schedule Study Time")}
           </Button>
           <Button variant="ghost" className="w-full justify-start px-4 py-2 bg-gray-50 hover:bg-gray-100">
-            💡 Study Hints
+            💡 {tContent("Study Hints")}
           </Button>
         </div>
       </div>
@@ -208,9 +209,11 @@ export default function TestPage() {
           <div>
             <h1 className="text-2xl font-bold mb-1">{test.title}</h1>
             <p className="text-sm text-gray-600 flex items-center gap-3">
-              <span>{totalQuestions} questions</span>
+              <span>
+                {totalQuestions} {tContent("questions")}
+              </span>
               <span className="inline-flex items-center gap-1">
-                Time Remaining:
+                {tContent("Time Remaining")}:
                 <span
                   className={`font-semibold tabular-nums ${
                     timeLeft < 60 ? "text-red-600 animate-pulse" : "text-red-500"
@@ -222,7 +225,7 @@ export default function TestPage() {
             </p>
           </div>
           <div className="text-sm text-gray-600">
-            Question {page} / {totalQuestions}
+            {tContent("Question")} {page} / {totalQuestions}
           </div>
         </div>
 
@@ -234,7 +237,9 @@ export default function TestPage() {
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <div className="text-xs text-gray-500 mt-1 font-medium">{progressPct}% complete</div>
+          <div className="text-xs text-gray-500 mt-1 font-medium">
+            {progressPct}% {tContent("complete")}
+          </div>
         </div>
 
         {/* Question */}
@@ -274,7 +279,7 @@ export default function TestPage() {
               </div>
             </>
           ) : (
-            <p>No question found.</p>
+            <p>{tContent("No question found.")}</p>
           )}
         </div>
 
@@ -286,7 +291,7 @@ export default function TestPage() {
             onClick={() => setPage((p) => p - 1)}
             className="gap-2"
           >
-            ‹ Previous
+            {tContent("‹ Previous")}
           </Button>
           <div className="flex gap-2">
             <Button variant="primary" onClick={handleSubmitTest} disabled={page !== totalQuestions || isSubmitting}>
@@ -297,7 +302,7 @@ export default function TestPage() {
               disabled={page === totalQuestions || isSubmitting}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next ›
+              {tContent("Next ›")}
             </Button>
           </div>
         </div>
@@ -305,7 +310,7 @@ export default function TestPage() {
 
       {/* Question Navigator */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="font-semibold mb-4">Question Navigator</h3>
+        <h3 className="font-semibold mb-4">{tContent("Question Navigator")}</h3>
         <div className="grid grid-cols-10 gap-2 mb-4">
           {questions.map((q, i) => {
             const num = i + 1;

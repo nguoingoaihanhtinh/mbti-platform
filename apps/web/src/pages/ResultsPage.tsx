@@ -31,7 +31,7 @@ import {
   Legend,
 } from "recharts";
 import api from "../libs/api";
-
+import { useDynamicTranslation } from "../libs/translations";
 type ResponseItem = {
   id: string;
   question_id: string;
@@ -101,7 +101,7 @@ export default function ResultsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-
+  const { tContent } = useDynamicTranslation();
   const limit = 10;
 
   useEffect(() => {
@@ -208,7 +208,7 @@ export default function ResultsPage() {
     return (
       <AppShell activeNav="assessments">
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải kết quả của bạn...</div>
+          <div className="text-gray-500">{tContent("Loading your result...")}</div>
         </div>
       </AppShell>
     );
@@ -217,7 +217,7 @@ export default function ResultsPage() {
     return (
       <AppShell activeNav="assessments">
         <div className="flex items-center justify-center h-64">
-          <div className="text-red-500">Không tìm thấy kết quả</div>
+          <div className="text-red-500">{tContent("Result not found")}</div>
         </div>
       </AppShell>
     );
@@ -242,8 +242,8 @@ export default function ResultsPage() {
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Kết quả MBTI của bạn</h1>
-          <p className="text-gray-600">Báo cáo tính cách chi tiết và chuyên nghiệp</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">{tContent("My MBTI Result")}</h1>
+          <p className="text-gray-600">{tContent("Detailed and professional personality report")}</p>
         </div>
 
         {/* Result Card */}
@@ -261,7 +261,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <TrendingUp className="w-5 h-5 text-purple-600 mr-2" />
-              Phân tích theo chiều
+              {tContent("Dimension Analysis")}
             </h2>
             <ResponsiveContainer width="100%" height={300}>
               <RadarChart data={radarData}>
@@ -278,7 +278,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <BarChart3 className="w-5 h-5 text-purple-600 mr-2" />
-              Phân bố câu trả lời
+              {tContent("Answer Distribution")}
             </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={answerChartData}>
@@ -301,7 +301,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center text-green-700">
               <CheckCircle className="w-5 h-5 mr-2" />
-              Điểm mạnh
+              {tContent("Strengths")}
             </h2>
             <ul className="space-y-3">
               {mbti.strengths.map((s, i) => (
@@ -318,7 +318,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center text-orange-700">
               <AlertCircle className="w-5 h-5 mr-2" />
-              Điểm yếu
+              {tContent("Weaknesses")}
             </h2>
             <ul className="space-y-3">
               {mbti.weaknesses.map((w, i) => (
@@ -338,7 +338,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
-              Phong cách giao tiếp
+              {tContent("Communication Style")}
             </h2>
             <p className="text-gray-700 leading-relaxed">{mbti.communication_style}</p>
           </div>
@@ -346,7 +346,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Users className="w-5 h-5 text-purple-600 mr-2" />
-              Phong cách lãnh đạo
+              {tContent("Leadership Style")}
             </h2>
             <p className="text-gray-700 leading-relaxed">{mbti.leadership_style}</p>
           </div>
@@ -357,7 +357,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Briefcase className="w-5 h-5 text-blue-600 mr-2" />
-              Gợi ý nghề nghiệp
+              {tContent("Career Suggestions")}
             </h2>
             <div className="flex flex-wrap gap-2">
               {mbti.career_recommendations.map((c, i) => (
@@ -371,7 +371,7 @@ export default function ResultsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Target className="w-5 h-5 text-green-600 mr-2" />
-              Vai trò phù hợp
+              {tContent("Suitable Roles")}
             </h2>
             <div className="flex flex-wrap gap-2">
               {mbti.suitable_roles.map((r, i) => (
@@ -387,7 +387,7 @@ export default function ResultsPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <BookOpen className="w-5 h-5 text-purple-600 mr-2" />
-            Nhu cầu môi trường làm việc
+            {tContent("Workplace Needs")}
           </h2>
           <div className="grid md:grid-cols-2 gap-3">
             {mbti.workplace_needs.map((n, i) => (
@@ -405,7 +405,7 @@ export default function ResultsPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-6 flex items-center">
             <Award className="w-5 h-5 text-purple-600 mr-2" />
-            Chi tiết câu trả lời của bạn
+            {tContent("Your Answer Details")}
           </h2>
           <div className="space-y-4">
             {responses.map((resp, index) => {
@@ -423,7 +423,7 @@ export default function ResultsPage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-gray-900 font-medium mb-2">{q?.text}</p>
-                      <p className="text-gray-700 text-sm">{answerText || "—"}</p>
+                      <p className="text-gray-700 text-sm">{answerText || tContent("—")}</p>
                     </div>
                   </div>
                 </div>
@@ -439,17 +439,17 @@ export default function ResultsPage() {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               >
-                ← Trang trước
+                {tContent("Previous Page")}
               </Button>
               <span className="text-sm text-gray-600">
-                Trang {currentPage} / {totalPages}
+                {tContent("Page")} {currentPage} {tContent("of")} {totalPages}
               </span>
               <Button
                 variant="ghost"
                 disabled={currentPage >= totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               >
-                Trang sau →
+                {tContent("Next Page")}
               </Button>
             </div>
           )}
@@ -457,7 +457,7 @@ export default function ResultsPage() {
 
         <div className="flex justify-center">
           <Button variant="primary" onClick={() => window.history.back()}>
-            Quay lại Danh sách
+            {tContent("Back to List")}
           </Button>
         </div>
       </div>

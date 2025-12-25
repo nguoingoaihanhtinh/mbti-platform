@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../hooks/useAuth";
-
+import { useDynamicTranslation } from "../libs/translations";
 type SignupStep = "form" | "otp";
 
 export default function SignupPage() {
@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [otp, setOtp] = useState("");
   const { sendRegisterOtp, verifyRegisterOtp } = useAuth();
   const navigate = useNavigate();
+  const { tContent } = useDynamicTranslation();
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,28 +52,30 @@ export default function SignupPage() {
       <div className="min-h-screen flex flex-col justify-center px-4">
         <div className="max-w-md w-full mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify Email</h1>
-            <p className="text-gray-600">Enter the OTP sent to {formData.email}</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{tContent("Verify Email")}</h1>
+            <p className="text-gray-600">
+              {tContent("Enter the OTP sent to")} {formData.email}
+            </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
             <form onSubmit={handleVerifyOtp} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">One-Time Code</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("One-Time Code")}</label>
                 <input
                   type="text"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6-digit code"
+                  placeholder={tContent("Enter 6-digit code")}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
                   required
                 />
               </div>
               <Button type="submit" variant="primary" size="md" fullWidth>
-                Verify OTP
+                {tContent("Verify OTP")}
               </Button>
               <Button type="button" variant="link" className="w-full text-center" onClick={() => setStep("form")}>
-                ← Back to signup
+                ← {tContent("Back to signup")}
               </Button>
             </form>
           </div>
@@ -88,14 +91,14 @@ export default function SignupPage() {
           <div className="inline-flex items-center justify-center mb-4">
             <img src="/Group 50.png" alt="H&HIS" className="h-16 w-auto" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-600">Start your learning journey today</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{tContent("Create Account")}</h1>
+          <p className="text-gray-600">{tContent("Start your learning journey today")}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Full Name")}</label>
               <input
                 type="text"
                 name="fullName"
@@ -107,7 +110,7 @@ export default function SignupPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Email Address")}</label>
               <input
                 type="email"
                 name="email"
@@ -119,7 +122,7 @@ export default function SignupPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Password")}</label>
               <input
                 type="password"
                 name="password"
@@ -129,10 +132,10 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
                 required
               />
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+              <p className="mt-1 text-xs text-gray-500">{tContent("Must be at least 8 characters")}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Confirm Password")}</label>
               <input
                 type="password"
                 name="confirmPassword"
@@ -150,18 +153,18 @@ export default function SignupPage() {
                 required
               />
               <label className="ml-2 text-sm text-gray-700 ">
-                <span>I agree to the</span>
+                <span>{tContent("I agree to the")}</span>
                 <Button type="button" variant="link" className="h-auto px-0 text-sm">
-                  Terms of Service
+                  {tContent("Terms of Service")}
                 </Button>
-                <span>and</span>
+                <span>{tContent("and")}</span>
                 <Button type="button" variant="link" className="h-auto px-0 text-sm">
-                  Privacy Policy
+                  {tContent("Privacy Policy")}
                 </Button>
               </label>
             </div>
             <Button type="submit" variant="primary" size="md" fullWidth>
-              Create Account
+              {tContent("Create Account")}
             </Button>
           </form>
 
@@ -171,28 +174,28 @@ export default function SignupPage() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">Or sign up with</span>
+                <span className="px-4 bg-white text-gray-500">{tContent("Or sign up with")}</span>
               </div>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <Button type="button" variant="outline" className="gap-2" onClick={() => alert("Google OAuth (pending)")}>
-                <span className="text-sm font-medium text-gray-700">Google</span>
+                <span className="text-sm font-medium text-gray-700">{tContent("Google")}</span>
               </Button>
               <Button type="button" variant="outline" className="gap-2" onClick={() => alert("GitHub OAuth (pending)")}>
-                <span className="text-sm font-medium text-gray-700">GitHub</span>
+                <span className="text-sm font-medium text-gray-700">{tContent("GitHub")}</span>
               </Button>
             </div>
           </div>
 
           <p className="mt-8 text-center text-sm text-gray-600">
-            Already have an account?{" "}
+            {tContent("Already have an account?")}{" "}
             <Button
               type="button"
               variant="link"
               onClick={() => navigate({ to: "/login" })}
               className="font-medium text-gray-900 hover:text-gray-700"
             >
-              Sign in
+              {tContent("Sign in")}
             </Button>
           </p>
         </div>

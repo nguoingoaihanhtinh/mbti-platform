@@ -6,10 +6,12 @@ import { useTests } from "../hooks/useTests";
 import { useAssessments, useDeleteAssessment } from "../hooks/useAssessments";
 import type { Assessment } from "../types/assessment";
 import type { Test } from "../types/test";
+import { useDynamicTranslation } from "../libs/translations";
 
 type View = "tests" | "assessments";
 
 export default function AssessmentsPage() {
+  const { tContent } = useDynamicTranslation();
   const navigate = useNavigate();
   const [view, setView] = useState<View>("assessments");
   const deleteAssessment = useDeleteAssessment();
@@ -25,25 +27,27 @@ export default function AssessmentsPage() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">{view === "tests" ? "Available Tests" : "My Assessments"}</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {view === "tests" ? tContent("Available Tests") : tContent("My Assessments")}
+        </h1>
         <p className="text-gray-600">
           {view === "tests"
-            ? "Browse and start new personality tests"
-            : "Manage your personality tests and study results"}
+            ? tContent("Browse and start new personality tests")
+            : tContent("Manage your personality tests and study results")}
         </p>
       </div>
 
       <div className="flex gap-4 mb-6">
         <Button variant={view === "tests" ? "primary" : "ghost"} onClick={() => setView("tests")}>
-          Available Tests
+          {tContent("Available Tests")}
         </Button>
         <Button variant={view === "assessments" ? "primary" : "ghost"} onClick={() => setView("assessments")}>
-          My Assessments
+          {tContent("My Assessments")}
         </Button>
       </div>
 
       {isLoading ? (
-        <div>Loading...</div>
+        <div>{tContent("Loading...")}</div>
       ) : view === "tests" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {tests.map((test: Test) => (
@@ -64,7 +68,7 @@ export default function AssessmentsPage() {
                   });
                 }}
               >
-                Take Test
+                {tContent("Take Test")}
               </Button>
             </div>
           ))}
@@ -72,7 +76,7 @@ export default function AssessmentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {assessments.length === 0 ? (
-            <div className="col-span-2 text-gray-500">You haven’t started any assessments yet.</div>
+            <div className="col-span-2 text-gray-500">{tContent("You haven’t started any assessments yet.")}</div>
           ) : (
             assessments.map((assessment: Assessment) => {
               const test = tests.find((t: Test) => t.id === assessment.test_id);
@@ -80,32 +84,32 @@ export default function AssessmentsPage() {
                 <div key={assessment.id} className="bg-white rounded-xl shadow-sm border p-6">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="font-semibold text-lg">{test?.title || "Unknown Test"}</h3>
+                      <h3 className="font-semibold text-lg">{test?.title || tContent("Unknown Test")}</h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        Started: {new Date(assessment.created_at).toLocaleDateString()}
+                        {tContent("Started:")} {new Date(assessment.created_at).toLocaleDateString()}
                       </p>
                     </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (window.confirm("Are you sure you want to delete this assessment?")) {
+                        if (window.confirm(tContent("Are you sure you want to delete this assessment?"))) {
                           deleteAssessment.mutate(assessment.id);
                         }
                       }}
                       className="text-red-500 hover:text-red-700 p-1 rounded"
-                      title="Delete assessment"
+                      title={tContent("Delete assessment")}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
                   <p className="text-sm text-gray-600 mb-2">
-                    Status: <span className="capitalize font-medium">{assessment.status}</span>
+                    {tContent("Status:")} <span className="capitalize font-medium">{assessment.status}</span>
                   </p>
 
                   {assessment.completed_at && (
                     <p className="text-sm text-gray-500 mb-4">
-                      Completed: {new Date(assessment.completed_at).toLocaleDateString()}
+                      {tContent("Completed:")} {new Date(assessment.completed_at).toLocaleDateString()}
                     </p>
                   )}
 
@@ -126,7 +130,7 @@ export default function AssessmentsPage() {
                     }}
                     className="w-full"
                   >
-                    {assessment.status === "completed" ? "View Result" : "Continue"}
+                    {assessment.status === "completed" ? tContent("View Result") : tContent("Continue")}
                   </Button>
                 </div>
               );
