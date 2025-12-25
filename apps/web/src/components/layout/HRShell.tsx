@@ -3,6 +3,7 @@ import { Bell, User, Home, Users, BarChart3, Settings, LogOut, type LucideIcon }
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../LanguageSwitcher";
 export type HRNav =
   | "dashboard"
   | "candidates"
@@ -84,7 +85,7 @@ export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {
                 <p className="text-xs text-gray-500">{user.email}</p>
               </div>
             </div>
-
+            <LanguageSwitcher />
             <button className="p-2 hover:bg-gray-100 rounded-lg relative">
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full"></span>

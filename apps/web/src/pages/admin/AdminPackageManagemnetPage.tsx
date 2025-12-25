@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import api from "../../libs/api";
 import { Plus, Edit, Trash2, Package, Users, DollarSign, CheckCircle, XCircle } from "lucide-react";
-
+import { useDynamicTranslation } from "../../libs/translations";
 interface PackageItem {
   id: string;
   name: string;
@@ -19,7 +19,7 @@ interface PackageItem {
 export default function AdminPackagesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
+  const { tContent } = useDynamicTranslation();
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ["admin", "packages"],
     queryFn: async () => {
@@ -39,15 +39,15 @@ export default function AdminPackagesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "packages"] });
-      alert("Xóa package thành công!");
+      alert(tContent("Package deleted successfully!"));
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Có lỗi xảy ra");
+      alert(error.response?.data?.message || tContent("An error occurred"));
     },
   });
 
   const handleDelete = (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa package này?")) {
+    if (confirm(tContent("Are you sure you want to delete this package?"))) {
       deleteMutation.mutate(id);
     }
   };
@@ -55,7 +55,7 @@ export default function AdminPackagesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Đang tải...</div>
+        <div className="text-gray-500">{tContent("Loading...")}</div>
       </div>
     );
   }
@@ -65,15 +65,17 @@ export default function AdminPackagesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Packages</h1>
-          <p className="text-gray-500 mt-1">Tổng số {packages.length} packages</p>
+          <h1 className="text-2xl font-bold text-gray-900">{tContent("Manage Packages")}</h1>
+          <p className="text-gray-500 mt-1">
+            {tContent("Total")} {packages.length} {tContent("packages")}
+          </p>
         </div>
         <button
           onClick={() => navigate({ to: "/admin/packages/create" })}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg"
         >
           <Plus className="w-4 h-4" />
-          Tạo package mới
+          {tContent("Create New Package")}
         </button>
       </div>
 
@@ -92,12 +94,12 @@ export default function AdminPackagesPage() {
               {pkg.is_active ? (
                 <>
                   <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-green-700">Đang hoạt động</span>
+                  <span className="text-green-700">{tContent("Active")}</span>
                 </>
               ) : (
                 <>
                   <XCircle className="w-4 h-4 text-red-600" />
-                  <span className="text-red-700">Ngừng hoạt động</span>
+                  <span className="text-red-700">{tContent("Inactive")}</span>
                 </>
               )}
             </div>
@@ -105,14 +107,16 @@ export default function AdminPackagesPage() {
             {/* Price */}
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-purple-600" />
-              <span className="text-2xl font-bold">{pkg.price_per_month.toLocaleString()} VNĐ</span>
+              <span className="text-2xl font-bold">
+                {pkg.price_per_month.toLocaleString()} {tContent("VND")}
+              </span>
             </div>
 
             {/* Assignments */}
             <div className="flex items-center gap-2 text-sm">
               <Users className="w-4 h-4 text-purple-600" />
               <span>
-                <strong>{pkg.max_assignments}</strong> assignments
+                <strong>{pkg.max_assignments}</strong> {tContent("assignments")}
               </span>
             </div>
 
@@ -126,13 +130,17 @@ export default function AdminPackagesPage() {
                   <p key={i}>• {b}</p>
                 ))}
                 {pkg.benefits.length > 3 && (
-                  <p className="text-purple-600">+{pkg.benefits.length - 3} quyền lợi khác</p>
+                  <p className="text-purple-600">
+                    +{pkg.benefits.length - 3} {tContent("other benefits")}
+                  </p>
                 )}
               </div>
             )}
 
             {/* Created */}
-            <div className="text-xs text-gray-400">Tạo ngày {new Date(pkg.created_at).toLocaleDateString("vi-VN")}</div>
+            <div className="text-xs text-gray-400">
+              {tContent("Created on")} {new Date(pkg.created_at).toLocaleDateString("vi-VN")}
+            </div>
 
             {/* Actions */}
             <div className="flex gap-2 pt-2">
@@ -140,13 +148,13 @@ export default function AdminPackagesPage() {
                 onClick={() => navigate({ to: `/admin/packages/${pkg.id}/edit` })}
                 className="flex-1 border rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-gray-50"
               >
-                <Edit className="w-4 h-4" /> Sửa
+                <Edit className="w-4 h-4" /> {tContent("Edit")}
               </button>
               <button
                 onClick={() => handleDelete(pkg.id)}
                 className="flex-1 border border-red-300 text-red-600 rounded-lg py-2 flex items-center justify-center gap-2 hover:bg-red-50"
               >
-                <Trash2 className="w-4 h-4" /> Xóa
+                <Trash2 className="w-4 h-4" /> {tContent("Delete")}
               </button>
             </div>
           </div>
@@ -157,12 +165,12 @@ export default function AdminPackagesPage() {
       {packages.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Chưa có package nào</h3>
+          <h3 className="text-lg font-semibold mb-2">{tContent("No packages available")}</h3>
           <button
             onClick={() => navigate({ to: "/admin/packages/create" })}
             className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg"
           >
-            <Plus className="w-4 h-4" /> Tạo package mới
+            <Plus className="w-4 h-4" /> {tContent("Create New Package")}
           </button>
         </div>
       )}

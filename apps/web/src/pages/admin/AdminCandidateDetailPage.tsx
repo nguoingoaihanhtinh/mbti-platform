@@ -16,6 +16,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import api from "../../libs/api";
+import { useDynamicTranslation } from "../../libs/translations";
 
 type MbtiTypeDetails = {
   id?: string;
@@ -54,7 +55,7 @@ type CandidateInfo = {
 export default function AdminCandidateDetailPage() {
   const { assessmentId } = useParams({ from: "/admin/candidates/$assessmentId" });
   const navigate = useNavigate();
-
+  const { tContent } = useDynamicTranslation();
   const [result, setResult] = useState<MbtiResult | null>(null);
   const [candidate, setCandidate] = useState<CandidateInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +77,7 @@ export default function AdminCandidateDetailPage() {
           apiCandidate = {
             id: assessment.id,
             email: assessment.guest_email,
-            full_name: assessment.guest_fullname || "Guest",
+            full_name: assessment.guest_fullname || tContent("Guest"),
             completed_at: assessment.completed_at || assessment.created_at,
           };
         } else if (assessment.users) {
@@ -127,7 +128,7 @@ export default function AdminCandidateDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Đang tải chi tiết ứng viên...</div>
+        <div className="text-gray-500">{tContent("Loading candidate details...")}</div>
       </div>
     );
   }
@@ -135,7 +136,7 @@ export default function AdminCandidateDetailPage() {
   if (!result || !candidate) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Không tìm thấy kết quả</div>
+        <div className="text-red-500">{tContent("Result not found")}</div>
       </div>
     );
   }
@@ -143,7 +144,7 @@ export default function AdminCandidateDetailPage() {
   const mbtiRaw: MbtiTypeDetails = (result as any).mbti_types ?? (result as any).mbti_type_details ?? {};
 
   const mbti = {
-    type_name: mbtiRaw.type_name ?? "Không có dữ liệu",
+    type_name: mbtiRaw.type_name ?? tContent("No data available"),
     overview: mbtiRaw.overview ?? "—",
     strengths: Array.isArray(mbtiRaw.strengths) ? mbtiRaw.strengths : [],
     weaknesses: Array.isArray(mbtiRaw.weaknesses) ? mbtiRaw.weaknesses : [],
@@ -168,7 +169,7 @@ export default function AdminCandidateDetailPage() {
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Quay lại danh sách</span>
+          <span>{tContent("Back to list")}</span>
         </button>
         <div className="flex items-center gap-3">
           <button
@@ -177,7 +178,7 @@ export default function AdminCandidateDetailPage() {
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4" />
-            <span>{exporting ? "Đang xuất..." : "Xuất PDF"}</span>
+            <span>{exporting ? tContent("Exporting...") : tContent("Export PDF")}</span>
           </button>
         </div>
       </div>
@@ -231,7 +232,7 @@ export default function AdminCandidateDetailPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold mb-4 flex items-center">
           <Award className="w-5 h-5 text-purple-600 mr-2" />
-          Tổng quan
+          {tContent("Overview")}
         </h2>
         <p className="text-gray-700 leading-relaxed">{mbti.overview}</p>
       </div>
@@ -241,7 +242,7 @@ export default function AdminCandidateDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center text-green-700">
             <CheckCircle className="w-5 h-5 mr-2" />
-            Điểm mạnh
+            {tContent("Strengths")}
           </h2>
           <ul className="space-y-3">
             {mbti.strengths.map((s, i) => (
@@ -258,7 +259,7 @@ export default function AdminCandidateDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center text-orange-700">
             <AlertCircle className="w-5 h-5 mr-2" />
-            Điểm yếu
+            {tContent("Weaknesses")}
           </h2>
           <ul className="space-y-3">
             {mbti.weaknesses.map((w, i) => (
@@ -278,7 +279,7 @@ export default function AdminCandidateDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
-            Phong cách giao tiếp
+            {tContent("Communication Style")}
           </h2>
           <p className="text-gray-700 leading-relaxed">{mbti.communication_style}</p>
         </div>
@@ -286,7 +287,7 @@ export default function AdminCandidateDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <Users className="w-5 h-5 text-purple-600 mr-2" />
-            Phong cách lãnh đạo
+            {tContent("Leadership Style")}
           </h2>
           <p className="text-gray-700 leading-relaxed">{mbti.leadership_style}</p>
         </div>
@@ -297,7 +298,7 @@ export default function AdminCandidateDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <Briefcase className="w-5 h-5 text-blue-600 mr-2" />
-            Gợi ý nghề nghiệp
+            {tContent("Career Recommendations")}
           </h2>
           <div className="flex flex-wrap gap-2">
             {mbti.career_recommendations.map((c, i) => (
@@ -311,7 +312,7 @@ export default function AdminCandidateDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <Target className="w-5 h-5 text-green-600 mr-2" />
-            Vai trò phù hợp
+            {tContent("Suitable Roles")}
           </h2>
           <div className="flex flex-wrap gap-2">
             {mbti.suitable_roles.map((r, i) => (
@@ -327,7 +328,7 @@ export default function AdminCandidateDetailPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold mb-4 flex items-center">
           <BookOpen className="w-5 h-5 text-purple-600 mr-2" />
-          Nhu cầu môi trường làm việc
+          {tContent("Workplace Needs")}
         </h2>
         <div className="grid md:grid-cols-2 gap-3">
           {mbti.workplace_needs.map((n, i) => (

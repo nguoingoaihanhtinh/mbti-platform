@@ -1,6 +1,6 @@
 // src/pages/admin/AdminTestsPage.tsx
 import { useState } from "react";
-
+import { useDynamicTranslation } from "../../libs/translations";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import api from "../../libs/api";
@@ -42,7 +42,7 @@ export default function AdminTestsPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
-
+  const { tContent } = useDynamicTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "tests", page, limit],
     queryFn: async () => {
@@ -54,21 +54,21 @@ export default function AdminTestsPage() {
   });
 
   const handleDelete = async (testId: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa test này?")) return;
+    if (!confirm(tContent("Are you sure you want to delete this test?"))) return;
 
     try {
       await api.delete(`/tests/${testId}`);
-      alert("Xóa test thành công!");
+      alert(tContent("Delete test successful!"));
       window.location.reload();
     } catch (error: any) {
-      alert(error.response?.data?.message || "Có lỗi xảy ra");
+      alert(error.response?.data?.message || tContent("An error occurred"));
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Đang tải danh sách tests...</div>
+        <div className="text-gray-500">{tContent("Loading tests list...")}</div>
       </div>
     );
   }
@@ -78,15 +78,17 @@ export default function AdminTestsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Tests</h1>
-          <p className="text-gray-500 mt-1">Tổng số {data?.total || 0} tests</p>
+          <h1 className="text-2xl font-bold text-gray-900">{tContent("Manage Tests")}</h1>
+          <p className="text-gray-500 mt-1">
+            {tContent("Total")} {data?.total || 0} {tContent("tests")}
+          </p>
         </div>
         <button
           onClick={() => navigate({ to: "/admin/tests/create" })}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow"
         >
           <Plus className="w-4 h-4" />
-          <span>Tạo test mới</span>
+          <span>{tContent("Create New Test")}</span>
         </button>
       </div>
 
@@ -99,7 +101,7 @@ export default function AdminTestsPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{data?.total || 0}</p>
-              <p className="text-sm text-gray-500">Tổng tests</p>
+              <p className="text-sm text-gray-500">{tContent("Total Tests")}</p>
             </div>
           </div>
         </div>
@@ -113,7 +115,7 @@ export default function AdminTestsPage() {
               <p className="text-2xl font-bold text-gray-900">
                 {data?.data.reduce((acc, t) => acc + (t.total_questions || 0), 0)}
               </p>
-              <p className="text-sm text-gray-500">Tổng câu hỏi</p>
+              <p className="text-sm text-gray-500">{tContent("Total Questions")}</p>
             </div>
           </div>
         </div>
@@ -127,7 +129,7 @@ export default function AdminTestsPage() {
               <p className="text-2xl font-bold text-gray-900">
                 {data?.data.reduce((acc, t) => acc + (t.total_assessments || 0), 0)}
               </p>
-              <p className="text-sm text-gray-500">Tổng lượt làm</p>
+              <p className="text-sm text-gray-500">{tContent("Total Assessments")}</p>
             </div>
           </div>
         </div>
@@ -139,7 +141,7 @@ export default function AdminTestsPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Tìm kiếm test..."
+            placeholder={tContent("Search tests...")}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
@@ -151,13 +153,13 @@ export default function AdminTestsPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr className="border-b border-gray-200">
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Test</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Mô tả</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Company</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Câu hỏi</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Lượt làm</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Ngày tạo</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Hành động</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Test")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Description")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Company")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Questions")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Attempts")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Created Date")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -197,21 +199,21 @@ export default function AdminTestsPage() {
                       <button
                         onClick={() => navigate({ to: `/admin/tests/${test.id}` })}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Xem chi tiết"
+                        title={tContent("View Details")}
                       >
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
                       <button
                         onClick={() => navigate({ to: `/admin/tests/${test.id}` })}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Chỉnh sửa"
+                        title={tContent("Edit")}
                       >
                         <Edit className="w-4 h-4 text-blue-600" />
                       </button>
                       <button
                         onClick={() => handleDelete(test.id)}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Xóa"
+                        title={tContent("Delete")}
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
@@ -226,8 +228,8 @@ export default function AdminTestsPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
           <div className="text-sm text-gray-600">
-            Hiển thị {(page - 1) * limit + 1} - {Math.min(page * limit, data?.total || 0)} của {data?.total || 0} kết
-            quả
+            {tContent("Showing")} {(page - 1) * limit + 1} - {Math.min(page * limit, data?.total || 0)} {tContent("of")}{" "}
+            {data?.total || 0} {tContent("results")}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -238,7 +240,7 @@ export default function AdminTestsPage() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="px-4 py-2 text-sm text-gray-700">
-              Trang {page} / {data?.total_pages || 1}
+              {tContent("Page")} {page} / {data?.total_pages || 1}
             </span>
             <button
               onClick={() => setPage((p) => p + 1)}

@@ -15,7 +15,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import CompanyAnalyticsDropdown from "../../components/CompanyAnalyticsDropdown";
-
+import { useDynamicTranslation } from "../../libs/translations";
 interface Company {
   id: string;
   email: string;
@@ -45,7 +45,7 @@ export default function AdminCompaniesPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [openAnalyticsId, setOpenAnalyticsId] = useState<string | null>(null);
-
+  const { tContent } = useDynamicTranslation();
   const toggleAnalytics = (id: string) => {
     setOpenAnalyticsId(openAnalyticsId === id ? null : id);
   };
@@ -67,7 +67,7 @@ export default function AdminCompaniesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Đang tải danh sách companies...</div>
+        <div className="text-gray-500">{tContent("Loading companies list...")}</div>
       </div>
     );
   }
@@ -77,8 +77,8 @@ export default function AdminCompaniesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Companies</h1>
-          <p className="text-gray-500 mt-1">Tổng số {total} companies</p>
+          <h1 className="text-2xl font-bold text-gray-900">{tContent("Manage Companies")}</h1>
+          <p className="text-gray-500 mt-1">{tContent("Total companies").replace("{count}", String(total))}</p>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export default function AdminCompaniesPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{total}</p>
-              <p className="text-sm text-gray-500">Tổng companies</p>
+              <p className="text-sm text-gray-500">{tContent("Total companies")}</p>
             </div>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function AdminCompaniesPage() {
               <p className="text-2xl font-bold text-gray-900">
                 {companies.filter((c) => c.subscription?.status === "active").length || 0}
               </p>
-              <p className="text-sm text-gray-500">Đang hoạt động</p>
+              <p className="text-sm text-gray-500">{tContent("Active")}</p>
             </div>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function AdminCompaniesPage() {
               <p className="text-2xl font-bold text-gray-900">
                 {companies.reduce((acc, c) => acc + (c.stats?.total_assignments || 0), 0)}
               </p>
-              <p className="text-sm text-gray-500">Tổng assignments</p>
+              <p className="text-sm text-gray-500">{tContent("Total assignments")}</p>
             </div>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function AdminCompaniesPage() {
               <p className="text-2xl font-bold text-gray-900">
                 {companies.reduce((acc, c) => acc + (c.stats?.total_candidates || 0), 0)}
               </p>
-              <p className="text-sm text-gray-500">Tổng candidates</p>
+              <p className="text-sm text-gray-500">{tContent("Total candidates")}</p>
             </div>
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function AdminCompaniesPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Tìm kiếm theo tên hoặc email..."
+            placeholder={tContent("Search by name or email...")}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
@@ -157,13 +157,15 @@ export default function AdminCompaniesPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr className="border-b border-gray-200">
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Company</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Email</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Gói hiện tại</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Assignments</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Candidates</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Ngày tạo</th>
-                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Phân tích</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Company")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Email")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">
+                  {tContent("Current Package")}
+                </th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Assignments")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Candidates")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Created Date")}</th>
+                <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Analytics")}</th>
               </tr>
             </thead>
             <tbody>
@@ -205,11 +207,11 @@ export default function AdminCompaniesPage() {
                               {company.subscription.package_name}
                             </span>
                             <p className="text-xs text-gray-400 mt-1">
-                              Đến {new Date(company.subscription.end_date).toLocaleDateString("vi-VN")}
+                              {tContent("Until")} {new Date(company.subscription.end_date).toLocaleDateString("vi-VN")}
                             </p>
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">Chưa có</span>
+                          <span className="text-sm text-gray-400">{tContent("No subscription")}</span>
                         )}
                       </td>
                       <td className="py-4 px-6">
@@ -236,12 +238,12 @@ export default function AdminCompaniesPage() {
                           {isOpen ? (
                             <>
                               <ChevronUp className="w-4 h-4" />
-                              Ẩn phân tích
+                              {tContent("Hide Analytics")}
                             </>
                           ) : (
                             <>
                               <ChevronDown className="w-4 h-4" />
-                              Xem phân tích
+                              {tContent("View Analytics")}
                             </>
                           )}
                         </button>
@@ -265,7 +267,8 @@ export default function AdminCompaniesPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
           <div className="text-sm text-gray-600">
-            Hiển thị {(page - 1) * limit + 1} - {Math.min(page * limit, total)} của {total} kết quả
+            {tContent("Showing")} {(page - 1) * limit + 1} - {Math.min(page * limit, total)} {tContent("of")} {total}{" "}
+            {tContent("results")}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -276,7 +279,7 @@ export default function AdminCompaniesPage() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="px-4 py-2 text-sm text-gray-700">
-              Trang {page} / {totalPages}
+              {tContent("Page")} {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => p + 1)}

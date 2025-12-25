@@ -30,21 +30,21 @@ import {
 } from "recharts";
 import { AppShell } from "../../components/layout/AppShell";
 import { useState } from "react";
-
+import { useDynamicTranslation } from "../../libs/translations";
 const ITEMS_PER_PAGE = 5;
 
 export default function CompanyResultDetailPage() {
   const { id: assessmentId } = useParams({ from: "/company/results/$id" });
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-
+  const { tContent } = useDynamicTranslation();
   const { data, isLoading, error } = useAssignmentDetail(assessmentId);
 
   if (isLoading) {
     return (
       <AppShell activeNav="assignments">
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải kết quả...</div>
+          <div className="text-gray-500">{tContent("Loading result...")}</div>
         </div>
       </AppShell>
     );
@@ -54,7 +54,7 @@ export default function CompanyResultDetailPage() {
     return (
       <AppShell activeNav="assignments">
         <div className="flex items-center justify-center h-64">
-          <div className="text-red-500">Không tìm thấy kết quả</div>
+          <div className="text-red-500">{tContent("Result not found")}</div>
         </div>
       </AppShell>
     );
@@ -109,7 +109,7 @@ export default function CompanyResultDetailPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-5 h-5" />
-            Quay lại danh sách
+            {tContent("Back to list")}
           </button>
         </div>
 
@@ -150,7 +150,7 @@ export default function CompanyResultDetailPage() {
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Award className="w-5 h-5 text-purple-600 mr-2" />
-              Tổng quan
+              {tContent("Overview")}
             </h2>
             <p className="text-gray-700">{mbtiType.overview}</p>
           </div>
@@ -163,7 +163,7 @@ export default function CompanyResultDetailPage() {
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
-                Phong cách giao tiếp
+                {tContent("Communication Style")}
               </h2>
               <p className="text-gray-700">{mbtiType.communication_style}</p>
             </div>
@@ -174,7 +174,7 @@ export default function CompanyResultDetailPage() {
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <Users2 className="w-5 h-5 text-green-600 mr-2" />
-                Phong cách lãnh đạo
+                {tContent("Leadership Style")}
               </h2>
               <p className="text-gray-700">{mbtiType.leadership_style}</p>
             </div>
@@ -188,7 +188,7 @@ export default function CompanyResultDetailPage() {
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <Target className="w-5 h-5 text-purple-600 mr-2" />
-                Phân tích theo chiều
+                {tContent("Dimension Analysis")}
               </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={radarData}>
@@ -205,7 +205,7 @@ export default function CompanyResultDetailPage() {
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <BarChart3 className="w-5 h-5 text-purple-600 mr-2" />
-                Phân bố câu trả lời
+                {tContent("Answer Distribution")}
               </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={barData}>
@@ -228,7 +228,7 @@ export default function CompanyResultDetailPage() {
         <div className="grid lg:grid-cols-2 gap-6">
           {mbtiType?.strengths && mbtiType.strengths.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-xl font-semibold mb-4 text-green-700">Điểm mạnh</h2>
+              <h2 className="text-xl font-semibold mb-4 text-green-700">{tContent("Strengths")}</h2>
               <ul className="space-y-2">
                 {mbtiType.strengths.map((s, i) => (
                   <li key={i} className="flex items-start gap-2 text-gray-700">
@@ -241,7 +241,7 @@ export default function CompanyResultDetailPage() {
 
           {mbtiType?.weaknesses && mbtiType.weaknesses.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-xl font-semibold mb-4 text-orange-700">Điểm yếu</h2>
+              <h2 className="text-xl font-semibold mb-4 text-orange-700">{tContent("Weaknesses")}</h2>
               <ul className="space-y-2">
                 {mbtiType.weaknesses.map((w, i) => (
                   <li key={i} className="flex items-start gap-2 text-gray-700">
@@ -260,7 +260,7 @@ export default function CompanyResultDetailPage() {
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
                   <Briefcase className="w-5 h-5 text-blue-600 mr-2" />
-                  Gợi ý nghề nghiệp
+                  {tContent("Career Suggestions")}
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {mbtiType.career_recommendations.map((c, i) => (
@@ -276,7 +276,7 @@ export default function CompanyResultDetailPage() {
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
                   <Users className="w-5 h-5 text-purple-600 mr-2" />
-                  Vai trò phù hợp
+                  {tContent("Suitable Roles")}
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {mbtiType.suitable_roles?.map((r: string, i: number) => (
@@ -292,7 +292,7 @@ export default function CompanyResultDetailPage() {
 
         {/* Detailed Responses with Pagination */}
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">Chi tiết câu trả lời</h2>
+          <h2 className="text-xl font-semibold mb-4">{tContent("Answer Details")}</h2>
           <div className="space-y-4">
             {paginatedResponses.map((resp, idx) => {
               const question = test?.questions?.find((q) => q.id === resp.question_id);
@@ -319,17 +319,17 @@ export default function CompanyResultDetailPage() {
                 disabled={currentPage === 1}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
               >
-                Trước
+                {tContent("Previous")}
               </button>
               <span className="text-gray-700">
-                Trang {currentPage} / {totalPages}
+                {tContent("Page")} {currentPage} {tContent("of")} {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
               >
-                Tiếp
+                {tContent("Next")}
               </button>
             </div>
           )}

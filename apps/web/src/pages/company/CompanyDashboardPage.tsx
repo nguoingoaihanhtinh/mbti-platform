@@ -18,12 +18,13 @@ import { AppShell } from "../../components/layout/AppShell";
 import { useCompanyUsers, useDashboardStats, useAssignments } from "../../hooks/useAssignments";
 import { useQuery } from "@tanstack/react-query";
 import api from "../../libs/api";
+import { useDynamicTranslation } from "../../libs/translations";
 
 const COLORS = ["#9333ea", "#ec4899", "#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 export default function CompanyDashboardPage() {
   const navigate = useNavigate();
-
+  const { tContent } = useDynamicTranslation();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: users, isLoading: usersLoading } = useCompanyUsers();
   const { data: assignmentsData, isLoading: assignmentsLoading } = useAssignments(1, 1000);
@@ -63,7 +64,7 @@ export default function CompanyDashboardPage() {
     return (
       <AppShell>
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải dashboard...</div>
+          <div className="text-gray-500">{tContent("Loading dashboard...")}</div>
         </div>
       </AppShell>
     );
@@ -75,15 +76,15 @@ export default function CompanyDashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-500 mt-1">Tổng quan hoạt động công ty của bạn</p>
+            <h1 className="text-2xl font-bold text-gray-900">{tContent("Dashboard")}</h1>
+            <p className="text-gray-500 mt-1">{tContent("Company activity overview")}</p>
           </div>
           <button
             onClick={() => navigate({ to: "/company/assignments/create" })}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow"
           >
             <Plus className="w-4 h-4" />
-            Gửi test mới
+            {tContent("Send new test")}
           </button>
         </div>
 
@@ -93,7 +94,7 @@ export default function CompanyDashboardPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Hạn mức</p>
+                <p className="text-sm text-gray-500">{tContent("Quota")}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.quota.used || 0} / {stats?.quota.max || 0}
                 </p>
@@ -110,14 +111,16 @@ export default function CompanyDashboardPage() {
                 }}
               ></div>
             </div>
-            <p className="text-xs text-gray-500 mt-2">Gói: {stats?.quota.package_name}</p>
+            <p className="text-xs text-gray-500 mt-2">
+              {tContent("Package")}: {stats?.quota.package_name}
+            </p>
           </div>
 
           {/* Total Assignments */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Tổng assignments</p>
+                <p className="text-sm text-gray-500">{tContent("Total assignments")}</p>
                 <p className="text-2xl font-bold text-gray-900">{totalAssignments}</p>
               </div>
               <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
@@ -130,7 +133,7 @@ export default function CompanyDashboardPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Nhân viên công ty</p>
+                <p className="text-sm text-gray-500">{tContent("Company employees")}</p>
                 <p className="text-2xl font-bold text-gray-900">{users?.length || 0}</p>
               </div>
               <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
@@ -143,7 +146,7 @@ export default function CompanyDashboardPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Đã hoàn thành</p>
+                <p className="text-sm text-gray-500">{tContent("Completed")}</p>
                 <p className="text-2xl font-bold text-gray-900">{completed}</p>
               </div>
               <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center">
@@ -158,7 +161,7 @@ export default function CompanyDashboardPage() {
           {/* MBTI Distribution */}
           {stats?.mbti_distribution && stats.mbti_distribution.length > 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố MBTI</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("MBTI Distribution")}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -183,20 +186,20 @@ export default function CompanyDashboardPage() {
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố MBTI</h3>
-              <p className="text-gray-500">Chưa có dữ liệu MBTI</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("MBTI Distribution")}</h3>
+              <p className="text-gray-500">{tContent("No MBTI data available")}</p>
             </div>
           )}
 
           {/* Assignment Status */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Trạng thái Assignment</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("Assignment Status")}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={[
-                  { name: "Đã gửi", value: assigned },
-                  { name: "Đang làm", value: inProgress },
-                  { name: "Hoàn thành", value: completed },
+                  { name: tContent("Assigned"), value: assigned },
+                  { name: tContent("In Progress"), value: inProgress },
+                  { name: tContent("Completed"), value: completed },
                 ]}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -217,7 +220,7 @@ export default function CompanyDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Tần suất sử dụng assignments trong 30 ngày gần đây
+              {tContent("Usage frequency of assignments in the last 30 days")}
             </h3>
             {timeline && timeline.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
@@ -233,7 +236,7 @@ export default function CompanyDashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-gray-500 text-center py-8">Chưa có dữ liệu sử dụng trong 30 ngày gần đây</p>
+              <p className="text-gray-500 text-center py-8">{tContent("No usage data in the last 30 days")}</p>
             )}
           </div>
         </div>
@@ -247,8 +250,8 @@ export default function CompanyDashboardPage() {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-4">
               <FileText className="w-5 h-5 text-purple-600" />
             </div>
-            <h3 className="font-semibold text-gray-900">Quản lý Assignments</h3>
-            <p className="text-sm text-gray-500 mt-1">Xem và theo dõi tất cả bài test đã gửi</p>
+            <h3 className="font-semibold text-gray-900">{tContent("Manage Assignments")}</h3>
+            <p className="text-sm text-gray-500 mt-1">{tContent("View and track all sent tests")}</p>
           </button>
 
           <button
@@ -258,8 +261,8 @@ export default function CompanyDashboardPage() {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-4">
               <Users className="w-5 h-5 text-blue-600" />
             </div>
-            <h3 className="font-semibold text-gray-900">Nhân viên</h3>
-            <p className="text-sm text-gray-500 mt-1">Quản lý danh sách nhân viên trong công ty</p>
+            <h3 className="font-semibold text-gray-900">{tContent("Employees")}</h3>
+            <p className="text-sm text-gray-500 mt-1">{tContent("Manage employee list")}</p>
           </button>
 
           <button
@@ -269,8 +272,8 @@ export default function CompanyDashboardPage() {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-4">
               <Package className="w-5 h-5 text-green-600" />
             </div>
-            <h3 className="font-semibold text-gray-900">Gói dịch vụ</h3>
-            <p className="text-sm text-gray-500 mt-1">Xem và cập nhật gói dịch vụ hiện tại</p>
+            <h3 className="font-semibold text-gray-900">{tContent("Service Package")}</h3>
+            <p className="text-sm text-gray-500 mt-1">{tContent("View and update current package")}</p>
           </button>
         </div>
       </div>

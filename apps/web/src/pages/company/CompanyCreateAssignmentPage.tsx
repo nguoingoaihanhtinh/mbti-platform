@@ -3,13 +3,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAvailableTests, useCreateAssignment } from "../../hooks/useAssignments";
 import { Send, ArrowLeft, FileText, Mail, User, CheckCircle, AlertCircle } from "lucide-react";
 import { AppShell } from "../../components/layout/AppShell";
-
+import { useDynamicTranslation } from "../../libs/translations";
 export default function CompanyCreateAssignmentPage() {
   const navigate = useNavigate();
   const { data: testsData, isLoading: testsLoading } = useAvailableTests();
   const tests = testsData?.data || [];
   const createAssignment = useCreateAssignment();
-
+  const { tContent } = useDynamicTranslation();
   const [formData, setFormData] = useState({
     test_id: "",
     candidate_email: "",
@@ -26,12 +26,12 @@ export default function CompanyCreateAssignmentPage() {
 
     const newErrors: Record<string, string> = {};
     if (!formData.test_id) {
-      newErrors.test_id = "Vui lòng chọn bài test";
+      newErrors.test_id = tContent("Please select a test");
     }
     if (!formData.candidate_email) {
-      newErrors.candidate_email = "Vui lòng nhập email ứng viên";
+      newErrors.candidate_email = tContent("Please enter candidate email");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.candidate_email)) {
-      newErrors.candidate_email = "Email không hợp lệ";
+      newErrors.candidate_email = tContent("Invalid email");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -59,7 +59,7 @@ export default function CompanyCreateAssignmentPage() {
     return (
       <AppShell>
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải danh sách test...</div>
+          <div className="text-gray-500">{tContent("Loading tests list...")}</div>
         </div>
       </AppShell>
     );
@@ -75,14 +75,16 @@ export default function CompanyCreateAssignmentPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Quay lại</span>
+            <span> {tContent("Back")}</span>
           </button>
         </div>
 
         {/* Title */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Gửi bài test cho ứng viên</h1>
-          <p className="text-gray-600">Chọn bài test và nhập thông tin ứng viên để gửi link làm bài</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{tContent("Send test to candidate")}</h1>
+          <p className="text-gray-600">
+            {tContent("Select a test and enter candidate information to send the test link")}
+          </p>
         </div>
 
         {/* Success Message */}
@@ -90,8 +92,8 @@ export default function CompanyCreateAssignmentPage() {
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
             <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-green-900 font-medium">Gửi bài test thành công!</p>
-              <p className="text-green-700 text-sm mt-1">Đang chuyển hướng đến danh sách assignments...</p>
+              <p className="text-green-900 font-medium">{tContent("Test sent successfully!")}</p>
+              <p className="text-green-700 text-sm mt-1">{tContent("Redirecting to assignments list...")}</p>
             </div>
           </div>
         )}
@@ -101,7 +103,7 @@ export default function CompanyCreateAssignmentPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-red-900 font-medium">Có lỗi xảy ra</p>
+              <p className="text-red-900 font-medium">{tContent("An error occurred")}</p>
               <p className="text-red-700 text-sm mt-1">{errors.submit}</p>
             </div>
           </div>
@@ -113,7 +115,7 @@ export default function CompanyCreateAssignmentPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4">
               <FileText className="w-5 h-5 text-purple-600" />
-              Chọn bài test
+              {tContent("Select test")}
             </label>
             <select
               value={formData.test_id}
@@ -122,7 +124,7 @@ export default function CompanyCreateAssignmentPage() {
                 errors.test_id ? "border-red-500" : "border-gray-300"
               }`}
             >
-              <option value="">-- Chọn bài test --</option>
+              <option value="">{tContent("-- Select test --")}</option>
               {tests?.map((test: any) => (
                 <option key={test.id} value={test.id}>
                   {test.title}
@@ -142,19 +144,19 @@ export default function CompanyCreateAssignmentPage() {
 
           {/* Candidate Information */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin ứng viên</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("Candidate info")}</h3>
 
             {/* Email */}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <Mail className="w-4 h-4 text-gray-500" />
-                Email ứng viên *
+                {tContent("Candidate email *")}
               </label>
               <input
                 type="email"
                 value={formData.candidate_email}
                 onChange={(e) => setFormData({ ...formData, candidate_email: e.target.value })}
-                placeholder="candidate@example.com"
+                placeholder={tContent("Enter candidate email")}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
                   errors.candidate_email ? "border-red-500" : "border-gray-300"
                 }`}
@@ -166,13 +168,13 @@ export default function CompanyCreateAssignmentPage() {
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <User className="w-4 h-4 text-gray-500" />
-                Tên ứng viên (tùy chọn)
+                {tContent("Candidate name (optional)")}
               </label>
               <input
                 type="text"
                 value={formData.candidate_fullname}
                 onChange={(e) => setFormData({ ...formData, candidate_fullname: e.target.value })}
-                placeholder="Nguyễn Văn A"
+                placeholder={tContent("Enter candidate name")}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
             </div>
@@ -185,7 +187,7 @@ export default function CompanyCreateAssignmentPage() {
               onClick={() => navigate({ to: "/company/assignments" })}
               className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Hủy
+              {tContent("Cancel")}
             </button>
             <button
               type="submit"
@@ -193,7 +195,7 @@ export default function CompanyCreateAssignmentPage() {
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
-              <span>{createAssignment.isPending ? "Đang gửi..." : "Gửi bài test"}</span>
+              <span>{createAssignment.isPending ? tContent("Sending...") : tContent("Send test")}</span>
             </button>
           </div>
         </form>

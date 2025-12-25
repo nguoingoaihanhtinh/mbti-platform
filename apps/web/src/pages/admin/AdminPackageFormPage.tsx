@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save, CheckCircle, AlertCircle, Package, DollarSign, Users } from "lucide-react";
 import { useAdminPackage } from "../../hooks/useAdmin";
-
+import { useDynamicTranslation } from "../../libs/translations";
 import api from "../../libs/api";
 
 interface PackageFormData {
@@ -21,7 +21,7 @@ interface Props {
 
 export default function AdminPackageFormPage({ packageId }: Props) {
   const navigate = useNavigate();
-
+  const { tContent } = useDynamicTranslation();
   const isEdit = !!packageId;
 
   const queryClient = useQueryClient();
@@ -60,7 +60,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         return response.data;
       } else {
         const response = await api.post("/admin/packages", data);
-        console.log("RAW RESPONSE:", response.data);
+        // console.log("RAW RESPONSE:", response.data);
         return response.data;
       }
     },
@@ -73,7 +73,9 @@ export default function AdminPackageFormPage({ packageId }: Props) {
     },
     onError: (error: any) => {
       const message =
-        error.response?.data?.message || error.message || `Có lỗi xảy ra khi ${isEdit ? "cập nhật" : "tạo"} package`;
+        error.response?.data?.message ||
+        error.message ||
+        `Có lỗi xảy ra khi ${isEdit ? tContent("updating") : tContent("creating")} package`;
       setErrors({ submit: message });
     },
   });
@@ -83,10 +85,11 @@ export default function AdminPackageFormPage({ packageId }: Props) {
     setErrors({});
 
     const newErrors: Record<string, string> = {};
-    if (!formData.name) newErrors.name = "Vui lòng nhập tên package";
-    if (!formData.code) newErrors.code = "Vui lòng nhập mã package";
-    if (formData.price_per_month <= 0) newErrors.price_per_month = "Giá phải lớn hơn 0";
-    if (formData.max_assignments <= 0) newErrors.max_assignments = "Số assignment phải lớn hơn 0";
+    if (!formData.name) newErrors.name = tContent("Please enter the package name");
+    if (!formData.code) newErrors.code = tContent("Please enter the package code");
+    if (formData.price_per_month <= 0) newErrors.price_per_month = tContent("Price must be greater than 0");
+    if (formData.max_assignments <= 0)
+      newErrors.max_assignments = tContent("Number of assignments must be greater than 0");
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -99,7 +102,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
   if (isEdit && isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Đang tải...</div>
+        <div className="text-gray-500">{tContent("Loading...")}</div>
       </div>
     );
   }
@@ -113,17 +116,21 @@ export default function AdminPackageFormPage({ packageId }: Props) {
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Quay lại danh sách</span>
+          <span>{tContent("Back to list")}</span>
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{isEdit ? "Chỉnh sửa Package" : "Tạo Package Mới"}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {isEdit ? tContent("Edit Package") : tContent("Create New Package")}
+        </h1>
       </div>
 
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
           <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-green-900 font-medium">{isEdit ? "Cập nhật" : "Tạo"} package thành công!</p>
-            <p className="text-green-700 text-sm mt-1">Đang chuyển hướng...</p>
+            <p className="text-green-900 font-medium">
+              {isEdit ? tContent("Updated") : tContent("Created")} package {tContent("successfully")}!
+            </p>
+            <p className="text-green-700 text-sm mt-1">{tContent("Redirecting...")}</p>
           </div>
         </div>
       )}
@@ -132,7 +139,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-red-900 font-medium">Có lỗi xảy ra</p>
+            <p className="text-red-900 font-medium">{tContent("An error occurred")}</p>
             <p className="text-red-700 text-sm mt-1">{errors.submit}</p>
           </div>
         </div>
@@ -142,18 +149,18 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
             <Package className="w-6 h-6 text-purple-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Thông tin cơ bản</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{tContent("Basic Information")}</h2>
           </div>
 
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tên package *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Package Name")} *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Basic Plan"
+                  placeholder={tContent("Basic Plan")}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
                     errors.name ? "border-red-500" : "border-gray-300"
                   }`}
@@ -162,7 +169,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mã package *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Package Code")} *</label>
                 <input
                   type="text"
                   value={formData.code}
@@ -189,7 +196,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                 className="rounded"
               />
-              <span className="text-sm text-gray-700">Kích hoạt package này</span>
+              <span className="text-sm text-gray-700">{tContent("Activate this package")}</span>
             </div>
           </div>
         </div>
@@ -197,16 +204,16 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
             <DollarSign className="w-6 h-6 text-green-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Giá</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{tContent("Pricing")}</h2>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Giá (VNĐ/tháng) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Price (VND/month)")} *</label>
             <input
               type="number"
               value={formData.price_per_month}
               onChange={(e) => setFormData({ ...formData, price_per_month: Number(e.target.value) })}
-              placeholder="100000"
+              placeholder={tContent("100000")}
               min="0"
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
                 errors.price_per_month ? "border-red-500" : "border-gray-300"
@@ -219,11 +226,11 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-6 h-6 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Giới hạn</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{tContent("Limits")}</h2>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Số assignment tối đa *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Maximum Assignments")} *</label>
             <input
               type="number"
               value={formData.max_assignments}
@@ -244,11 +251,11 @@ export default function AdminPackageFormPage({ packageId }: Props) {
         </div>
         {/* Description */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Mô tả (tùy chọn)</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{tContent("Description (optional)")}</h2>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Mô tả ngắn về gói dịch vụ..."
+            placeholder={tContent("Short description of the package...")}
             rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
@@ -256,7 +263,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
 
         {/* Benefits / Features */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Tính năng (benefits)</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{tContent("Benefits / Features")}</h2>
           <div className="space-y-2">
             {(formData.benefits || []).map((benefit, index) => (
               <div key={index} className="flex gap-2">
@@ -268,7 +275,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
                     newBenefits[index] = e.target.value;
                     setFormData({ ...formData, benefits: newBenefits });
                   }}
-                  placeholder="Ví dụ: Hỗ trợ ưu tiên"
+                  placeholder={tContent("e.g., Priority Support")}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                 />
                 <button
@@ -280,7 +287,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
                   }}
                   className="px-3 text-red-600 hover:text-red-800"
                 >
-                  Xóa
+                  {tContent("Remove")}
                 </button>
               </div>
             ))}
@@ -294,7 +301,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
               }}
               className="text-sm text-purple-600 hover:text-purple-800 font-medium"
             >
-              + Thêm tính năng
+              + {tContent("Add Feature")}
             </button>
           </div>
         </div>
@@ -305,7 +312,7 @@ export default function AdminPackageFormPage({ packageId }: Props) {
             onClick={() => navigate({ to: "/admin/packages" })}
             className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Hủy
+            {tContent("Cancel")}
           </button>
           <button
             type="submit"
@@ -313,7 +320,13 @@ export default function AdminPackageFormPage({ packageId }: Props) {
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
-            <span>{saveMutation.isPending ? "Đang lưu..." : isEdit ? "Cập nhật" : "Tạo package"}</span>
+            <span>
+              {saveMutation.isPending
+                ? tContent("Saving...")
+                : isEdit
+                  ? tContent("Update")
+                  : tContent("Create Package")}
+            </span>
           </button>
         </div>
       </form>

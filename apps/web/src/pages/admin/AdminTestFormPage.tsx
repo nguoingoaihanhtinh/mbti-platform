@@ -3,7 +3,7 @@ import { useMatch, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../libs/api";
 import { ArrowLeft, Save, Plus, Trash2, FileText, CheckCircle, AlertCircle, GripVertical } from "lucide-react";
-
+import { useDynamicTranslation } from "../../libs/translations";
 interface Answer {
   id?: string;
   text: string;
@@ -34,7 +34,7 @@ interface TestFormData {
 
 export default function AdminTestFormPage() {
   const navigate = useNavigate();
-
+  const { tContent } = useDynamicTranslation();
   const editMatch = useMatch({ from: "/admin/tests/$testId", shouldThrow: false });
 
   const isEdit = !!editMatch;
@@ -100,7 +100,9 @@ export default function AdminTestFormPage() {
     },
     onError: (error: any) => {
       setErrors({
-        submit: error.response?.data?.message || `Có lỗi xảy ra khi ${isEdit ? "cập nhật" : "tạo"} test`,
+        submit:
+          error.response?.data?.message ||
+          tContent("Error saving test").replace("{action}", isEdit ? "cập nhật" : "tạo"),
       });
     },
   });
@@ -173,24 +175,24 @@ export default function AdminTestFormPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title?.trim()) {
-      newErrors.title = "Vui lòng nhập tiêu đề test";
+      newErrors.title = tContent("Please enter the test title");
     }
 
     if (formData.questions.length === 0) {
-      newErrors.questions = "Vui lòng thêm ít nhất 1 câu hỏi";
+      newErrors.questions = tContent("Please add at least one question");
     }
 
     formData.questions.forEach((q, i) => {
       if (!q.text?.trim()) {
-        newErrors[`question_${i}`] = "Câu hỏi không được để trống";
+        newErrors[`question_${i}`] = tContent("Question cannot be empty");
       }
       if (q.answers.length < 2) {
-        newErrors[`question_${i}_answers`] = "Cần ít nhất 2 câu trả lời";
+        newErrors[`question_${i}_answers`] = tContent("At least 2 answers are required");
       }
 
       q.answers.forEach((a, j) => {
         if (!a.text?.trim()) {
-          newErrors[`question_${i}_answer_${j}`] = "Câu trả lời không được để trống";
+          newErrors[`question_${i}_answer_${j}`] = tContent("Answer cannot be empty");
         }
       });
     });
@@ -206,7 +208,7 @@ export default function AdminTestFormPage() {
   if (isEdit && loadingTest) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Đang tải...</div>
+        <div className="text-gray-500">{tContent("Loading...")}</div>
       </div>
     );
   }
@@ -219,17 +221,21 @@ export default function AdminTestFormPage() {
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Quay lại</span>
+          <span>{tContent("Go Back")}</span>
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{isEdit ? "Chỉnh sửa Test" : "Tạo Test Mới"}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {isEdit ? tContent("Edit Test") : tContent("Create New Test")}
+        </h1>
       </div>
 
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
           <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-green-900 font-medium">{isEdit ? "Cập nhật" : "Tạo"} test thành công!</p>
-            <p className="text-green-700 text-sm mt-1">Đang chuyển hướng...</p>
+            <p className="text-green-900 font-medium">
+              {isEdit ? tContent("Update") : tContent("Create")} {tContent("test")} {tContent("successful")}!
+            </p>
+            <p className="text-green-700 text-sm mt-1">{tContent("Redirecting...")}</p>
           </div>
         </div>
       )}
@@ -238,7 +244,7 @@ export default function AdminTestFormPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-red-900 font-medium">Có lỗi xảy ra</p>
+            <p className="text-red-900 font-medium">{tContent("An error occurred")}</p>
             <p className="text-red-700 text-sm mt-1">{errors.submit}</p>
           </div>
         </div>
@@ -247,12 +253,12 @@ export default function AdminTestFormPage() {
       <div className="space-y-6">
         {/* Basic Info */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông tin cơ bản</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">{tContent("Basic Information")}</h2>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tiêu đề test <span className="text-red-500">*</span>
+                {tContent("Test Title")} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -267,11 +273,11 @@ export default function AdminTestFormPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{tContent("Description")}</label>
               <textarea
                 value={formData.description || ""}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value || null })}
-                placeholder="Mô tả về test..."
+                placeholder={tContent("Description about the test...")}
                 rows={3}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
@@ -286,7 +292,7 @@ export default function AdminTestFormPage() {
                 className="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-600"
               />
               <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
-                Kích hoạt test
+                {tContent("Activate")} {tContent("test")}
               </label>
             </div>
           </div>
@@ -295,14 +301,16 @@ export default function AdminTestFormPage() {
         {/* Questions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Câu hỏi ({formData.questions.length})</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {tContent("Questions")} ({formData.questions.length})
+            </h2>
             <button
               type="button"
               onClick={handleAddQuestion}
               className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              <span>Thêm câu hỏi</span>
+              <span>{tContent("Add Question")}</span>
             </button>
           </div>
 
@@ -319,7 +327,9 @@ export default function AdminTestFormPage() {
                     <GripVertical className="w-5 h-5 text-gray-400 cursor-move" />
                     <div className="flex items-center gap-2">
                       <FileText className="w-5 h-5 text-purple-600" />
-                      <span className="font-medium text-gray-900">Câu {qIndex + 1}</span>
+                      <span className="font-medium text-gray-900">
+                        {tContent("Question")} {qIndex + 1}
+                      </span>
                     </div>
                   </div>
                   <button
@@ -336,7 +346,7 @@ export default function AdminTestFormPage() {
                   {/* Question Text */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nội dung câu hỏi <span className="text-red-500">*</span>
+                      {tContent("Question Text")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -354,24 +364,26 @@ export default function AdminTestFormPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-gray-600 mb-1">Loại câu hỏi</label>
+                      <label className="block text-sm text-gray-600 mb-1">{tContent("Question Type")}</label>
                       <select
                         value={question.type || "single_choice"}
                         onChange={(e) => handleQuestionChange(qIndex, "type", e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                       >
-                        <option value="single_choice">Chọn 1 đáp án</option>
-                        <option value="multiple_choice">Chọn nhiều đáp án</option>
-                        <option value="scale">Thang đo</option>
+                        <option value="single_choice">{tContent("Choose 1 answer")}</option>
+                        <option value="multiple_choice">{tContent("Choose multiple answers")}</option>
+                        <option value="scale">{tContent("Scale")}</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-600 mb-1">Dimension (E/I, S/N, T/F, J/P)</label>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        {tContent("Dimension (E/I, S/N, T/F, J/P)")}
+                      </label>
                       <input
                         type="text"
                         value={question.dimension || ""}
                         onChange={(e) => handleQuestionChange(qIndex, "dimension", e.target.value || null)}
-                        placeholder="Ví dụ: E/I"
+                        placeholder={tContent("Example: E/I")}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                       />
                     </div>
@@ -381,14 +393,14 @@ export default function AdminTestFormPage() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-sm font-medium text-gray-700">
-                        Câu trả lời <span className="text-red-500">*</span>
+                        {tContent("Answers")} <span className="text-red-500">*</span>
                       </label>
                       <button
                         type="button"
                         onClick={() => handleAddAnswer(qIndex)}
                         className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                       >
-                        + Thêm câu trả lời
+                        + {tContent("Add Answer")}
                       </button>
                     </div>
 
@@ -400,7 +412,7 @@ export default function AdminTestFormPage() {
                               type="text"
                               value={answer.text}
                               onChange={(e) => handleAnswerChange(qIndex, aIndex, "text", e.target.value)}
-                              placeholder={`Câu trả lời ${aIndex + 1}`}
+                              placeholder={`${tContent("Answer")} ${aIndex + 1}`}
                               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 ${
                                 errors[`question_${qIndex}_answer_${aIndex}`] ? "border-red-500" : "border-gray-300"
                               }`}
@@ -415,8 +427,8 @@ export default function AdminTestFormPage() {
                             type="number"
                             value={answer.score}
                             onChange={(e) => handleAnswerChange(qIndex, aIndex, "score", parseInt(e.target.value) || 0)}
-                            placeholder="Điểm"
-                            title="Điểm số của câu trả lời"
+                            placeholder={tContent("Score")}
+                            title={tContent("Score of the answer")}
                             className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                           />
                           {question.answers.length > 2 && (
@@ -424,7 +436,7 @@ export default function AdminTestFormPage() {
                               type="button"
                               onClick={() => handleRemoveAnswer(qIndex, aIndex)}
                               className="p-2 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-                              title="Xóa câu trả lời"
+                              title={tContent("Delete Answer")}
                             >
                               <Trash2 className="w-4 h-4 text-red-600" />
                             </button>
@@ -443,14 +455,14 @@ export default function AdminTestFormPage() {
             {formData.questions.length === 0 && (
               <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500 mb-4">Chưa có câu hỏi nào</p>
+                <p className="text-gray-500 mb-4">{tContent("No questions yet")}</p>
                 <button
                   type="button"
                   onClick={handleAddQuestion}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Thêm câu hỏi đầu tiên</span>
+                  <span>{tContent("Add the first question")}</span>
                 </button>
               </div>
             )}
@@ -472,7 +484,13 @@ export default function AdminTestFormPage() {
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
-            <span>{saveMutation.isPending ? "Đang lưu..." : isEdit ? "Cập nhật Test" : "Tạo Test"}</span>
+            <span>
+              {saveMutation.isPending
+                ? tContent("Saving...")
+                : isEdit
+                  ? tContent("Update Test")
+                  : tContent("Create Test")}
+            </span>
           </button>
         </div>
       </div>

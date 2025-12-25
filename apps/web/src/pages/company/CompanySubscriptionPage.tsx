@@ -6,7 +6,7 @@ import api from "../../libs/api";
 import { CreditCard, Users, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { useState } from "react";
-
+import { useDynamicTranslation } from "../../libs/translations";
 interface Package {
   id: string;
   code: string;
@@ -31,7 +31,7 @@ interface Subscription {
 export default function CompanySubscriptionPage() {
   const navigate = useNavigate();
   const [showTimeline, setShowTimeline] = useState(false);
-
+  const { tContent } = useDynamicTranslation();
   const { data: subscription, isLoading: subLoading } = useQuery({
     queryKey: ["company", "subscription"],
     queryFn: async () => {
@@ -55,7 +55,7 @@ export default function CompanySubscriptionPage() {
     return (
       <AppShell activeNav="subscription">
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải...</div>
+          <div className="text-gray-500">{tContent("Loading...")}</div>
         </div>
       </AppShell>
     );
@@ -67,13 +67,15 @@ export default function CompanySubscriptionPage() {
         <div className="max-w-2xl mx-auto text-center py-12">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             <AlertCircle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Chưa có gói đăng ký</h2>
-            <p className="text-gray-600 mb-6">Bạn chưa đăng ký gói dịch vụ nào. Hãy chọn gói phù hợp để bắt đầu.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{tContent("No subscription yet")}</h2>
+            <p className="text-gray-600 mb-6">
+              {tContent("You haven't subscribed to any package. Choose a suitable plan to get started.")}
+            </p>
             <button
               onClick={() => navigate({ to: "/company/packages" })}
               className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow"
             >
-              Xem các gói dịch vụ
+              {tContent("View packages")}
             </button>
           </div>
         </div>
@@ -101,14 +103,14 @@ export default function CompanySubscriptionPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gói hiện tại</h1>
-            <p className="text-gray-500 mt-1">Quản lý gói đăng ký của bạn</p>
+            <h1 className="text-2xl font-bold text-gray-900">{tContent("Current Subscription")}</h1>
+            <p className="text-gray-500 mt-1">{tContent("Manage your subscription")}</p>
           </div>
           <button
             onClick={() => navigate({ to: "/company/packages" })}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
           >
-            Nâng cấp gói
+            {tContent("Upgrade package")}
           </button>
         </div>
 
@@ -123,12 +125,14 @@ export default function CompanySubscriptionPage() {
                     status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
                   }`}
                 >
-                  {status === "active" ? "Đang hoạt động" : "Không khả dụng"}
+                  {status === "active" ? tContent("Active") : tContent("Inactive")}
                 </span>
               </div>
-              <p className="text-gray-500">Mã gói: {packages.code.toUpperCase()}</p>
+              <p className="text-gray-500">
+                {tContent("Package code")}: {packages.code.toUpperCase()}
+              </p>
               <p className="text-sm text-gray-500 mt-1">
-                Giá: {packages.price_per_month.toLocaleString("vi-VN")} ₫ / tháng
+                {tContent("Price")}: {packages.price_per_month.toLocaleString("vi-VN")} ₫ / {tContent("month")}
               </p>
             </div>
             <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center">
@@ -141,7 +145,7 @@ export default function CompanySubscriptionPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-purple-600" />
-                <span className="text-sm font-medium text-gray-900">Đã sử dụng</span>
+                <span className="text-sm font-medium text-gray-900">{tContent("Used")}</span>
               </div>
               <span className="text-sm text-gray-600">
                 {usedAssignments} / {totalAssignments}
@@ -160,16 +164,22 @@ export default function CompanySubscriptionPage() {
               />
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Còn lại</span>
-              <span className="font-medium text-green-600">{remaining} lượt</span>
+              <span className="text-gray-500">{tContent("Remaining")}</span>
+              <span className="font-medium text-green-600">
+                {remaining} {tContent("assignments")}
+              </span>
             </div>
-            {carryOver > 0 && <div className="text-xs text-gray-500 mt-2">+ {carryOver} lượt từ gói trước</div>}
+            {carryOver > 0 && (
+              <div className="text-xs text-gray-500 mt-2">
+                + {carryOver} {tContent("assignments")} {tContent("from previous package")}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("Quick Actions")}</h3>
           <div className="grid md:grid-cols-2 gap-4">
             <button
               onClick={() => navigate({ to: "/company/packages" })}
@@ -179,8 +189,8 @@ export default function CompanySubscriptionPage() {
                 <TrendingUp className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">Nâng cấp gói</p>
-                <p className="text-sm text-gray-500">Tăng giới hạn sử dụng</p>
+                <p className="font-medium text-gray-900">{tContent("Upgrade")}</p>
+                <p className="text-sm text-gray-500">{tContent("Increase usage limit")}</p>
               </div>
             </button>
 
@@ -193,7 +203,7 @@ export default function CompanySubscriptionPage() {
               </div>
               <div>
                 <p className="font-medium text-gray-900">{showTimeline ? "Ẩn thống kê" : "Xem thống kê"}</p>
-                <p className="text-sm text-gray-500">Theo dõi mức sử dụng</p>
+                <p className="text-sm text-gray-500">{tContent("Track your usage")}</p>
               </div>
             </button>
           </div>
@@ -201,7 +211,7 @@ export default function CompanySubscriptionPage() {
           {/* Biểu đồ chỉ hiển thị khi bật */}
           {showTimeline && (
             <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Mức tiêu dùng assignment</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("Assignment usage")}</h3>
               {timelineFormatted.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={timelineFormatted}>
@@ -216,7 +226,7 @@ export default function CompanySubscriptionPage() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-gray-500 text-center py-8">Chưa có dữ liệu sử dụng trong 30 ngày gần đây</p>
+                <p className="text-gray-500 text-center py-8">{tContent("No usage data in the last 30 days")}</p>
               )}
             </div>
           )}

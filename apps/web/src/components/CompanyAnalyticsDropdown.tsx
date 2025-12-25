@@ -14,7 +14,7 @@ import {
   Cell,
 } from "recharts";
 import api from "../libs/api";
-
+import { useDynamicTranslation } from "../libs/translations";
 const COLORS = ["#9333ea", "#ec4899", "#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 interface Props {
@@ -25,6 +25,7 @@ interface Props {
 export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
   const { data, isLoading, error, refetch } = useCompanyAnalytics(companyId);
   const [exporting, setExporting] = useState(false);
+  const { tContent } = useDynamicTranslation();
 
   useEffect(() => {
     if (isOpen) {
@@ -61,7 +62,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
   if (isLoading) {
     return (
       <div className="p-6 border-t border-gray-100 bg-gradient-to-br from-purple-50 to-pink-50">
-        <div className="text-center text-gray-500">Đang tải phân tích...</div>
+        <div className="text-center text-gray-500">{tContent("Loading analytics...")}</div>
       </div>
     );
   }
@@ -69,7 +70,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
   if (error) {
     return (
       <div className="p-6 border-t border-gray-100 bg-gradient-to-br from-red-50 to-orange-50">
-        <div className="text-center text-red-500">Không thể tải dữ liệu phân tích</div>
+        <div className="text-center text-red-500">{tContent("Unable to load analytics data")}</div>
       </div>
     );
   }
@@ -79,7 +80,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
   if (!hasData) {
     return (
       <div className="p-6 border-t border-gray-100 bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="text-center text-gray-500">Chưa có dữ liệu phân tích cho công ty này</div>
+        <div className="text-center text-gray-500">{tContent("No analytics data available for this company")}</div>
       </div>
     );
   }
@@ -97,7 +98,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
       <div className="p-6 space-y-6">
         {/* Header with Export Button */}
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Phân tích chi tiết công ty</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{tContent("Company Detailed Analytics")}</h3>
           <button
             onClick={handleExportPDF}
             disabled={exporting}
@@ -116,7 +117,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
                 <FileText className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Tổng assignments</p>
+                <p className="text-xs text-gray-500">{tContent("Total assignments")}</p>
                 <p className="text-xl font-bold text-gray-900">{totalAssignments}</p>
               </div>
             </div>
@@ -128,7 +129,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Trung bình/tháng</p>
+                <p className="text-xs text-gray-500">{tContent("Average per month")}</p>
                 <p className="text-xl font-bold text-gray-900">{avgPerMonth}</p>
               </div>
             </div>
@@ -140,7 +141,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
                 <Trophy className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Số loại test</p>
+                <p className="text-xs text-gray-500">{tContent("Number of test types")}</p>
                 <p className="text-xl font-bold text-gray-900">{totalTests}</p>
               </div>
             </div>
@@ -152,7 +153,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
                 <span className="text-white text-lg font-bold">★</span>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Test phổ biến</p>
+                <p className="text-xs text-gray-500">{tContent("Most popular test")}</p>
                 <p className="text-xs font-semibold text-gray-900 truncate" title={mostPopularTest}>
                   {mostPopularTest.length > 12 ? mostPopularTest.substring(0, 12) + "..." : mostPopularTest}
                 </p>
@@ -167,7 +168,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-purple-600"></div>
-              Số assignment theo tháng
+              {tContent("Monthly assignments")}
             </h4>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -193,7 +194,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-pink-600"></div>
-              Xu hướng chọn bài test
+              {tContent("Test Preferences")}
             </h4>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -237,7 +238,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-blue-600"></div>
-              Chi tiết bài test
+              {tContent("Test Details List")}
             </h4>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {data.test_preferences.map((test, idx) => (
@@ -252,7 +253,7 @@ export default function CompanyAnalyticsDropdown({ companyId, isOpen }: Props) {
                     <span className="text-sm text-gray-700">{test.test_title}</span>
                   </div>
                   <span className="text-sm font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
-                    {test.count} lượt
+                    {test.count} {tContent("times")}
                   </span>
                 </div>
               ))}

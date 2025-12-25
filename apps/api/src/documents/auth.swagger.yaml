@@ -16,7 +16,7 @@ paths:
             schema:
               $ref: '#/components/schemas/RegisterDto'
             example:
-              email: 'user@example.com'
+              email: 'user@example.coAP
               password: 'password123'
               confirm_password: 'password123'
               full_name: 'User Name'

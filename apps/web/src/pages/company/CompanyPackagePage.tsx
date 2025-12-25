@@ -4,7 +4,7 @@ import { AppShell } from "../../components/layout/AppShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../libs/api";
 import { CheckCircle, Star, Zap } from "lucide-react";
-
+import { useDynamicTranslation } from "../../libs/translations";
 interface Package {
   id: string;
   name: string;
@@ -19,7 +19,7 @@ interface Package {
 
 export default function CompanyPackagesPage() {
   const queryClient = useQueryClient();
-
+  const { tContent } = useDynamicTranslation();
   const { data: packages, isLoading } = useQuery({
     queryKey: ["packages"],
     queryFn: async () => {
@@ -45,15 +45,15 @@ export default function CompanyPackagesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["company", "subscription"] });
-      alert("Đăng ký gói thành công!");
+      alert(tContent("Subscribe successfully!"));
     },
     onError: (error: any) => {
-      alert(error.response?.data?.message || "Có lỗi xảy ra");
+      alert(error.response?.data?.message || tContent("An error occurred"));
     },
   });
 
   const handleSubscribe = (packageCode: string) => {
-    if (confirm("Bạn có chắc chắn muốn đăng ký gói này?")) {
+    if (confirm(tContent("Are you sure you want to subscribe to this package?"))) {
       subscribeMutation.mutate(packageCode);
     }
   };
@@ -66,7 +66,7 @@ export default function CompanyPackagesPage() {
     return (
       <AppShell activeNav="packages">
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải...</div>
+          <div className="text-gray-500">{tContent("Loading...")}</div>
         </div>
       </AppShell>
     );
@@ -77,8 +77,8 @@ export default function CompanyPackagesPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gói dịch vụ</h1>
-          <p className="text-gray-500 mt-1">Chọn gói phù hợp với nhu cầu của bạn</p>
+          <h1 className="text-2xl font-bold text-gray-900">{tContent("Service Packages")}</h1>
+          <p className="text-gray-500 mt-1">{tContent("Choose the package that suits your needs")}</p>
         </div>
 
         {/* Packages Grid */}
@@ -99,7 +99,7 @@ export default function CompanyPackagesPage() {
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                     <Star className="w-3 h-3" />
-                    PHỔ BIẾN
+                    {tContent("POPULAR")}
                   </span>
                 </div>
               )}
@@ -108,7 +108,7 @@ export default function CompanyPackagesPage() {
               {isCurrentPackage(pkg.code) && (
                 <div className="absolute -top-3 right-4">
                   <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    GÓI HIỆN TẠI
+                    {tContent("CURRENT PACKAGE")}
                   </span>
                 </div>
               )}
@@ -118,16 +118,18 @@ export default function CompanyPackagesPage() {
                 {/* Package Name */}
                 <div className="mb-4">
                   <h3 className="text-xl font-bold text-gray-900">{pkg.name}</h3>
-                  <p className="text-gray-500 text-sm mt-1">{pkg.code.toUpperCase()}</p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    {tContent("Package code")}: {pkg.code.toUpperCase()}
+                  </p>
                 </div>
 
                 {/* Price */}
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-gray-900">{pkg.price_per_month.toLocaleString()}</span>
-                    <span className="text-gray-500">VNĐ</span>
+                    <span className="text-gray-500">{tContent("VND")}</span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">/tháng</p>
+                  <p className="text-sm text-gray-500 mt-1">{tContent("/month")}</p>
                 </div>
 
                 {/* Limits */}
@@ -135,7 +137,7 @@ export default function CompanyPackagesPage() {
                   <div className="flex items-center gap-2 text-sm">
                     <Zap className="w-4 h-4 text-purple-600" />
                     <span className="text-gray-700">
-                      Tối đa <strong>{pkg.max_assignments}</strong> lượt
+                      {tContent("Max")} <strong>{pkg.max_assignments}</strong> {tContent("assignments")}
                     </span>
                   </div>
                 </div>
@@ -146,7 +148,7 @@ export default function CompanyPackagesPage() {
                 {/* Benefits */}
                 {pkg.benefits && pkg.benefits.length > 0 && (
                   <div className="mb-6">
-                    <p className="text-sm font-medium text-gray-900 mb-2">Lợi ích:</p>
+                    <p className="text-sm font-medium text-gray-900 mb-2">{tContent("Benefits:")}</p>
                     <ul className="space-y-1">
                       {pkg.benefits.map((benefit, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
@@ -172,10 +174,10 @@ export default function CompanyPackagesPage() {
                 }`}
               >
                 {isCurrentPackage(pkg.code)
-                  ? "Đang sử dụng"
+                  ? tContent("Currently using")
                   : subscribeMutation.isPending
-                    ? "Đang xử lý..."
-                    : "Đăng ký ngay"}
+                    ? tContent("Processing...")
+                    : tContent("Subscribe now")}
               </button>
             </div>
           ))}

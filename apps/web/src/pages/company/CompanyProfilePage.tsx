@@ -1,7 +1,7 @@
 // src/pages/company/CompanyProfilePage.tsx
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-
+import { useDynamicTranslation } from "../../libs/translations";
 import api from "../../libs/api";
 import { AppShell } from "../../components/layout/AppShell";
 import { User, Globe, MapPin, Phone, Edit3, Save, X } from "lucide-react";
@@ -19,7 +19,7 @@ interface CompanyProfile {
 
 export default function CompanyProfilePage() {
   const queryClient = useQueryClient();
-
+  const { tContent } = useDynamicTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<CompanyProfile>>({
     name: "",
@@ -95,7 +95,7 @@ export default function CompanyProfilePage() {
     return (
       <AppShell activeNav="profile">
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải thông tin công ty...</div>
+          <div className="text-gray-500">{tContent("Loading company information...")}</div>
         </div>
       </AppShell>
     );
@@ -107,8 +107,8 @@ export default function CompanyProfilePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Thông tin công ty</h1>
-            <p className="text-gray-500 mt-1">Quản lý và cập nhật thông tin công ty của bạn</p>
+            <h1 className="text-2xl font-bold text-gray-900">{tContent("Company Information")}</h1>
+            <p className="text-gray-500 mt-1">{tContent("Manage and update your company information")}</p>
           </div>
           {!isEditing ? (
             <button
@@ -116,7 +116,7 @@ export default function CompanyProfilePage() {
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow"
             >
               <Edit3 className="w-4 h-4" />
-              Chỉnh sửa
+              {tContent("Edit")}
             </button>
           ) : (
             <div className="flex gap-2">
@@ -125,7 +125,7 @@ export default function CompanyProfilePage() {
                 className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
               >
                 <X className="w-4 h-4" />
-                Hủy
+                {tContent("Cancel")}
               </button>
               <button
                 onClick={handleSave}
@@ -144,7 +144,7 @@ export default function CompanyProfilePage() {
           <div className="space-y-6">
             {/* Company Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tên công ty *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tContent("Company Name *")}</label>
               {isEditing ? (
                 <input
                   type="text"
@@ -152,7 +152,7 @@ export default function CompanyProfilePage() {
                   value={formData.name || ""}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  placeholder="Nhập tên công ty"
+                  placeholder={tContent("Enter company name")}
                 />
               ) : (
                 <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export default function CompanyProfilePage() {
 
             {/* Website */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tContent("Website")}</label>
               {isEditing ? (
                 <input
                   type="url"
@@ -193,7 +193,7 @@ export default function CompanyProfilePage() {
 
             {/* Address */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tContent("Address")}</label>
               {isEditing ? (
                 <input
                   type="text"
@@ -201,7 +201,7 @@ export default function CompanyProfilePage() {
                   value={formData.address || ""}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  placeholder="Số 1, Đường ABC, Quận XYZ"
+                  placeholder={tContent("Enter address")}
                 />
               ) : (
                 profile?.address && (
@@ -215,7 +215,7 @@ export default function CompanyProfilePage() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tContent("Phone Number")}</label>
               {isEditing ? (
                 <input
                   type="tel"
@@ -223,7 +223,7 @@ export default function CompanyProfilePage() {
                   value={formData.phone || ""}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  placeholder="0123 456 789"
+                  placeholder={tContent("Enter phone number")}
                 />
               ) : (
                 profile?.phone && (
@@ -237,7 +237,7 @@ export default function CompanyProfilePage() {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{tContent("Description")}</label>
               {isEditing ? (
                 <textarea
                   name="description"
@@ -245,7 +245,7 @@ export default function CompanyProfilePage() {
                   onChange={handleChange}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  placeholder="Giới thiệu về công ty..."
+                  placeholder={tContent("Company introduction...")}
                 />
               ) : (
                 profile?.description && <p className="text-gray-700 whitespace-pre-line">{profile.description}</p>

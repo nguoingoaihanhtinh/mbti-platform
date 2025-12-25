@@ -15,14 +15,14 @@ import {
   Send,
 } from "lucide-react";
 import { AppShell } from "../../components/layout/AppShell";
-
+import { useDynamicTranslation } from "../../libs/translations";
 export default function CompanyAssignmentsPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const { tContent } = useDynamicTranslation();
   const { data: rawData, isLoading } = useAssignments(page, limit, statusFilter);
 
   const data = rawData;
@@ -47,19 +47,19 @@ export default function CompanyAssignmentsPage() {
         bg: "bg-green-100",
         text: "text-green-700",
         icon: CheckCircle2,
-        label: "Hoàn thành",
+        label: tContent("Completed"),
       },
       in_progress: {
         bg: "bg-yellow-100",
         text: "text-yellow-700",
         icon: Clock,
-        label: "Đang làm",
+        label: tContent("In Progress"),
       },
       assigned: {
         bg: "bg-blue-100",
         text: "text-blue-700",
         icon: Send,
-        label: "Đã gửi",
+        label: tContent("Assigned"),
       },
     };
     return (
@@ -67,7 +67,7 @@ export default function CompanyAssignmentsPage() {
         bg: "bg-gray-100",
         text: "text-gray-700",
         icon: AlertCircle,
-        label: "Chưa xác định",
+        label: tContent("Unknown"),
       }
     );
   };
@@ -76,7 +76,7 @@ export default function CompanyAssignmentsPage() {
     return (
       <AppShell>
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Đang tải danh sách assignments...</div>
+          <div className="text-gray-500">{tContent("Loading assignments list...")}</div>
         </div>
       </AppShell>
     );
@@ -88,15 +88,15 @@ export default function CompanyAssignmentsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Quản lý Assignments</h1>
-            <p className="text-gray-500 mt-1">Theo dõi bài test đã gửi và kết quả ứng viên</p>
+            <h1 className="text-2xl font-bold text-gray-900">{tContent("Manage Assignments")}</h1>
+            <p className="text-gray-500 mt-1">{tContent("Track sent tests and candidate results")}</p>
           </div>
           <button
             onClick={() => navigate({ to: "/company/assignments/create" })}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow"
           >
             <Plus className="w-4 h-4" />
-            <span>Gửi test mới</span>
+            <span> {tContent("Send new test")}</span>
           </button>
         </div>
 
@@ -109,7 +109,7 @@ export default function CompanyAssignmentsPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{data?.total || 0}</p>
-                <p className="text-sm text-gray-500">Tổng assignments</p>
+                <p className="text-sm text-gray-500">{tContent("Total assignments")}</p>
               </div>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function CompanyAssignmentsPage() {
                 <p className="text-2xl font-bold text-gray-900">
                   {data?.data.filter((a) => a.status === "assigned").length || 0}
                 </p>
-                <p className="text-sm text-gray-500">Đã gửi</p>
+                <p className="text-sm text-gray-500">{tContent("Sent")}</p>
               </div>
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function CompanyAssignmentsPage() {
                 <p className="text-2xl font-bold text-gray-900">
                   {data?.data.filter((a) => a.status === "in_progress").length || 0}
                 </p>
-                <p className="text-sm text-gray-500">Đang làm</p>
+                <p className="text-sm text-gray-500">{tContent("In Progress")}</p>
               </div>
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function CompanyAssignmentsPage() {
                 <p className="text-2xl font-bold text-gray-900">
                   {data?.data.filter((a) => a.status === "completed").length || 0}
                 </p>
-                <p className="text-sm text-gray-500">Hoàn thành</p>
+                <p className="text-sm text-gray-500">{tContent("Completed")}</p>
               </div>
             </div>
           </div>
@@ -178,10 +178,10 @@ export default function CompanyAssignmentsPage() {
               }}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
             >
-              <option value="">Tất cả trạng thái</option>
-              <option value="assigned">Đã gửi</option>
-              <option value="in_progress">Đang làm</option>
-              <option value="completed">Hoàn thành</option>
+              <option value="">{tContent("All statuses")}</option>
+              <option value="assigned">{tContent("Assigned")}</option>
+              <option value="in_progress">{tContent("In progress")}</option>
+              <option value="completed">{tContent("Completed")}</option>
             </select>
           </div>
         </div>
@@ -192,12 +192,12 @@ export default function CompanyAssignmentsPage() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Ứng viên</th>
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Bài test</th>
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Trạng thái</th>
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Ngày gửi</th>
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Kết quả</th>
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Hành động</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Candidate")}</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Test")}</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Status")}</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Sent Date")}</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Result")}</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">{tContent("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -220,11 +220,13 @@ export default function CompanyAssignmentsPage() {
                               </>
                             ) : assignment.guest_email ? (
                               <>
-                                <p className="font-medium text-gray-900">{assignment.guest_fullname || "Guest"}</p>
-                                <p className="text-sm text-gray-500">{assignment.guest_email || "N/A"}</p>
+                                <p className="font-medium text-gray-900">
+                                  {assignment.guest_fullname || tContent("Guest")}
+                                </p>
+                                <p className="text-sm text-gray-500">{assignment.guest_email || tContent("Guest")}</p>
                               </>
                             ) : (
-                              <p className="font-medium text-gray-900">N/A</p>
+                              <p className="font-medium text-gray-900">{tContent("N/A")}</p>
                             )}
                           </div>
                         </div>
@@ -263,7 +265,7 @@ export default function CompanyAssignmentsPage() {
                             {assignment.result.mbti_type}
                           </span>
                         ) : (
-                          <span className="text-sm text-gray-400">Chưa có</span>
+                          <span className="text-sm text-gray-400">{tContent("Not completed yet")}</span>
                         )}
                       </td>
                       <td className="py-4 px-6">
@@ -304,8 +306,8 @@ export default function CompanyAssignmentsPage() {
           {/* Pagination */}
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
             <div className="text-sm text-gray-600">
-              Hiển thị {(page - 1) * limit + 1} - {Math.min(page * limit, data?.total || 0)} của {data?.total || 0} kết
-              quả
+              {tContent("Showing")} {(page - 1) * limit + 1} - {Math.min(page * limit, data?.total || 0)}{" "}
+              {tContent("of")} {data?.total || 0} {tContent("results")}
             </div>
             <div className="flex items-center gap-2">
               <button

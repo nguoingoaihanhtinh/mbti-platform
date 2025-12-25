@@ -1,7 +1,7 @@
 import { Eye, Search, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useAdminTestCandidates } from "../../hooks/useAdmin";
-
+import { useDynamicTranslation } from "../../libs/translations";
 const DEFAULT_TEST_ID = "465c0214-ba18-46d7-b56e-325cf252856e";
 
 export default function AdminCandidatesPage() {
@@ -9,26 +9,34 @@ export default function AdminCandidatesPage() {
   const { page } = useSearch({ from: "/admin/candidates/" });
   const limit = 20;
   const { data, isLoading, isFetching } = useAdminTestCandidates(DEFAULT_TEST_ID, page, limit);
-
+  const { tContent } = useDynamicTranslation();
   const candidates = data?.data ?? [];
   //   console.log("Candidates:", candidates);
   if (isLoading) {
-    return <div className="h-64 flex items-center justify-center text-gray-500">Đang tải danh sách ứng viên...</div>;
+    return (
+      <div className="h-64 flex items-center justify-center text-gray-500">
+        {" "}
+        {tContent("Loading candidates list...")}
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">All Candidates</h1>
-        <p className="text-gray-500 mt-1">Quản lý toàn bộ ứng viên trên hệ thống</p>
+        <h1 className="text-2xl font-bold">{tContent("All Candidates")}</h1>
+        <p className="text-gray-500 mt-1">{tContent("Manage all candidates in the system")}</p>
       </div>
 
       {/* Search */}
       <div className="bg-white p-4 rounded-xl border">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input className="w-full pl-10 pr-4 py-2 border rounded-lg" placeholder="Tìm theo tên hoặc email" />
+          <input
+            className="w-full pl-10 pr-4 py-2 border rounded-lg"
+            placeholder={tContent("Search by name or email")}
+          />
         </div>
       </div>
 
@@ -37,11 +45,11 @@ export default function AdminCandidatesPage() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="px-6 py-4 text-left text-sm">Ứng viên</th>
-              <th className="px-6 py-4 text-left text-sm">Email</th>
-              <th className="px-6 py-4 text-left text-sm">Bài test</th>
-              <th className="px-6 py-4 text-left text-sm">MBTI</th>
-              <th className="px-6 py-4 text-left text-sm">Hành động</th>
+              <th className="px-6 py-4 text-left text-sm">{tContent("Candidate")}</th>
+              <th className="px-6 py-4 text-left text-sm">{tContent("Email")}</th>
+              <th className="px-6 py-4 text-left text-sm">{tContent("Test")}</th>
+              <th className="px-6 py-4 text-left text-sm">{tContent("MBTI")}</th>
+              <th className="px-6 py-4 text-left text-sm">{tContent("Actions")}</th>
             </tr>
           </thead>
 
@@ -49,7 +57,7 @@ export default function AdminCandidatesPage() {
             {candidates.length === 0 && (
               <tr>
                 <td colSpan={5} className="text-center py-10 text-gray-400">
-                  Không có ứng viên nào
+                  {tContent("No candidates found")}
                 </td>
               </tr>
             )}
@@ -104,7 +112,9 @@ export default function AdminCandidatesPage() {
 
         {/* Pagination */}
         <div className="flex justify-between items-center px-6 py-4 border-t">
-          <span className="text-sm text-gray-600">Trang {page}</span>
+          <span className="text-sm text-gray-600">
+            {tContent("Page")} {page}
+          </span>
 
           <div className="flex gap-2">
             <button

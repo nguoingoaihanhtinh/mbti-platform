@@ -18,7 +18,7 @@ import {
 import { useAdminDashboardStats, useAdminTimeline } from "../../hooks/useAdmin";
 // import type { AdminDashboardStats, AdminTimelineItem } from "../../hooks/useAdmin";
 import type { AdminTimelineItem } from "../../hooks/useAdmin";
-
+import { useDynamicTranslation } from "../../libs/translations";
 const COLORS = {
   primary: "#9333ea",
   secondary: "#ec4899",
@@ -33,6 +33,7 @@ const PIE_COLORS = [COLORS.primary, COLORS.secondary, COLORS.info, COLORS.warnin
 export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useAdminDashboardStats();
   const { data: timelineData, isLoading: timelineLoading } = useAdminTimeline();
+  const { tContent } = useDynamicTranslation();
 
   const completionChartData = useMemo(() => {
     if (!timelineData) return [];
@@ -89,7 +90,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Đang tải dữ liệu...</div>
+        <div className="text-gray-500">{tContent("Loading...")}</div>
       </div>
     );
   }
@@ -99,40 +100,40 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Xin chào, Admin</h1>
-          <p className="text-gray-500 mt-1">Chào mừng trở lại với dashboard quản trị</p>
+          <h1 className="text-2xl font-bold text-gray-900">{tContent("Hello")}, Admin</h1>
+          <p className="text-gray-500 mt-1">{tContent("Welcome back to the admin dashboard")}</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-shadow">
           <Download className="w-4 h-4" />
-          <span>Xuất báo cáo</span>
+          <span>{tContent("Export Report")}</span>
         </button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Tổng lượt hoàn thành"
+          title={tContent("Total Completions")}
           value={summaryStats.totalCompletions}
           icon={Users}
           color="from-purple-600 to-purple-400"
           change={`${summaryStats.totalCompletions} lượt`}
         />
         <StatCard
-          title="Ứng viên duy nhất"
+          title={tContent("Unique Candidates")}
           value={summaryStats.uniqueCandidates}
           icon={FileText}
           color="from-pink-600 to-pink-400"
           change={`${summaryStats.uniqueCandidates} người`}
         />
         <StatCard
-          title="Bài test phổ biến"
+          title={tContent("Most Popular Test")}
           value={summaryStats.mostTakenTest?.taken_count || 0}
           icon={Trophy}
           color="from-blue-600 to-blue-400"
           change={summaryStats.mostTakenTest?.title?.substring(0, 15) || "N/A"}
         />
         <StatCard
-          title="Công ty đang hoạt động"
+          title={tContent("Active Companies")}
           value={stats?.active_companies || 0}
           icon={Calendar}
           color="from-green-600 to-green-400"
@@ -144,7 +145,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Completion Timeline */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Lượt hoàn thành theo thời gian</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("Completion Timeline")}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={completionChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -157,7 +158,7 @@ export default function AdminDashboard() {
                 dataKey="completions"
                 stroke={COLORS.primary}
                 strokeWidth={2}
-                name="Lượt hoàn thành"
+                name={tContent("Completions")}
                 dot={{ fill: COLORS.primary, r: 4 }}
               />
             </LineChart>
@@ -166,7 +167,7 @@ export default function AdminDashboard() {
 
         {/* MBTI Distribution */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố MBTI toàn hệ thống</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("MBTI Distribution")}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -193,7 +194,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Company Timeline */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Hoạt động theo công ty</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("Company Timeline")}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={timelineChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -208,7 +209,7 @@ export default function AdminDashboard() {
               <YAxis stroke="#6b7280" />
               <Tooltip />
               <Legend />
-              <Bar dataKey="tests" name="Bài test" fill={COLORS.primary} radius={[8, 8, 0, 0]} />
+              <Bar dataKey="tests" name={tContent("Tests")} fill={COLORS.primary} radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -216,7 +217,7 @@ export default function AdminDashboard() {
         {/* Most Taken Tests */}
         {testPopularityData.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Bài test được làm nhiều nhất</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{tContent("Most Taken Tests")}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={testPopularityData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -231,7 +232,7 @@ export default function AdminDashboard() {
                 <YAxis stroke="#6b7280" />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" name="Lượt làm" fill={COLORS.secondary} radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" name={tContent("Times Taken")} fill={COLORS.secondary} radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -241,8 +242,10 @@ export default function AdminDashboard() {
       {/* Recent Activity */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Hoạt động gần đây</h3>
-          <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">Xem tất cả →</button>
+          <h3 className="text-lg font-semibold text-gray-900">{tContent("Recent Activity")}</h3>
+          <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
+            {tContent("View All")} →
+          </button>
         </div>
 
         <div className="space-y-4">

@@ -293,6 +293,460 @@ const dynamicTranslations: Record<string, Record<"en" | "vi", string>> = {
 
   // Back Button
   "Back to List": { en: "Back to List", vi: "Quay lại Danh sách" },
+
+  // === Company Dashboard ===
+  Dashboard: { en: "Dashboard", vi: "Bảng điều khiển" },
+  "Company activity overview": {
+    en: "Company activity overview",
+    vi: "Tổng quan hoạt động công ty của bạn",
+  },
+  "Send new test": { en: "Send new test", vi: "Gửi test mới" },
+  Quota: { en: "Quota", vi: "Hạn mức" },
+  "Total assignments": { en: "Total assignments", vi: "Tổng assignments" },
+  "Company employees": { en: "Company employees", vi: "Nhân viên công ty" },
+  Completed: { en: "Completed", vi: "Đã hoàn thành" },
+  Package: { en: "Package", vi: "Gói" },
+  "MBTI Distribution": { en: "MBTI Distribution", vi: "Phân bố MBTI" },
+  "No MBTI data available": { en: "No MBTI data available", vi: "Chưa có dữ liệu MBTI" },
+  "Assignment Status": { en: "Assignment Status", vi: "Trạng thái Assignment" },
+  Assigned: { en: "Assigned", vi: "Đã gửi" },
+  "In Progress": { en: "In Progress", vi: "Đang làm" },
+  "Usage frequency of assignments in the last 30 days": {
+    en: "Usage frequency of assignments in the last 30 days",
+    vi: "Tần suất sử dụng assignments trong 30 ngày gần đây",
+  },
+  "No usage data in the last 30 days": {
+    en: "No usage data in the last 30 days",
+    vi: "Chưa có dữ liệu sử dụng trong 30 ngày gần đây",
+  },
+  "Number of assignments": { en: "Number of assignments", vi: "Số assignment" },
+
+  // Quick Actions
+  "Manage Assignments": { en: "Manage Assignments", vi: "Quản lý Assignments" },
+  "View and track all sent tests": {
+    en: "View and track all sent tests",
+    vi: "Xem và theo dõi tất cả bài test đã gửi",
+  },
+  Employees: { en: "Employees", vi: "Nhân viên" },
+  "Manage employee list": {
+    en: "Manage employee list",
+    vi: "Quản lý danh sách nhân viên trong công ty",
+  },
+  "Service Package": { en: "Service Package", vi: "Gói dịch vụ" },
+  "View and update current package": {
+    en: "View and update current package",
+    vi: "Xem và cập nhật gói dịch vụ hiện tại",
+  },
+
+  // Loading
+  "Loading dashboard...": { en: "Loading dashboard...", vi: "Đang tải dashboard..." },
+
+  // === Company Profile ===
+  "Company Information": { en: "Company Information", vi: "Thông tin công ty" },
+  "Manage and update your company information": {
+    en: "Manage and update your company information",
+    vi: "Quản lý và cập nhật thông tin công ty của bạn",
+  },
+  Edit: { en: "Edit", vi: "Chỉnh sửa" },
+
+  Save: { en: "Save", vi: "Lưu" },
+  "Company Name *": { en: "Company Name *", vi: "Tên công ty *" },
+  "Enter company name": { en: "Enter company name", vi: "Nhập tên công ty" },
+  Website: { en: "Website", vi: "Website" },
+  Address: { en: "Address", vi: "Địa chỉ" },
+  "Phone Number": { en: "Phone Number", vi: "Số điện thoại" },
+  Description: { en: "Description", vi: "Mô tả" },
+  "About the company...": { en: "About the company...", vi: "Giới thiệu về công ty..." },
+  "Loading company information...": {
+    en: "Loading company information...",
+    vi: "Đang tải thông tin công ty...",
+  },
+
+  // Formatted labels (for display mode)
+  "Company name": { en: "Company name", vi: "Tên công ty" },
+
+  // === Company Assignments List ===
+
+  "Track sent tests and candidate results": {
+    en: "Track sent tests and candidate results",
+    vi: "Theo dõi bài test đã gửi và kết quả ứng viên",
+  },
+
+  "Loading assignments list...": { en: "Loading assignments list...", vi: "Đang tải danh sách assignments..." },
+
+  Sent: { en: "Sent", vi: "Đã gửi" },
+
+  "Search by name or email...": {
+    en: "Search by name or email...",
+    vi: "Tìm kiếm theo tên hoặc email...",
+  },
+  "All statuses": { en: "All statuses", vi: "Tất cả trạng thái" },
+  Candidate: { en: "Candidate", vi: "Ứng viên" },
+  Test: { en: "Test", vi: "Bài test" },
+  Status: { en: "Status", vi: "Trạng thái" },
+  "Sent Date": { en: "Sent Date", vi: "Ngày gửi" },
+  Result: { en: "Result", vi: "Kết quả" },
+  Actions: { en: "Actions", vi: "Hành động" },
+  Guest: { en: "Guest", vi: "Khách" },
+  "N/A": { en: "N/A", vi: "N/A" },
+  "Not completed yet": { en: "Not completed yet", vi: "Chưa hoàn thành" },
+  Showing: { en: "Showing", vi: "Hiển thị" },
+
+  results: { en: "results", vi: "kết quả" },
+
+  // Status labels
+
+  "In progress": { en: "In progress", vi: "Đang làm" },
+
+  Unknown: { en: "Unknown", vi: "Chưa xác định" },
+
+  // === Company Create Assignment ===
+  Back: { en: "Back", vi: "Quay lại" },
+  "Send test to candidate": { en: "Send test to candidate", vi: "Gửi bài test cho ứng viên" },
+  "Choose a test and enter candidate info to send test link": {
+    en: "Choose a test and enter candidate info to send test link",
+    vi: "Chọn bài test và nhập thông tin ứng viên để gửi link làm bài",
+  },
+  "Test sent successfully!": { en: "Test sent successfully!", vi: "Gửi bài test thành công!" },
+  "Redirecting to assignments list...": {
+    en: "Redirecting to assignments list...",
+    vi: "Đang chuyển hướng đến danh sách assignments...",
+  },
+  "An error occurred": { en: "An error occurred", vi: "Có lỗi xảy ra" },
+  "Select test": { en: "Select test", vi: "Chọn bài test" },
+  "-- Select test --": { en: "-- Select test --", vi: "-- Chọn bài test --" },
+  "Candidate info": { en: "Candidate info", vi: "Thông tin ứng viên" },
+  "Candidate email *": { en: "Candidate email *", vi: "Email ứng viên *" },
+  "Enter candidate email": { en: "Enter candidate email", vi: "Nhập email ứng viên" },
+  "Candidate name (optional)": { en: "Candidate name (optional)", vi: "Tên ứng viên (tùy chọn)" },
+  "Enter candidate name": { en: "Enter candidate name", vi: "Nhập tên ứng viên" },
+
+  "Send test": { en: "Send test", vi: "Gửi bài test" },
+
+  "Please select a test": { en: "Please select a test", vi: "Vui lòng chọn bài test" },
+  "Please enter candidate email": { en: "Please enter candidate email", vi: "Vui lòng nhập email ứng viên" },
+  "Invalid email": { en: "Invalid email", vi: "Email không hợp lệ" },
+  "Loading tests list...": { en: "Loading tests list...", vi: "Đang tải danh sách test..." },
+
+  // === Company Result Detail ===
+  "Loading result...": { en: "Loading result...", vi: "Đang tải kết quả..." },
+  "Back to list": { en: "Back to list", vi: "Quay lại danh sách" },
+
+  // Section Titles
+  Overview: { en: "Overview", vi: "Tổng quan" },
+
+  "Answer Details": { en: "Answer Details", vi: "Chi tiết câu trả lời" },
+
+  // Pagination
+  Previous: { en: "Previous", vi: "Trước" },
+  Next: { en: "Next", vi: "Tiếp" },
+
+  // === Company Packages & Subscription ===
+  "Service Packages": { en: "Service Packages", vi: "Gói dịch vụ" },
+  "Choose the right plan for your needs": {
+    en: "Choose the right plan for your needs",
+    vi: "Chọn gói phù hợp với nhu cầu của bạn",
+  },
+  "Subscribe successfully!": { en: "Subscribe successfully!", vi: "Đăng ký gói thành công!" },
+
+  "Are you sure you want to subscribe to this package?": {
+    en: "Are you sure you want to subscribe to this package?",
+    vi: "Bạn có chắc chắn muốn đăng ký gói này?",
+  },
+  POPULAR: { en: "POPULAR", vi: "PHỔ BIẾN" },
+  "CURRENT PACKAGE": { en: "CURRENT PACKAGE", vi: "GÓI HIỆN TẠI" },
+  Max: { en: "Max", vi: "Tối đa" },
+  assignments: { en: "assignments", vi: "lượt" },
+  "Benefits:": { en: "Benefits:", vi: "Lợi ích:" },
+  "Currently using": { en: "Currently using", vi: "Đang sử dụng" },
+  "Processing...": { en: "Processing...", vi: "Đang xử lý..." },
+  "Subscribe now": { en: "Subscribe now", vi: "Đăng ký ngay" },
+  VND: { en: "VND", vi: "VNĐ" },
+  "/month": { en: "/month", vi: "/tháng" },
+
+  // Subscription Page
+  "Current Subscription": { en: "Current Subscription", vi: "Gói hiện tại" },
+  "Manage your subscription": { en: "Manage your subscription", vi: "Quản lý gói đăng ký của bạn" },
+  "Upgrade package": { en: "Upgrade package", vi: "Nâng cấp gói" },
+  Used: { en: "Used", vi: "Đã sử dụng" },
+  Remaining: { en: "Remaining", vi: "Còn lại" },
+  Active: { en: "Active", vi: "Đang hoạt động" },
+  Inactive: { en: "Inactive", vi: "Không khả dụng" },
+  "Package code": { en: "Package code", vi: "Mã gói" },
+  Price: { en: "Price", vi: "Giá" },
+  "from previous package": { en: "from previous package", vi: "từ gói trước" },
+
+  // No subscription
+  "No subscription yet": { en: "No subscription yet", vi: "Chưa có gói đăng ký" },
+  "You haven't subscribed to any package. Choose a suitable plan to get started.": {
+    en: "You haven't subscribed to any package. Choose a suitable plan to get started.",
+    vi: "Bạn chưa đăng ký gói dịch vụ nào. Hãy chọn gói phù hợp để bắt đầu.",
+  },
+  "View packages": { en: "View packages", vi: "Xem các gói dịch vụ" },
+
+  // Quick Actions
+
+  Upgrade: { en: "Upgrade", vi: "Nâng cấp gói" },
+  "Increase usage limit": { en: "Increase usage limit", vi: "Tăng giới hạn sử dụng" },
+  "View stats": { en: "View stats", vi: "Xem thống kê" },
+  "Hide stats": { en: "Hide stats", vi: "Ẩn thống kê" },
+  "Track your usage": { en: "Track your usage", vi: "Theo dõi mức sử dụng" },
+
+  // Chart
+  "Assignment usage": { en: "Assignment usage", vi: "Mức tiêu dùng assignment" },
+
+  "Number of assignments sent": { en: "Number of assignments sent", vi: "Số assignment đã gửi" },
+
+  // === Admin Users ===
+  "Manage Users": { en: "Manage Users", vi: "Quản lý Users" },
+  "Total users in system": { en: "Total {count} users in system", vi: "Tổng số {count} users trong hệ thống" },
+  "Loading users list...": { en: "Loading users list...", vi: "Đang tải danh sách users..." },
+  "Add user": { en: "Add user", vi: "Thêm user" },
+  "Total users": { en: "Total users", vi: "Tổng users" },
+  Admins: { en: "Admins", vi: "Admins" },
+  Companies: { en: "Companies", vi: "Companies" },
+  Candidates: { en: "Candidates", vi: "Candidates" },
+  "All roles": { en: "All roles", vi: "Tất cả roles" },
+  User: { en: "User", vi: "User" },
+  Role: { en: "Role", vi: "Role" },
+  "Created Date": { en: "Created Date", vi: "Ngày tạo" },
+  Information: { en: "Information", vi: "Thông tin" },
+  "Are you sure you want to delete this user? This action cannot be undone.": {
+    en: "Are you sure you want to delete this user? This action cannot be undone.",
+    vi: "Bạn có chắc chắn muốn xoá user này? Hành động này không thể hoàn tác.",
+  },
+  "Delete user": { en: "Delete user", vi: "Xoá user" },
+
+  // Create User Modal
+  "Create new user": { en: "Create new user", vi: "Tạo người dùng mới" },
+  "Full name *": { en: "Full name *", vi: "Họ và tên *" },
+  "Enter full name": { en: "Enter full name", vi: "Nhập họ và tên" },
+  "Email *": { en: "Email *", vi: "Email *" },
+  "Enter email": { en: "Enter email", vi: "Nhập email" },
+  "Password *": { en: "Password *", vi: "Mật khẩu *" },
+  "Enter password": { en: "Enter password", vi: "Nhập mật khẩu" },
+  "Role *": { en: "Role *", vi: "Vai trò *" },
+
+  Company: { en: "Company", vi: "Công ty" },
+  Admin: { en: "Admin", vi: "Admin" },
+  "Company name *": { en: "Company name *", vi: "Tên công ty *" },
+
+  "Create user": { en: "Create user", vi: "Tạo user" },
+  "Creating...": { en: "Creating...", vi: "Đang tạo..." },
+  "Please fill in all required fields": {
+    en: "Please fill in all required fields",
+    vi: "Vui lòng điền đầy đủ thông tin",
+  },
+  "Please enter company name": { en: "Please enter company name", vi: "Vui lòng nhập tên công ty" },
+  "Error creating user": { en: "Error creating user", vi: "Có lỗi xảy ra khi tạo user" },
+
+  // === Admin Companies ===
+  "Manage Companies": { en: "Manage Companies", vi: "Quản lý Companies" },
+  "Total companies": { en: "Total companies", vi: "Tổng companies" },
+
+  "Total candidates": { en: "Total candidates", vi: "Tổng candidates" },
+  "Current Package": { en: "Current Package", vi: "Gói hiện tại" },
+  Assignments: { en: "Assignments", vi: "Assignments" },
+
+  Analytics: { en: "Analytics", vi: "Phân tích" },
+  "Hide analytics": { en: "Hide analytics", vi: "Ẩn phân tích" },
+  "View analytics": { en: "View analytics", vi: "Xem phân tích" },
+  "No subscription": { en: "No subscription", vi: "Chưa có" },
+  Until: { en: "Until", vi: "Đến" },
+
+  // === Company Analytics ===
+  "Detailed company analytics": { en: "Detailed company analytics", vi: "Phân tích chi tiết công ty" },
+  "Export PDF": { en: "Export PDF", vi: "Xuất PDF" },
+  "Exporting...": { en: "Exporting...", vi: "Đang xuất..." },
+  "Loading analytics...": { en: "Loading analytics...", vi: "Đang tải phân tích..." },
+  "Failed to load analytics data": {
+    en: "Failed to load analytics data",
+    vi: "Không thể tải dữ liệu phân tích",
+  },
+  "No analytics data available for this company": {
+    en: "No analytics data available for this company",
+    vi: "Chưa có dữ liệu phân tích cho công ty này",
+  },
+
+  // Stats Cards
+
+  "Avg per month": { en: "Avg per month", vi: "Trung bình/tháng" },
+  "Number of test types": { en: "Number of test types", vi: "Số loại test" },
+  "Most popular test": { en: "Most popular test", vi: "Test phổ biến" },
+
+  // Charts
+  "Assignments by month": { en: "Assignments by month", vi: "Số assignment theo tháng" },
+  "Test selection trends": { en: "Test selection trends", vi: "Xu hướng chọn bài test" },
+
+  "Test details": { en: "Test details", vi: "Chi tiết bài test" },
+  times: { en: "times", vi: "lượt" },
+
+  // === Admin Candidates ===
+  "All Candidates": { en: "All Candidates", vi: "Tất cả ứng viên" },
+  "Manage all candidates in the system": {
+    en: "Manage all candidates in the system",
+    vi: "Quản lý toàn bộ ứng viên trên hệ thống",
+  },
+  "Loading candidates list...": { en: "Loading candidates list...", vi: "Đang tải danh sách ứng viên..." },
+  "Search by name or email": { en: "Search by name or email", vi: "Tìm theo tên hoặc email" },
+
+  Email: { en: "Email", vi: "Email" },
+
+  MBTI: { en: "MBTI", vi: "MBTI" },
+
+  "No candidates found": { en: "No candidates found", vi: "Không có ứng viên nào" },
+
+  // Detail Page
+  "Candidate Detail": { en: "Candidate Detail", vi: "Chi tiết ứng viên" },
+
+  "Loading candidate detail...": {
+    en: "Loading candidate detail...",
+    vi: "Đang tải chi tiết ứng viên...",
+  },
+
+  // Candidate Info
+  "Completed at": { en: "Completed at", vi: "Hoàn thành lúc" },
+  // === Admin Tests ===
+  "Manage Tests": { en: "Manage Tests", vi: "Quản lý Tests" },
+  "Total tests": { en: "Total tests", vi: "Tổng tests" },
+
+  "Create new test": { en: "Create new test", vi: "Tạo test mới" },
+  "Search test...": { en: "Search test...", vi: "Tìm kiếm test..." },
+
+  Questions: { en: "Questions", vi: "Câu hỏi" },
+  "Total attempts": { en: "Total attempts", vi: "Tổng lượt làm" },
+
+  System: { en: "System", vi: "System" },
+  "View details": { en: "View details", vi: "Xem chi tiết" },
+
+  Delete: { en: "Delete", vi: "Xóa" },
+  "Are you sure you want to delete this test?": {
+    en: "Are you sure you want to delete this test?",
+    vi: "Bạn có chắc chắn muốn xóa test này?",
+  },
+  "Test deleted successfully!": { en: "Test deleted successfully!", vi: "Xóa test thành công!" },
+
+  "Edit Test": { en: "Edit Test", vi: "Chỉnh sửa Test" },
+  "Create New Test": { en: "Create New Test", vi: "Tạo Test Mới" },
+  "Update test successfully!": { en: "Update test successfully!", vi: "Cập nhật test thành công!" },
+  "Create test successfully!": { en: "Create test successfully!", vi: "Tạo test thành công!" },
+  "Redirecting...": { en: "Redirecting...", vi: "Đang chuyển hướng..." },
+  "Basic Information": { en: "Basic Information", vi: "Thông tin cơ bản" },
+  "Test title *": { en: "Test title *", vi: "Tiêu đề test *" },
+  "Enter test title": { en: "Enter test title", vi: "Nhập tiêu đề test" },
+
+  "Enter description": { en: "Enter description", vi: "Mô tả về test..." },
+  "Activate test": { en: "Activate test", vi: "Kích hoạt test" },
+  "Questions ({count})": { en: "Questions ({count})", vi: "Câu hỏi ({count})" },
+  "Add question": { en: "Add question", vi: "Thêm câu hỏi" },
+  "Question {number}": { en: "Question {number}", vi: "Câu {number}" },
+  "Question content *": { en: "Question content *", vi: "Nội dung câu hỏi *" },
+  "Enter question content": { en: "Enter question content", vi: "Nhập nội dung câu hỏi..." },
+  "Question type": { en: "Question type", vi: "Loại câu hỏi" },
+  "Single choice": { en: "Single choice", vi: "Chọn 1 đáp án" },
+  "Multiple choice": { en: "Multiple choice", vi: "Chọn nhiều đáp án" },
+  Scale: { en: "Scale", vi: "Thang đo" },
+  "Dimension (E/I, S/N, T/F, J/P)": {
+    en: "Dimension (E/I, S/N, T/F, J/P)",
+    vi: "Dimension (E/I, S/N, T/F, J/P)",
+  },
+  "Enter dimension": { en: "Enter dimension", vi: "Ví dụ: E/I" },
+  "Answers *": { en: "Answers *", vi: "Câu trả lời *" },
+  "Add answer": { en: "Add answer", vi: "+ Thêm câu trả lời" },
+  "Answer {number}": { en: "Answer {number}", vi: "Câu trả lời {number}" },
+
+  "Remove question": { en: "Remove question", vi: "Xóa câu hỏi" },
+  "Remove answer": { en: "Remove answer", vi: "Xóa câu trả lời" },
+  "Add first question": { en: "Add first question", vi: "Thêm câu hỏi đầu tiên" },
+  "No questions yet": { en: "No questions yet", vi: "Chưa có câu hỏi nào" },
+
+  "Update Test": { en: "Update Test", vi: "Cập nhật Test" },
+  "Create Test": { en: "Create Test", vi: "Tạo Test" },
+  "Please enter test title": { en: "Please enter test title", vi: "Vui lòng nhập tiêu đề test" },
+  "Please add at least 1 question": {
+    en: "Please add at least 1 question",
+    vi: "Vui lòng thêm ít nhất 1 câu hỏi",
+  },
+  "Question cannot be empty": { en: "Question cannot be empty", vi: "Câu hỏi không được để trống" },
+  "Need at least 2 answers": { en: "Need at least 2 answers", vi: "Cần ít nhất 2 câu trả lời" },
+  "Answer cannot be empty": { en: "Answer cannot be empty", vi: "Câu trả lời không được để trống" },
+  "Error saving test": { en: "Error saving test", vi: "Có lỗi xảy ra khi {action} test" },
+
+  // Thêm vào object `dynamicTranslations` trong file src/libs/translations.ts
+
+  // === Admin Dashboard ===
+  "Hello, Admin": { en: "Hello, Admin", vi: "Xin chào, Admin" },
+  "Welcome back to admin dashboard": {
+    en: "Welcome back to admin dashboard",
+    vi: "Chào mừng trở lại với dashboard quản trị",
+  },
+  "Export report": { en: "Export report", vi: "Xuất báo cáo" },
+  "Total completions": { en: "Total completions", vi: "Tổng lượt hoàn thành" },
+  "Unique candidates": { en: "Unique candidates", vi: "Ứng viên duy nhất" },
+
+  "Active companies": { en: "Active companies", vi: "Công ty đang hoạt động" },
+  "Completions by time": { en: "Completions by time", vi: "Lượt hoàn thành theo thời gian" },
+  "System-wide MBTI distribution": {
+    en: "System-wide MBTI distribution",
+    vi: "Phân bố MBTI toàn hệ thống",
+  },
+  "Activity by company": { en: "Activity by company", vi: "Hoạt động theo công ty" },
+  "Most taken tests": { en: "Most taken tests", vi: "Bài test được làm nhiều nhất" },
+  "Recent activity": { en: "Recent activity", vi: "Hoạt động gần đây" },
+  "View all →": { en: "View all →", vi: "Xem tất cả →" },
+  completions: { en: "completions", vi: "lượt" },
+  people: { en: "people", vi: "người" },
+  companies: { en: "companies", vi: "công ty" },
+
+  // === Admin Packages ===
+  "Manage Packages": { en: "Manage Packages", vi: "Quản lý Packages" },
+
+  "Create new package": { en: "Create new package", vi: "Tạo package mới" },
+  "Are you sure you want to delete this package?": {
+    en: "Are you sure you want to delete this package?",
+    vi: "Bạn có chắc chắn muốn xóa package này?",
+  },
+  "Package deleted successfully!": { en: "Package deleted successfully!", vi: "Xóa package thành công!" },
+  "Create Package": { en: "Create Package", vi: "Tạo Package" },
+  "Edit Package": { en: "Edit Package", vi: "Chỉnh sửa Package" },
+  "Package created successfully!": { en: "Package created successfully!", vi: "Tạo package thành công!" },
+  "Package updated successfully!": { en: "Package updated successfully!", vi: "Cập nhật package thành công!" },
+
+  "Package name *": { en: "Package name *", vi: "Tên package *" },
+  "Enter package name": { en: "Enter package name", vi: "Basic Plan" },
+  "Package code *": { en: "Package code *", vi: "Mã package *" },
+  "Enter package code": { en: "Enter package code", vi: "basic" },
+  "Activate this package": { en: "Activate this package", vi: "Kích hoạt package này" },
+  Pricing: { en: "Pricing", vi: "Giá" },
+  "Price (VND/month) *": { en: "Price (VND/month) *", vi: "Giá (VNĐ/tháng) *" },
+  "Enter price": { en: "Enter price", vi: "100000" },
+  Limits: { en: "Limits", vi: "Giới hạn" },
+  "Max assignments *": { en: "Max assignments *", vi: "Số assignment tối đa *" },
+  "Enter max assignments": { en: "Enter max assignments", vi: "10" },
+  "Description (optional)": { en: "Description (optional)", vi: "Mô tả (tùy chọn)" },
+
+  "Features (benefits)": { en: "Features (benefits)", vi: "Tính năng (benefits)" },
+  "Example: Priority support": { en: "Example: Priority support", vi: "Ví dụ: Hỗ trợ ưu tiên" },
+  "Add feature": { en: "Add feature", vi: "+ Thêm tính năng" },
+  Remove: { en: "Remove", vi: "Xóa" },
+
+  "Please enter package name": { en: "Please enter package name", vi: "Vui lòng nhập tên package" },
+  "Please enter package code": { en: "Please enter package code", vi: "Vui lòng nhập mã package" },
+  "Price must be greater than 0": { en: "Price must be greater than 0", vi: "Giá phải lớn hơn 0" },
+  "Max assignments must be greater than 0": {
+    en: "Max assignments must be greater than 0",
+    vi: "Số assignment phải lớn hơn 0",
+  },
+  "Error saving package": { en: "Error saving package", vi: "Có lỗi xảy ra khi {action} package" },
+
+  // Package list item
+
+  "Created on": { en: "Created on", vi: "Tạo ngày" },
+
+  "No packages yet": { en: "No packages yet", vi: "Chưa có package nào" },
+
+  benefits: { en: "benefits", vi: "quyền lợi khác" },
+
   // Tiếp tục thêm ở đây
 };
 // src/libs/translations.ts
