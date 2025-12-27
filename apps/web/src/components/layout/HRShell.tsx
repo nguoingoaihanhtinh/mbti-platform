@@ -76,6 +76,7 @@ export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
               <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                 <User className="w-5 h-5 text-gray-600" />
@@ -85,7 +86,7 @@ export function HRShell({ children, activeNav = "dashboard" }: HRShellProps) {
                 <p className="text-xs text-gray-500">{user.email}</p>
               </div>
             </div>
-            <LanguageSwitcher />
+
             <button className="p-2 hover:bg-gray-100 rounded-lg relative">
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full"></span>

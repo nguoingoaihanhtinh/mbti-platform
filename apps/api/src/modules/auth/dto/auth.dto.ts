@@ -13,6 +13,9 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   full_name: string;
+
+  @IsString()
+  role?: 'candidate' | 'company';
 }
 
 export class LoginDto {

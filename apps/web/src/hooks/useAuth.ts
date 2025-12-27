@@ -20,6 +20,13 @@ export type ForgotPasswordData = {
   email: string;
 };
 
+type CompanyRegisterData = {
+  email: string;
+  full_name: string;
+  password: string;
+  company_name: string;
+};
+
 export const useAuth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -151,6 +158,23 @@ export const useAuth = () => {
       setLoading(false);
     }
   };
+  const registerCompany = async (data: CompanyRegisterData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.post("/auth/register/company", data);
+      navigate({ to: "/login" });
+      alert("Company registered successfully! Please sign in.");
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Company registration failed";
+      setError(message);
+      alert(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     register,
     login,
@@ -162,5 +186,6 @@ export const useAuth = () => {
     verifyRegisterOtp,
     loading,
     error,
+    registerCompany,
   };
 };

@@ -211,11 +211,23 @@ export class AssessmentService {
       throw new BadRequestException('No valid responses to calculate MBTI');
     }
     const mbtiType = this.calculateMBTI(validResponses);
+
+    const { data: mbtiRecord, error: mbtiErr } = await this.supabase.client
+      .from('mbti_types')
+      .select('id')
+      .eq('type_code', mbtiType)
+      .single();
+
+    if (mbtiErr || !mbtiRecord) {
+      console.warn(`MBTI type ${mbtiType} not found in mbti_types table`);
+    }
+
     const { data: result, error: resultErr } = await this.supabase.client
       .from('results')
       .insert({
         assessment_id: assessmentId,
         mbti_type: mbtiType,
+        mbti_type_id: mbtiRecord?.id || null,
         raw_scores: {},
       })
       .select()

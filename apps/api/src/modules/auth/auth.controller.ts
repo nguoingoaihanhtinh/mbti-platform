@@ -24,6 +24,7 @@ import { JWTPayload, JwtUtil } from '@/utils/jwt.util';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { UpdateProfileDto } from '../user/dto/update-profile.dto';
+import { RegisterCompanyDto } from './dto/register-company.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -328,5 +329,22 @@ export class AuthController {
     });
 
     return { user };
+  }
+
+  @Post('register/company')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email' },
+        full_name: { type: 'string' },
+        password: { type: 'string' },
+        company_name: { type: 'string' },
+      },
+      required: ['email', 'full_name', 'password', 'company_name'],
+    },
+  })
+  async registerCompany(@Body() dto: RegisterCompanyDto) {
+    return this.authService.registerCompany(dto);
   }
 }

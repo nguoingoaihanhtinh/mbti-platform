@@ -1,3 +1,4 @@
+// src/pages/auth/LoginPage.tsx
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "../components/ui/button";
@@ -151,6 +152,18 @@ export default function LoginPage() {
                 className="font-medium text-gray-900 hover:text-gray-700"
               >
                 {tContent("Sign up")}
+              </Button>
+            </p>
+
+            <p className="mt-2 text-center text-sm text-gray-600">
+              {tContent("Are you representing a company?")}{" "}
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => navigate({ to: "/company/signup" })}
+                className="font-medium text-gray-900 hover:text-gray-700"
+              >
+                {tContent("Sign up as a company")}
               </Button>
             </p>
           </div>

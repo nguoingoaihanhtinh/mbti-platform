@@ -10,6 +10,7 @@ import { JwtUtil, JWTPayload } from '@/utils/jwt.util';
 import { SupabaseProvider } from '@/database/supabase.provider';
 import * as crypto from 'crypto';
 import { sendPasswordResetEmail } from '@/utils/email';
+import { RegisterCompanyDto } from './dto/register-company.dto';
 
 @Injectable()
 export class AuthService {
@@ -181,5 +182,26 @@ export class AuthService {
 
     const safeUser = user;
     return safeUser;
+  }
+  async registerCompany(dto: RegisterCompanyDto) {
+    const { email, full_name, password, company_name } = dto;
+
+    const existing = await this.userService.findOneByEmail(email);
+    if (existing) {
+      throw new BadRequestException('Email already in use');
+    }
+
+    const company_id = await this.userService.createCompany(company_name);
+    const hashed = await bcrypt.hash(password, 10);
+
+    const user = await this.userService.create({
+      email,
+      full_name,
+      password: hashed,
+      role: 'company',
+      company_id,
+    });
+
+    return { message: 'Company registered successfully' };
   }
 }
