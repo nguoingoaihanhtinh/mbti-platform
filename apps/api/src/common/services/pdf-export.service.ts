@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
 import PDFDocument from 'pdfkit';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class PdfExportService {
@@ -16,6 +18,36 @@ export class PdfExportService {
     }
 
     this.client = createClient(url, key);
+  }
+
+  /**
+   * Tạo PDF document với font hỗ trợ tiếng Việt
+   */
+  private createPdfWithVietnameseFont(): PDFDocument {
+    const doc = new PDFDocument({ margin: 50 });
+
+    // Đường dẫn đến font Noto Sans (hỗ trợ Unicode + tiếng Việt)
+    const fontPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'assets',
+      'fonts',
+      'NotoSans-Regular.ttf',
+    );
+
+    if (!fs.existsSync(fontPath)) {
+      console.warn(
+        `⚠️ Font file not found at ${fontPath}. Falling back to default.`,
+      );
+      return doc; // Dùng font mặc định (sẽ lỗi tiếng Việt)
+    }
+
+    // Đăng ký và sử dụng font
+    doc.registerFont('NotoSans', fontPath);
+    doc.font('NotoSans');
+
+    return doc;
   }
 
   async generateAssessmentResultPDF(assessmentId: string): Promise<Buffer> {
@@ -66,9 +98,8 @@ export class PdfExportService {
       : assessment.results;
     const mbtiTypes = result?.mbti_types?.[0] || result?.mbti_types;
 
-    // Create PDF
     return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = this.createPdfWithVietnameseFont();
       const chunks: Buffer[] = [];
 
       doc.on('data', (chunk) => chunks.push(chunk));
@@ -76,19 +107,15 @@ export class PdfExportService {
       doc.on('error', reject);
 
       // Header
-      doc
-        .fontSize(24)
-        .font('Helvetica-Bold')
-        .text('Kết quả đánh giá tính cách', { align: 'center' });
+      doc.fontSize(24).text('Kết quả đánh giá tính cách', { align: 'center' });
 
       doc.moveDown();
 
       // Candidate Info
-      doc.fontSize(16).font('Helvetica-Bold').text('Thông tin ứng viên');
+      doc.fontSize(16).text('Thông tin ứng viên');
 
       doc
         .fontSize(12)
-        .font('Helvetica')
         .text(
           `Họ tên: ${user?.full_name || assessment.guest_fullname || 'N/A'}`,
         )
@@ -101,7 +128,7 @@ export class PdfExportService {
       doc.moveDown();
 
       // MBTI Result
-      doc.fontSize(16).font('Helvetica-Bold').text('Kết quả MBTI');
+      doc.fontSize(16).text('Kết quả MBTI');
 
       doc
         .fontSize(20)
@@ -117,22 +144,15 @@ export class PdfExportService {
 
       // Overview
       if (mbtiTypes?.overview) {
-        doc.fontSize(14).font('Helvetica-Bold').text('Tổng quan');
-        doc
-          .fontSize(11)
-          .font('Helvetica')
-          .text(mbtiTypes.overview, { align: 'justify' });
+        doc.fontSize(14).text('Tổng quan');
+        doc.fontSize(11).text(mbtiTypes.overview, { align: 'justify' });
         doc.moveDown();
       }
 
       // Strengths
       if (mbtiTypes?.strengths && mbtiTypes.strengths.length > 0) {
-        doc
-          .fontSize(14)
-          .font('Helvetica-Bold')
-          .fillColor('#10b981')
-          .text('Điểm mạnh');
-        doc.fontSize(11).font('Helvetica').fillColor('#000000');
+        doc.fontSize(14).fillColor('#10b981').text('Điểm mạnh');
+        doc.fontSize(11).fillColor('#000000');
         mbtiTypes.strengths.forEach((strength: string) => {
           doc.text(`• ${strength}`);
         });
@@ -141,12 +161,8 @@ export class PdfExportService {
 
       // Weaknesses
       if (mbtiTypes?.weaknesses && mbtiTypes.weaknesses.length > 0) {
-        doc
-          .fontSize(14)
-          .font('Helvetica-Bold')
-          .fillColor('#f59e0b')
-          .text('Điểm yếu');
-        doc.fontSize(11).font('Helvetica').fillColor('#000000');
+        doc.fontSize(14).fillColor('#f59e0b').text('Điểm yếu');
+        doc.fontSize(11).fillColor('#000000');
         mbtiTypes.weaknesses.forEach((weakness: string) => {
           doc.text(`• ${weakness}`);
         });
@@ -155,21 +171,17 @@ export class PdfExportService {
 
       // Communication Style
       if (mbtiTypes?.communication_style) {
-        doc.fontSize(14).font('Helvetica-Bold').text('Phong cách giao tiếp');
+        doc.fontSize(14).text('Phong cách giao tiếp');
         doc
           .fontSize(11)
-          .font('Helvetica')
           .text(mbtiTypes.communication_style, { align: 'justify' });
         doc.moveDown();
       }
 
       // Leadership Style
       if (mbtiTypes?.leadership_style) {
-        doc.fontSize(14).font('Helvetica-Bold').text('Phong cách lãnh đạo');
-        doc
-          .fontSize(11)
-          .font('Helvetica')
-          .text(mbtiTypes.leadership_style, { align: 'justify' });
+        doc.fontSize(14).text('Phong cách lãnh đạo');
+        doc.fontSize(11).text(mbtiTypes.leadership_style, { align: 'justify' });
         doc.moveDown();
       }
 
@@ -179,8 +191,8 @@ export class PdfExportService {
         mbtiTypes.career_recommendations.length > 0
       ) {
         doc.addPage();
-        doc.fontSize(14).font('Helvetica-Bold').text('Gợi ý nghề nghiệp');
-        doc.fontSize(11).font('Helvetica');
+        doc.fontSize(14).text('Gợi ý nghề nghiệp');
+        doc.fontSize(11);
         mbtiTypes.career_recommendations.forEach((career: string) => {
           doc.text(`• ${career}`);
         });
@@ -189,8 +201,8 @@ export class PdfExportService {
 
       // Suitable Roles
       if (mbtiTypes?.suitable_roles && mbtiTypes.suitable_roles.length > 0) {
-        doc.fontSize(14).font('Helvetica-Bold').text('Vai trò phù hợp');
-        doc.fontSize(11).font('Helvetica');
+        doc.fontSize(14).text('Vai trò phù hợp');
+        doc.fontSize(11);
         mbtiTypes.suitable_roles.forEach((role: string) => {
           doc.text(`• ${role}`);
         });
@@ -199,11 +211,8 @@ export class PdfExportService {
 
       // Workplace Needs
       if (mbtiTypes?.workplace_needs && mbtiTypes.workplace_needs.length > 0) {
-        doc
-          .fontSize(14)
-          .font('Helvetica-Bold')
-          .text('Nhu cầu môi trường làm việc');
-        doc.fontSize(11).font('Helvetica');
+        doc.fontSize(14).text('Nhu cầu môi trường làm việc');
+        doc.fontSize(11);
         mbtiTypes.workplace_needs.forEach((need: string) => {
           doc.text(`• ${need}`);
         });
@@ -261,9 +270,8 @@ export class PdfExportService {
     const completedAssessments =
       assessments?.filter((a) => a.completed_at).length || 0;
 
-    // Create PDF
     return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = this.createPdfWithVietnameseFont();
       const chunks: Buffer[] = [];
 
       doc.on('data', (chunk) => chunks.push(chunk));
@@ -271,19 +279,15 @@ export class PdfExportService {
       doc.on('error', reject);
 
       // Header
-      doc
-        .fontSize(24)
-        .font('Helvetica-Bold')
-        .text('Báo cáo hoạt động công ty', { align: 'center' });
+      doc.fontSize(24).text('Báo cáo hoạt động công ty', { align: 'center' });
 
       doc.moveDown();
 
       // Company Info
-      doc.fontSize(16).font('Helvetica-Bold').text('Thông tin công ty');
+      doc.fontSize(16).text('Thông tin công ty');
 
       doc
         .fontSize(12)
-        .font('Helvetica')
         .text(`Tên công ty: ${company.name}`)
         .text(
           `Ngày tạo: ${new Date(company.created_at).toLocaleDateString('vi-VN')}`,
@@ -292,11 +296,10 @@ export class PdfExportService {
       doc.moveDown();
 
       // Statistics
-      doc.fontSize(16).font('Helvetica-Bold').text('Thống kê tổng quan');
+      doc.fontSize(16).text('Thống kê tổng quan');
 
       doc
         .fontSize(12)
-        .font('Helvetica')
         .text(`Tổng số assignments: ${totalAssessments}`)
         .text(`Số assignments hoàn thành: ${completedAssessments}`)
         .text(
@@ -306,9 +309,9 @@ export class PdfExportService {
       doc.moveDown();
 
       // Monthly breakdown
-      doc.fontSize(16).font('Helvetica-Bold').text('Phân bố theo tháng');
+      doc.fontSize(16).text('Phân bố theo tháng');
 
-      doc.fontSize(11).font('Helvetica');
+      doc.fontSize(11);
 
       const sortedMonths = Array.from(monthlyMap.entries()).sort((a, b) =>
         a[0].localeCompare(b[0]),
@@ -326,9 +329,9 @@ export class PdfExportService {
       doc.moveDown();
 
       // Test preferences
-      doc.fontSize(16).font('Helvetica-Bold').text('Bài test phổ biến');
+      doc.fontSize(16).text('Bài test phổ biến');
 
-      doc.fontSize(11).font('Helvetica');
+      doc.fontSize(11);
 
       const sortedTests = Array.from(testMap.entries())
         .sort((a, b) => b[1] - a[1])
