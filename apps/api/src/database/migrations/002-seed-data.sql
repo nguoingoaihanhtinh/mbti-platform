@@ -673,3 +673,52 @@ INSERT INTO mbti_types (
 -- ============================================
 -- End of MBTI Types Seed Data
 -- ============================================
+
+INSERT INTO packages (
+    id,
+    name,
+    code,
+    max_assignments,
+    price_per_month,
+    description,
+    is_active,
+    created_at,
+    updated_at,
+    benefits
+) VALUES
+(
+    '7ec08675-da25-48a8-af0e-217795fd11a3',
+    'Starter 2025',
+    'starter-2025',
+    10,
+    490000,
+    'Gói cơ bản cho startup',
+    true,
+    '2025-12-16 06:44:16.468476+00',
+    '2025-12-16 06:44:16.468476+00',
+    '[]'::jsonb
+),
+(
+    '47039f1a-3cf4-4958-bda2-c83c60b4e735',
+    'Normal 2025',
+    'Normal-2025',
+    30,
+    1000000,
+    'Gói trung bình cho doanh nghiệp vừa',
+    true,
+    '2025-12-16 06:47:34.55836+00',
+    '2025-12-16 06:47:34.55836+00',
+    '[]'::jsonb
+),
+(
+    'a5c05014-4ecd-45a8-b549-27c371cc74ff',
+    'High 2025',
+    'High-2025',
+    100,
+    3000000,
+    'Gói cao cấp do doanh nghiệp',
+    true,
+    '2025-12-16 06:48:14.581881+00',
+    '2025-12-18 03:23:08.56776+00',
+    '["Hỗ trợ"]'::jsonb
+);
