@@ -1,3 +1,4 @@
+# apps/api/docker-compose.yml
 services:
   api:
     build:
@@ -14,6 +15,8 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - FRONTEND_URL=${FRONTEND_URL}
+      - AWS_SES_SMTP_USER=${AWS_SES_SMTP_USER}
+      - AWS_SES_SMTP_PASS=${AWS_SES_SMTP_PASS}
     networks:
       - app-network
     restart: unless-stopped

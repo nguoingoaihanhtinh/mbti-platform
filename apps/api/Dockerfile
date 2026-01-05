@@ -1,3 +1,4 @@
+# apps/api/Dockerfile
 FROM oven/bun:1 AS builder
 WORKDIR /app
 
@@ -21,27 +22,20 @@ RUN bun run build
 
 # Production
 FROM node:20-alpine
-WORKDIR /app
+WORKDIR /app/apps/api
 
 RUN apk add --no-cache curl
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/src ./src
+COPY --from=builder /app/apps/api/tsconfig*.json ./
+COPY --from=builder /app/apps/api/package.json ./
 
-# Copy ALL tsconfig files for path resolution
-COPY --from=builder /app/apps/api/tsconfig.json ./apps/api/tsconfig.json
-COPY --from=builder /app/apps/api/tsconfig.build.json ./apps/api/tsconfig.build.json
-
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/apps/api/package.json ./apps/api/
+RUN npm install
 
 ENV NODE_ENV=production
 ENV PORT=3000
-# Set TS_NODE_PROJECT to point to tsconfig
-ENV TS_NODE_PROJECT=/app/apps/api/tsconfig.json
 
 EXPOSE 3000
 
-WORKDIR /app/apps/api
 CMD ["node", "-r", "tsconfig-paths/register", "dist/main.js"]
