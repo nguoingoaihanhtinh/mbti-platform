@@ -274,6 +274,9 @@ export class AssessmentService {
       .eq('assessment_id', assessmentId)
       .single();
     if (!result) throw new BadRequestException('Result not found');
+    if (!result.mbti_type) {
+      throw new BadRequestException('MBTI type is missing in result');
+    }
     const { data: mbtiType } = await this.supabase.client
       .from('mbti_types')
       .select('*')
@@ -320,6 +323,9 @@ export class AssessmentService {
       .single();
     if (resultErr || !result) {
       throw new BadRequestException('Result not found');
+    }
+    if (!result.mbti_type) {
+      throw new BadRequestException('MBTI type is missing in result');
     }
     const { data: mbtiType, error: mbtiErr } = await this.supabase.client
       .from('mbti_types')

@@ -22,7 +22,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate:up": "pg-migrate up -u $DATABASE_URL",
-    "migrate:create": "pg-migrate create"
+    "migrate:create": "pg-migrate create",
+    "gen-db": "npx supabase gen types typescript --project-id vpufjhziiqrdrylacwux > src/types/database.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

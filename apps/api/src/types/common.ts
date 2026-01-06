@@ -66,6 +66,11 @@ export type Package = Database['public']['Tables']['packages']['Row'];
 export type PackageInsert = Database['public']['Tables']['packages']['Insert'];
 export type PackageUpdate = Database['public']['Tables']['packages']['Update'];
 
+// === COMPANY ===
+export type Company = Database['public']['Tables']['companies']['Row'];
+export type CompanyInsert = Database['public']['Tables']['companies']['Insert'];
+export type CompanyUpdate = Database['public']['Tables']['companies']['Update'];
+
 // === COMPANY SUBSCRIPTIONS (company sử dụng) ===
 export type CompanySubscription =
   Database['public']['Tables']['company_subscriptions']['Row'];

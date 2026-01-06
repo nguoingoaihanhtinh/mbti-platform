@@ -12,10 +12,13 @@ import { CompanyModule } from './modules/company/company.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PdfExportModule } from './common/module/pdf-export.module';
 import { HealthModule } from './health/health.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     AuthModule,
     UserModule,
     TestModule,
@@ -27,6 +30,7 @@ import { HealthModule } from './health/health.module';
     AdminModule,
     PdfExportModule,
     HealthModule,
+    EmailModule,
   ],
   providers: [PaginationService],
 })

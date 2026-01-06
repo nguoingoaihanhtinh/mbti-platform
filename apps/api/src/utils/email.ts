@@ -1,25 +1,45 @@
 // apps/api/src/utils/email.ts
 import * as nodemailer from 'nodemailer';
+import { ConfigService } from '@nestjs/config';
 
-const transporter = nodemailer.createTransport({
-  host: 'email-smtp.ap-southeast-2.amazonaws.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.AWS_SES_SMTP_USER,
-    pass: process.env.AWS_SES_SMTP_PASS,
-  },
-});
+let transporter: nodemailer.Transporter | null = null;
 
-transporter.verify((error) => {
-  if (error) {
-    console.error('[email] SMTP connection failed:', error);
-  } else {
-    console.log('[email] SMTP server ready');
+export function initEmailTransporter(configService: ConfigService) {
+  const user = configService.get<string>('AWS_SES_SMTP_USER');
+  const pass = configService.get<string>('AWS_SES_SMTP_PASS');
+
+  console.log('SMTP_USER (from ConfigService):', user?.length);
+  console.log('SMTP_PASS (from ConfigService):', pass?.length);
+
+  if (!user || !pass) {
+    console.warn('[email] SMTP credentials missing. Email service disabled.');
+    return;
   }
-});
+
+  transporter = nodemailer.createTransport({
+    host: 'email-smtp.ap-southeast-2.amazonaws.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user,
+      pass,
+    },
+  });
+
+  transporter.verify((error) => {
+    if (error) {
+      console.error('[email] SMTP connection failed:', error);
+    } else {
+      console.log('[email] SMTP server ready');
+    }
+  });
+}
 
 export async function sendPasswordResetEmail(email: string, otp: string) {
+  if (!transporter) {
+    console.warn(`[email] Skipped sending to ${email} (not configured)`);
+    return;
+  }
   try {
     await transporter.sendMail({
       from: 'tuankhoaanh2104@gmail.com',
@@ -29,7 +49,7 @@ export async function sendPasswordResetEmail(email: string, otp: string) {
     });
     console.log(`[email] Sent OTP to ${email}`);
   } catch (error) {
-    console.error('[email] SEND FAILED:', error.message);
+    console.error('[email] SEND FAILED:', (error as Error).message);
     throw error;
   }
 }
@@ -39,6 +59,10 @@ export async function sendAssignmentEmail(
   testLink: string,
   note?: string,
 ) {
+  if (!transporter) {
+    console.warn(`[email] Skipped sending to ${email} (not configured)`);
+    return;
+  }
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto;">
       <h2 style="color: #4f46e5;">Bạn được mời làm bài đánh giá MBTI</h2>

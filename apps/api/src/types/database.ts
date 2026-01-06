@@ -7,187 +7,84 @@ export type Json =
   | Json[];
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '13.0.5';
+    PostgrestVersion: '14.1';
   };
   public: {
     Tables: {
-      users: {
+      ai_scoring_logs: {
         Row: {
-          avatar: string | null;
+          assessment_id: string;
           created_at: string | null;
-          email: string;
-          full_name: string | null;
-          password: string;
-          role: string;
-          updated_at: string | null;
           id: string;
+          model: string;
+          prompt: string | null;
+          response: string | null;
+          scores: Json | null;
+          updated_at: string | null;
         };
         Insert: {
-          avatar?: string | null;
-          created_at: string | null;
-          email: string;
-          full_name: string | null;
-          password: string;
-          role: string;
-          updated_at: string | null;
-          id: string;
-        };
-        Update: {
-          avatar?: string | null;
+          assessment_id: string;
           created_at?: string | null;
-          email?: string;
-          full_name?: string | null;
-          password?: string;
-          role?: string;
+          id?: string;
+          model: string;
+          prompt?: string | null;
+          response?: string | null;
+          scores?: Json | null;
           updated_at?: string | null;
-          id?: string;
-        };
-        Relationships: [];
-      };
-      tests: {
-        Row: {
-          id: string;
-          title: string;
-          description: string | null;
-          is_active: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          description?: string | null;
-          is_active?: boolean;
-          created_at?: string;
-          updated_at?: string;
         };
         Update: {
+          assessment_id?: string;
+          created_at?: string | null;
           id?: string;
-          title?: string;
-          description?: string | null;
-          is_active?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      test_versions: {
-        Row: {
-          id: string;
-          test_id: string;
-          version_number: number;
-          description: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          test_id: string;
-          version_number: number;
-          description?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          test_id?: string;
-          version_number?: number;
-          description?: string | null;
-          created_at?: string;
-          updated_at?: string;
+          model?: string;
+          prompt?: string | null;
+          response?: string | null;
+          scores?: Json | null;
+          updated_at?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: 'test_versions_test_id_fkey';
-            columns: ['test_id'];
+            foreignKeyName: 'ai_scoring_logs_assessment_id_fkey';
+            columns: ['assessment_id'];
             isOneToOne: false;
-            referencedRelation: 'tests';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      questions: {
-        Row: {
-          id: string;
-          test_id: string;
-          test_version_id: string | null;
-          text: string;
-          type: string | null;
-          dimension: string | null;
-          order_index: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          test_id: string;
-          test_version_id?: string | null;
-          text: string;
-          type?: string | null;
-          dimension?: string | null;
-          order_index: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          test_id?: string;
-          test_version_id?: string | null;
-          text?: string;
-          type?: string | null;
-          dimension?: string | null;
-          order_index?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'questions_test_id_fkey';
-            columns: ['test_id'];
-            isOneToOne: false;
-            referencedRelation: 'tests';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'questions_test_version_id_fkey';
-            columns: ['test_version_id'];
-            isOneToOne: false;
-            referencedRelation: 'test_versions';
+            referencedRelation: 'assessments';
             referencedColumns: ['id'];
           },
         ];
       };
       answers: {
         Row: {
-          id: string;
-          question_id: string;
-          text: string;
-          score: number;
+          created_at: string | null;
           dimension: string | null;
+          id: string;
           order_index: number;
-          created_at: string;
-          updated_at: string;
+          question_id: string;
+          score: number;
+          text: string;
+          updated_at: string | null;
         };
         Insert: {
-          id?: string;
-          question_id: string;
-          text: string;
-          score: number;
+          created_at?: string | null;
           dimension?: string | null;
+          id?: string;
           order_index: number;
-          created_at?: string;
-          updated_at?: string;
+          question_id: string;
+          score: number;
+          text: string;
+          updated_at?: string | null;
         };
         Update: {
-          id?: string;
-          question_id?: string;
-          text?: string;
-          score?: number;
+          created_at?: string | null;
           dimension?: string | null;
+          id?: string;
           order_index?: number;
-          created_at?: string;
-          updated_at?: string;
+          question_id?: string;
+          score?: number;
+          text?: string;
+          updated_at?: string | null;
         };
         Relationships: [
           {
@@ -199,77 +96,55 @@ export type Database = {
           },
         ];
       };
-
-      otps: {
-        Row: {
-          email: string;
-          otp: string;
-          expires_at: string;
-          purpose: string;
-        };
-        Insert: {
-          email: string;
-          otp: string;
-          expires_at: string;
-          purpose: string;
-        };
-        Update: {
-          email?: string;
-          otp?: string;
-          expires_at?: string;
-          purpose?: string;
-        };
-        Relationships: [];
-      };
       assessments: {
         Row: {
-          id: string;
-          user_id: string;
-          test_id: string;
-          test_version_id: string | null;
-          status: string; // 'notStarted' | 'started' | 'completed'
-          started_at: string | null;
-          completed_at: string | null;
-          created_at: string;
-          updated_at: string;
           company_id: string | null;
+          completed_at: string | null;
+          created_at: string | null;
           guest_email: string | null;
           guest_fullname: string | null;
+          id: string;
+          started_at: string | null;
+          status: string | null;
+          test_id: string;
+          test_version_id: string | null;
+          updated_at: string | null;
+          user_id: string | null;
         };
         Insert: {
+          company_id?: string | null;
+          completed_at?: string | null;
+          created_at?: string | null;
+          guest_email?: string | null;
+          guest_fullname?: string | null;
           id?: string;
-          user_id?: string;
+          started_at?: string | null;
+          status?: string | null;
           test_id: string;
           test_version_id?: string | null;
-          status: string;
-          started_at?: string | null;
-          completed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-          company_id?: string | null;
-          guest_email?: string | null;
-          guest_fullname?: string | null;
+          updated_at?: string | null;
+          user_id?: string | null;
         };
         Update: {
-          id?: string;
-          user_id?: string;
-          test_id?: string;
-          test_version_id?: string | null;
-          status?: string;
-          started_at?: string | null;
-          completed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
           company_id?: string | null;
+          completed_at?: string | null;
+          created_at?: string | null;
           guest_email?: string | null;
           guest_fullname?: string | null;
+          id?: string;
+          started_at?: string | null;
+          status?: string | null;
+          test_id?: string;
+          test_version_id?: string | null;
+          updated_at?: string | null;
+          user_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: 'assessments_user_id_fkey';
-            columns: ['user_id'];
+            foreignKeyName: 'assessments_company_id_fkey';
+            columns: ['company_id'];
             isOneToOne: false;
-            referencedRelation: 'users';
+            referencedRelation: 'companies';
             referencedColumns: ['id'];
           },
           {
@@ -286,219 +161,90 @@ export type Database = {
             referencedRelation: 'test_versions';
             referencedColumns: ['id'];
           },
-        ];
-      };
-
-      responses: {
-        Row: {
-          id: string;
-          assessment_id: string;
-          question_id: string;
-          answer_id: string | null;
-          selected_option_index: number | null;
-          free_text: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          assessment_id: string;
-          question_id: string;
-          answer_id?: string | null;
-          selected_option_index?: number | null;
-          free_text?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          assessment_id?: string;
-          question_id?: string;
-          answer_id?: string | null;
-          selected_option_index?: number | null;
-          free_text?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
           {
-            foreignKeyName: 'responses_assessment_id_fkey';
-            columns: ['assessment_id'];
+            foreignKeyName: 'assessments_user_id_fkey';
+            columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'assessments';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'responses_question_id_fkey';
-            columns: ['question_id'];
-            isOneToOne: false;
-            referencedRelation: 'questions';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'responses_answer_id_fkey';
-            columns: ['answer_id'];
-            isOneToOne: false;
-            referencedRelation: 'answers';
+            referencedRelation: 'users';
             referencedColumns: ['id'];
           },
         ];
       };
-
-      // RESULTS
-      results: {
+      companies: {
         Row: {
-          id: string;
-          assessment_id: string;
-          mbti_type: string; // CHECK: matches "^[IE][NS][FT][JP]$"
-          raw_scores: Json;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          assessment_id: string;
-          mbti_type: string;
-          raw_scores: Json;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          assessment_id?: string;
-          mbti_type?: string;
-          raw_scores?: Json;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'results_assessment_id_fkey';
-            columns: ['assessment_id'];
-            isOneToOne: false;
-            referencedRelation: 'assessments';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      mbti_types: {
-        Row: {
-          id: string;
-          type_code: string;
-          type_name: string;
-          overview: string;
-          strengths: string[];
-          weaknesses: string[];
-          career_recommendations: string[];
-          improvement_areas: string[];
-          workplace_needs: string[];
-          suitable_roles: string[];
-          communication_style: string | null;
-          leadership_style: string | null;
-          stress_responses: string | null;
-          development_tips: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          type_code: string;
-          type_name: string;
-          overview: string;
-          strengths: string[];
-          weaknesses: string[];
-          career_recommendations: string[];
-          improvement_areas: string[];
-          workplace_needs: string[];
-          suitable_roles: string[];
-          communication_style?: string | null;
-          leadership_style?: string | null;
-          stress_responses?: string | null;
-          development_tips?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          type_code?: string;
-          type_name?: string;
-          overview?: string;
-          strengths?: string[];
-          weaknesses?: string[];
-          career_recommendations?: string[];
-          improvement_areas?: string[];
-          workplace_needs?: string[];
-          suitable_roles?: string[];
-          communication_style?: string | null;
-          leadership_style?: string | null;
-          stress_responses?: string | null;
-          development_tips?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      packages: {
-        Row: {
-          id: string;
-          name: string;
-          code: string;
-          max_assignments: number;
-          price_per_month: number;
+          address: string | null;
+          created_at: string | null;
           description: string | null;
-          is_active: boolean;
-          created_at: string;
-          updated_at: string;
+          domain: string | null;
+          id: string;
+          logo_url: string | null;
+          name: string;
+          phone: string | null;
+          updated_at: string | null;
+          website: string | null;
         };
         Insert: {
-          id?: string;
-          name: string;
-          code: string;
-          max_assignments: number;
-          price_per_month: number;
+          address?: string | null;
+          created_at?: string | null;
           description?: string | null;
-          is_active?: boolean;
-          created_at?: string;
-          updated_at?: string;
+          domain?: string | null;
+          id?: string;
+          logo_url?: string | null;
+          name: string;
+          phone?: string | null;
+          updated_at?: string | null;
+          website?: string | null;
         };
         Update: {
-          id?: string;
-          name?: string;
-          code?: string;
-          max_assignments?: number;
-          price_per_month?: number;
+          address?: string | null;
+          created_at?: string | null;
           description?: string | null;
-          is_active?: boolean;
-          created_at?: string;
-          updated_at?: string;
+          domain?: string | null;
+          id?: string;
+          logo_url?: string | null;
+          name?: string;
+          phone?: string | null;
+          updated_at?: string | null;
+          website?: string | null;
         };
         Relationships: [];
       };
-
       company_subscriptions: {
         Row: {
-          id: string;
+          carry_over_assignments: number | null;
           company_id: string;
+          created_at: string | null;
+          end_date: string | null;
+          id: string;
           package_id: string;
+          start_date: string | null;
+          status: string | null;
+          updated_at: string | null;
           used_assignments: number;
-          created_at: string;
-          updated_at: string;
         };
         Insert: {
-          id?: string;
+          carry_over_assignments?: number | null;
           company_id: string;
+          created_at?: string | null;
+          end_date?: string | null;
+          id?: string;
           package_id: string;
+          start_date?: string | null;
+          status?: string | null;
+          updated_at?: string | null;
           used_assignments?: number;
-          created_at?: string;
-          updated_at?: string;
         };
         Update: {
-          id?: string;
+          carry_over_assignments?: number | null;
           company_id?: string;
+          created_at?: string | null;
+          end_date?: string | null;
+          id?: string;
           package_id?: string;
+          start_date?: string | null;
+          status?: string | null;
+          updated_at?: string | null;
           used_assignments?: number;
-          created_at?: string;
-          updated_at?: string;
         };
         Relationships: [
           {
@@ -517,8 +263,511 @@ export type Database = {
           },
         ];
       };
+      mbti_career_paths: {
+        Row: {
+          created_at: string | null;
+          development_path: string | null;
+          id: string;
+          industry: string[];
+          job_satisfaction_factors: string[];
+          mbti_type_id: string | null;
+          potential_challenges: string[];
+          role_title: string;
+          salary_range: string | null;
+          skills_needed: string[];
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          development_path?: string | null;
+          id?: string;
+          industry: string[];
+          job_satisfaction_factors: string[];
+          mbti_type_id?: string | null;
+          potential_challenges: string[];
+          role_title: string;
+          salary_range?: string | null;
+          skills_needed: string[];
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          development_path?: string | null;
+          id?: string;
+          industry?: string[];
+          job_satisfaction_factors?: string[];
+          mbti_type_id?: string | null;
+          potential_challenges?: string[];
+          role_title?: string;
+          salary_range?: string | null;
+          skills_needed?: string[];
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'mbti_career_paths_mbti_type_id_fkey';
+            columns: ['mbti_type_id'];
+            isOneToOne: false;
+            referencedRelation: 'mbti_types';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      mbti_dimension_descriptions: {
+        Row: {
+          created_at: string | null;
+          description: string;
+          dimension_code: string;
+          dimension_name: string;
+          high_trait: string;
+          high_trait_description: string;
+          id: string;
+          low_trait: string;
+          low_trait_description: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description: string;
+          dimension_code: string;
+          dimension_name: string;
+          high_trait: string;
+          high_trait_description: string;
+          id?: string;
+          low_trait: string;
+          low_trait_description: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string;
+          dimension_code?: string;
+          dimension_name?: string;
+          high_trait?: string;
+          high_trait_description?: string;
+          id?: string;
+          low_trait?: string;
+          low_trait_description?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      mbti_types: {
+        Row: {
+          career_recommendations: string[];
+          communication_style: string | null;
+          created_at: string | null;
+          development_tips: string | null;
+          id: string;
+          improvement_areas: string[];
+          leadership_style: string | null;
+          overview: string;
+          strengths: string[];
+          stress_responses: string | null;
+          suitable_roles: string[];
+          type_code: string;
+          type_name: string;
+          updated_at: string | null;
+          weaknesses: string[];
+          workplace_needs: string[];
+        };
+        Insert: {
+          career_recommendations: string[];
+          communication_style?: string | null;
+          created_at?: string | null;
+          development_tips?: string | null;
+          id?: string;
+          improvement_areas: string[];
+          leadership_style?: string | null;
+          overview: string;
+          strengths: string[];
+          stress_responses?: string | null;
+          suitable_roles: string[];
+          type_code: string;
+          type_name: string;
+          updated_at?: string | null;
+          weaknesses: string[];
+          workplace_needs: string[];
+        };
+        Update: {
+          career_recommendations?: string[];
+          communication_style?: string | null;
+          created_at?: string | null;
+          development_tips?: string | null;
+          id?: string;
+          improvement_areas?: string[];
+          leadership_style?: string | null;
+          overview?: string;
+          strengths?: string[];
+          stress_responses?: string | null;
+          suitable_roles?: string[];
+          type_code?: string;
+          type_name?: string;
+          updated_at?: string | null;
+          weaknesses?: string[];
+          workplace_needs?: string[];
+        };
+        Relationships: [];
+      };
+      otps: {
+        Row: {
+          email: string;
+          expires_at: string;
+          otp: string;
+          purpose: string;
+        };
+        Insert: {
+          email: string;
+          expires_at: string;
+          otp: string;
+          purpose?: string;
+        };
+        Update: {
+          email?: string;
+          expires_at?: string;
+          otp?: string;
+          purpose?: string;
+        };
+        Relationships: [];
+      };
+      packages: {
+        Row: {
+          benefits: Json | null;
+          code: string;
+          created_at: string | null;
+          description: string | null;
+          id: string;
+          is_active: boolean | null;
+          max_assignments: number;
+          name: string;
+          price_per_month: number;
+          updated_at: string | null;
+        };
+        Insert: {
+          benefits?: Json | null;
+          code: string;
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          max_assignments: number;
+          name: string;
+          price_per_month: number;
+          updated_at?: string | null;
+        };
+        Update: {
+          benefits?: Json | null;
+          code?: string;
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          max_assignments?: number;
+          name?: string;
+          price_per_month?: number;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      questions: {
+        Row: {
+          created_at: string | null;
+          dimension: string | null;
+          id: string;
+          order_index: number;
+          test_id: string;
+          test_version_id: string | null;
+          text: string;
+          type: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          dimension?: string | null;
+          id?: string;
+          order_index: number;
+          test_id: string;
+          test_version_id?: string | null;
+          text: string;
+          type?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          dimension?: string | null;
+          id?: string;
+          order_index?: number;
+          test_id?: string;
+          test_version_id?: string | null;
+          text?: string;
+          type?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'questions_test_id_fkey';
+            columns: ['test_id'];
+            isOneToOne: false;
+            referencedRelation: 'tests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'questions_test_version_id_fkey';
+            columns: ['test_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'test_versions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      responses: {
+        Row: {
+          answer_id: string | null;
+          assessment_id: string;
+          created_at: string | null;
+          free_text: string | null;
+          id: string;
+          question_id: string;
+          selected_option_index: number | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          answer_id?: string | null;
+          assessment_id: string;
+          created_at?: string | null;
+          free_text?: string | null;
+          id?: string;
+          question_id: string;
+          selected_option_index?: number | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          answer_id?: string | null;
+          assessment_id?: string;
+          created_at?: string | null;
+          free_text?: string | null;
+          id?: string;
+          question_id?: string;
+          selected_option_index?: number | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'responses_answer_id_fkey';
+            columns: ['answer_id'];
+            isOneToOne: false;
+            referencedRelation: 'answers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'responses_assessment_id_fkey';
+            columns: ['assessment_id'];
+            isOneToOne: false;
+            referencedRelation: 'assessments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'responses_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: false;
+            referencedRelation: 'questions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      results: {
+        Row: {
+          assessment_id: string;
+          created_at: string | null;
+          id: string;
+          mbti_type: string | null;
+          mbti_type_id: string | null;
+          raw_scores: Json | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          assessment_id: string;
+          created_at?: string | null;
+          id?: string;
+          mbti_type?: string | null;
+          mbti_type_id?: string | null;
+          raw_scores?: Json | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          assessment_id?: string;
+          created_at?: string | null;
+          id?: string;
+          mbti_type?: string | null;
+          mbti_type_id?: string | null;
+          raw_scores?: Json | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'results_assessment_id_fkey';
+            columns: ['assessment_id'];
+            isOneToOne: false;
+            referencedRelation: 'assessments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'results_mbti_type_id_fkey';
+            columns: ['mbti_type_id'];
+            isOneToOne: false;
+            referencedRelation: 'mbti_types';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      test_versions: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          id: string;
+          test_id: string;
+          updated_at: string | null;
+          version_number: number;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          test_id: string;
+          updated_at?: string | null;
+          version_number: number;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          test_id?: string;
+          updated_at?: string | null;
+          version_number?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'test_versions_test_id_fkey';
+            columns: ['test_id'];
+            isOneToOne: false;
+            referencedRelation: 'tests';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      tests: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          id: string;
+          is_active: boolean | null;
+          title: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          title: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          title?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      user_profiles: {
+        Row: {
+          about: string | null;
+          education: string | null;
+          experience: string | null;
+          id: string;
+          social_links: Json | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          about?: string | null;
+          education?: string | null;
+          experience?: string | null;
+          id: string;
+          social_links?: Json | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          about?: string | null;
+          education?: string | null;
+          experience?: string | null;
+          id?: string;
+          social_links?: Json | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_profiles_id_fkey';
+            columns: ['id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      users: {
+        Row: {
+          avatar: string | null;
+          company_id: string | null;
+          created_at: string | null;
+          deleted_at: string | null;
+          email: string;
+          full_name: string;
+          id: string;
+          last_seen_at: string | null;
+          password: string | null;
+          role: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          avatar?: string | null;
+          company_id?: string | null;
+          created_at?: string | null;
+          deleted_at?: string | null;
+          email: string;
+          full_name: string;
+          id?: string;
+          last_seen_at?: string | null;
+          password?: string | null;
+          role?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          avatar?: string | null;
+          company_id?: string | null;
+          created_at?: string | null;
+          deleted_at?: string | null;
+          email?: string;
+          full_name?: string;
+          id?: string;
+          last_seen_at?: string | null;
+          password?: string | null;
+          role?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'users_company_id_fkey';
+            columns: ['company_id'];
+            isOneToOne: false;
+            referencedRelation: 'companies';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
-
     Views: {
       [_ in never]: never;
     };
@@ -526,8 +775,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      role: 'candidate' | 'company' | 'admin';
-      status: 'Active' | 'Inactive' | 'Banned';
+      [_ in never]: never;
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -535,23 +783,128 @@ export type Database = {
   };
 };
 
-// --- Helper Types  ---
-type PublicSchema = Database['public'];
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
 
-type TablesTypes = PublicSchema['Tables'];
-type EnumsTypes = PublicSchema['Enums'];
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  'public'
+>];
 
-export type TableNames = keyof TablesTypes;
-export type EnumNames = keyof EnumsTypes;
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
 
-// ✅ Tables
-export type Tables<T extends TableNames> = TablesTypes[T]['Row'];
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Insert: infer I;
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I;
+      }
+      ? I
+      : never
+    : never;
 
-// ✅ TablesInsert
-export type TablesInsert<T extends TableNames> = TablesTypes[T]['Insert'];
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Update: infer U;
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U;
+      }
+      ? U
+      : never
+    : never;
 
-// ✅ TablesUpdate
-export type TablesUpdate<T extends TableNames> = TablesTypes[T]['Update'];
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema['Enums']
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+    : never;
 
-// ✅ Enums
-export type Enums<T extends EnumNames> = EnumsTypes[T];
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema['CompositeTypes']
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never;
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const;
