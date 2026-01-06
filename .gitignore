@@ -73,3 +73,9 @@ Thumbs.db
 # Misc
 ###############################################
 *.pem
+# .gitignore
+*.tar
+*.tar.gz
+.env
+node_modules/
+dist/

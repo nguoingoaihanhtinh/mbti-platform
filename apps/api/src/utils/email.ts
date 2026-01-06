@@ -1,27 +1,37 @@
-import { Resend } from 'resend';
+// apps/api/src/utils/email.ts
+import * as nodemailer from 'nodemailer';
 
-function getResend(): Resend | null {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    // Skip sending when key missing (tests/dev)
-    return null;
+const transporter = nodemailer.createTransport({
+  host: 'email-smtp.ap-southeast-2.amazonaws.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.AWS_SES_SMTP_USER,
+    pass: process.env.AWS_SES_SMTP_PASS,
+  },
+});
+
+transporter.verify((error) => {
+  if (error) {
+    console.error('[email] SMTP connection failed:', error);
+  } else {
+    console.log('[email] SMTP server ready');
   }
-  return new Resend(key);
-}
+});
 
 export async function sendPasswordResetEmail(email: string, otp: string) {
-  const resend = getResend();
-  if (!resend) {
-    // eslint-disable-next-line no-console
-    console.warn('[email] RESEND_API_KEY missing; email send skipped');
-    return;
+  try {
+    await transporter.sendMail({
+      from: 'tuankhoaanh2104@gmail.com',
+      to: email,
+      subject: 'Password Reset OTP',
+      html: `<p>Your OTP is: <strong>${otp}</strong></p>`,
+    });
+    console.log(`[email] Sent OTP to ${email}`);
+  } catch (error) {
+    console.error('[email] SEND FAILED:', error.message);
+    throw error;
   }
-  await resend.emails.send({
-    from: 'onboarding@resend.dev',
-    to: email,
-    subject: 'Password Reset OTP',
-    html: `<p>Your OTP is: <strong>${otp}</strong></p>`,
-  });
 }
 
 export async function sendAssignmentEmail(
@@ -29,9 +39,6 @@ export async function sendAssignmentEmail(
   testLink: string,
   note?: string,
 ) {
-  const resend = getResend();
-  if (!resend) return;
-
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto;">
       <h2 style="color: #4f46e5;">Bạn được mời làm bài đánh giá MBTI</h2>
@@ -51,8 +58,8 @@ export async function sendAssignmentEmail(
     </div>
   `;
 
-  await resend.emails.send({
-    from: 'onboarding@resend.dev',
+  await transporter.sendMail({
+    from: 'tuankhoaanh2104@gmail.com',
     to: email,
     subject: 'Mời làm bài đánh giá MBTI từ HR',
     html,

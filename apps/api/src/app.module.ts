@@ -11,6 +11,7 @@ import { HRModule } from './modules/hr/hr.module';
 import { CompanyModule } from './modules/company/company.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PdfExportModule } from './common/module/pdf-export.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PdfExportModule } from './common/module/pdf-export.module';
     CompanyModule,
     AdminModule,
     PdfExportModule,
+    HealthModule,
   ],
   providers: [PaginationService],
 })
